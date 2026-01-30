@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using DG.Tweening;
 
 public class VirtualJoystickController : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
@@ -69,16 +68,18 @@ public class VirtualJoystickController : MonoBehaviour, IPointerDownHandler, IDr
             uiCamera,
             out var localPoint);
 
-        var radius = background.sizeDelta * 0.5f;
+        var radius = background.rect.size * 0.5f;
+        if (radius.x <= 0f || radius.y <= 0f) return;
         var normalized = new Vector2(localPoint.x / radius.x, localPoint.y / radius.y);
+        var magnitude = normalized.magnitude;
 
-        if (normalized.magnitude < deadZone)
+        if (magnitude < deadZone)
         {
             normalized = Vector2.zero;
         }
-        else
+        else if (magnitude > 1f)
         {
-            normalized = normalized.normalized * Mathf.Min(normalized.magnitude, 1f);
+            normalized /= magnitude;
         }
 
         InputVector = normalized;
@@ -114,6 +115,8 @@ public class VirtualJoystickController : MonoBehaviour, IPointerDownHandler, IDr
     private void SetBackgroundPosition(Vector2 anchoredPosition, bool useTween)
     {
         if (background == null) return;
+
+        background.DOKill();
 
         if (useTween && returnDuration > 0f)
         {
@@ -181,7 +184,6 @@ public class VirtualJoystickController : MonoBehaviour, IPointerDownHandler, IDr
                 out var localPoint);
 
             owner.SetBackgroundPosition(localPoint, false);
-            owner.background.anchoredPosition = localPoint;
             owner.handle.anchoredPosition = Vector2.zero;
         }
 

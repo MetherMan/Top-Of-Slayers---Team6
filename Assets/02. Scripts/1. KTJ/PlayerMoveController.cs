@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerMoveController : MonoBehaviour
 {
     [Header("이동")]
     [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private bool useFixedUpdate = true;
-    [SerializeField, Range(0f, 1f)] private float slowRunThreshold = 0.4f;
 
     [Header("입력 소스")]
     [SerializeField] private VirtualJoystickController joystick;
@@ -17,12 +14,17 @@ public class PlayerMoveController : MonoBehaviour
     [SerializeField] private string moveBlendParam = "MoveBlend";
 
     private IInputCommand currentCommand;
+    private IInputCommand moveCommand;
+    private IInputCommand stopCommand;
     private Vector2 currentInput;
     private Rigidbody cachedRigidbody;
 
     private void Awake()
     {
         cachedRigidbody = GetComponent<Rigidbody>();
+        moveCommand = new MoveCommand();
+        stopCommand = new StopCommand();
+        currentCommand = stopCommand;
     }
 
     private void OnEnable()
@@ -38,14 +40,6 @@ public class PlayerMoveController : MonoBehaviour
         joystick.OnInputChanged -= HandleInputChanged;
         joystick.OnInputReleased -= HandleInputReleased;
     }
-
- /*
-
-  HandleInput (파스칼 케이스) 함수명 클래스 명
-
-    playerHP (카멜 케이스) 변수명 
-  
-  */
 
     private void Update()
     {
@@ -69,18 +63,18 @@ public class PlayerMoveController : MonoBehaviour
         UpdateMoveAnimation(input);
         if (input == Vector2.zero)
         {
-            SetCommand(new StopCommand());
+            SetCommand(stopCommand);
             return;
         }
 
-        SetCommand(new MoveCommand(input));
+        SetCommand(moveCommand);
     }
 
     private void HandleInputReleased()
     {
         currentInput = Vector2.zero;
         UpdateMoveAnimation(Vector2.zero);
-        SetCommand(new StopCommand());
+        SetCommand(stopCommand);
     }
 
     private void SetCommand(IInputCommand command)
@@ -114,6 +108,10 @@ public class PlayerMoveController : MonoBehaviour
 
     public void ApplyStop()
     {
+        if (cachedRigidbody == null) return;
+
+        cachedRigidbody.velocity = Vector3.zero;
+        cachedRigidbody.angularVelocity = Vector3.zero;
     }
 
     private void ApplyRotation(Vector3 move)
@@ -138,13 +136,6 @@ public class PlayerMoveController : MonoBehaviour
         if (animator == null) return;
 
         var magnitude = Mathf.Clamp01(input.magnitude);
-
-        if (magnitude <= slowRunThreshold)
-        {
-            animator.SetFloat(moveBlendParam, magnitude);
-            return;
-        }
-
         animator.SetFloat(moveBlendParam, magnitude);
     }
 
@@ -155,16 +146,9 @@ public class PlayerMoveController : MonoBehaviour
 
     private class MoveCommand : IInputCommand
     {
-        private readonly Vector2 input;
-
-        public MoveCommand(Vector2 input)
-        {
-            this.input = input;
-        }
-
         public void Execute(PlayerMoveController controller, float deltaTime)
         {
-            controller.ApplyMove(input, deltaTime);
+            controller.ApplyMove(controller.currentInput, deltaTime);
         }
     }
 
