@@ -1,0 +1,39 @@
+/*
+    *ΩÃ±€≈Ê
+    StageConfigSO µ•¿Ã≈Õ ¿˙¿Â
+    StageManager ø¨µø
+*/
+
+public class StageConfig
+{
+    #region field
+    static StageConfig instance;
+    public static StageConfig Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = new StageConfig();
+            }
+            return instance;
+        }
+    }
+
+    StageConfig() { }
+
+    public StageConfigSO stageConfigSO;
+    #endregion
+
+    #region method
+    public void AddData()
+    {
+
+    }
+
+    public void RemoveData()
+    {
+
+    }
+    #endregion
+}
