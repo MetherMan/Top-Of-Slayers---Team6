@@ -11,10 +11,13 @@ public class StageDatabase : ScriptableObject
         {
             if (instance == null)
             {
-
+                instance = new StageDatabase();
             }
+            return instance;
         }
     }
+
+    public List<StageConfigSO> stageData;
 
     private Dictionary<float, StageConfigSO> stageDic;
 
