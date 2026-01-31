@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class SlowModeManager : MonoBehaviour
 {
+    [Header("참조")]
+    [SerializeField] private ChainComboSystem chainComboSystem;
+
     [Header("세팅")]
     [SerializeField] private float slowTimeScale = 0.5f; //얼마나 느려지는지
     [SerializeField] private int slowChainCount = 5;     //슬로우 들어가는 체인카운트
@@ -9,6 +12,25 @@ public class SlowModeManager : MonoBehaviour
 
     private bool isSlowMode;
 
+    private void Awake()
+    {
+        if (chainComboSystem != null)
+        {
+            chainComboSystem.OnChainChanged += EnterSlowMode;
+            chainComboSystem.OnChainEnded += EnterCommonMode;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        //구독 해제
+        if (chainComboSystem != null)
+        {
+            chainComboSystem.OnChainChanged -= EnterSlowMode;
+            chainComboSystem.OnChainEnded -= EnterCommonMode;
+
+        }
+    }
     void Update()
     {
         if (!isSlowMode) return;
@@ -22,13 +44,18 @@ public class SlowModeManager : MonoBehaviour
         }
     }
 
-    public void OnChainChanged(int chain)
+    public void EnterSlowMode(int chain)
     {
         //슬로우체인카운트 넘어가면 슬로우모드
         if (chain >= slowChainCount)
         {
             SlowMode();
         }
+    }
+
+    private void EnterCommonMode(int finalChain)
+    {
+        CommonMode();
     }
 
     private void SlowMode()
