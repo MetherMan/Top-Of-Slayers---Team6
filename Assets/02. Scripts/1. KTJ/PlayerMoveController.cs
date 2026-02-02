@@ -8,6 +8,8 @@ public class PlayerMoveController : MonoBehaviour
 
     [Header("입력 소스")]
     [SerializeField] private VirtualJoystickController joystick;
+    [SerializeField] private bool useKeyboardInput = true;
+    [SerializeField, Range(0f, 1f)] private float keyboardDeadZone = 0.1f;
 
     [Header("애니메이션")]
     [SerializeField] private Animator animator;
@@ -16,8 +18,11 @@ public class PlayerMoveController : MonoBehaviour
     private IInputCommand currentCommand;
     private IInputCommand moveCommand;
     private IInputCommand stopCommand;
+    private Vector2 joystickInput;
     private Vector2 currentInput;
     private Rigidbody cachedRigidbody;
+    private bool movementLocked;
+    private int movementLockCount;
 
     private void Awake()
     {
@@ -59,22 +64,12 @@ public class PlayerMoveController : MonoBehaviour
 
     private void HandleInputChanged(Vector2 input)
     {
-        currentInput = input;
-        UpdateMoveAnimation(input);
-        if (input == Vector2.zero)
-        {
-            SetCommand(stopCommand);
-            return;
-        }
-
-        SetCommand(moveCommand);
+        joystickInput = input;
     }
 
     private void HandleInputReleased()
     {
-        currentInput = Vector2.zero;
-        UpdateMoveAnimation(Vector2.zero);
-        SetCommand(stopCommand);
+        joystickInput = Vector2.zero;
     }
 
     private void SetCommand(IInputCommand command)
@@ -84,6 +79,18 @@ public class PlayerMoveController : MonoBehaviour
 
     private void ExecuteNextCommand(float deltaTime)
     {
+        if (movementLocked)
+        {
+            currentInput = Vector2.zero;
+            currentCommand = stopCommand;
+            currentCommand?.Execute(this, deltaTime);
+            UpdateMoveAnimation(Vector2.zero);
+            return;
+        }
+
+        var keyboardInput = GetMoveInput();
+        currentInput = keyboardInput.sqrMagnitude > 0f ? keyboardInput : joystickInput;
+        currentCommand = currentInput == Vector2.zero ? stopCommand : moveCommand;
         currentCommand?.Execute(this, deltaTime);
         UpdateMoveAnimation(currentInput);
     }
@@ -139,9 +146,49 @@ public class PlayerMoveController : MonoBehaviour
         animator.SetFloat(moveBlendParam, magnitude);
     }
 
+    private Vector2 GetMoveInput()
+    {
+        if (!useKeyboardInput)
+        {
+            return Vector2.zero;
+        }
+
+        var keyboard = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        if (keyboard.sqrMagnitude > keyboardDeadZone * keyboardDeadZone)
+        {
+            return Vector2.ClampMagnitude(keyboard, 1f);
+        }
+
+        return Vector2.zero;
+    }
+
     public interface IInputCommand
     {
         void Execute(PlayerMoveController controller, float deltaTime);
+    }
+
+    public void SetMovementLocked(bool locked)
+    {
+        if (locked)
+        {
+            AddMovementLock();
+        }
+        else
+        {
+            RemoveMovementLock();
+        }
+    }
+
+    public void AddMovementLock()
+    {
+        movementLockCount++;
+        movementLocked = movementLockCount > 0;
+    }
+
+    public void RemoveMovementLock()
+    {
+        movementLockCount = Mathf.Max(0, movementLockCount - 1);
+        movementLocked = movementLockCount > 0;
     }
 
     private class MoveCommand : IInputCommand
