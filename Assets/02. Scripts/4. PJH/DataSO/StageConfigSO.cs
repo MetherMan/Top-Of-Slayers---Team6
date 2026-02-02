@@ -23,14 +23,14 @@ public enum ClearResult
 public class StageConfigSO : ScriptableObject
 {
     /*
-        튜토리얼 맵 0.0 ~ 0.??
-        1번 스테이지 노말맵 1.0
-        1번 스테이지 하드맵 1.1
-        10번 스테이지 노말맵 10.0
-        10번 스테이지 하드맵 10.1
-    */
+        튜토리얼 맵 01 ~ 0?
+        1번 스테이지 노말맵 10
+        1번 스테이지 하드맵 11
+        10번 스테이지 노말맵 100
+        10번 스테이지 하드맵 101
+    */ //넘버링 설정 값
     [Header("스테이지 넘버링")]
-    public float stageNum;
+    public int stageNum;
 
     [Header("스테이지 타입")]
     public StageType stageType;
