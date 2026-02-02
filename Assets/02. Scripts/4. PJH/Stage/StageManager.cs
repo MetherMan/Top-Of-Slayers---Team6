@@ -7,21 +7,16 @@ using UnityEngine;
     StageFlowManager 연동
     StageDatabase 메서드 실행
 */
-public class StageManager : MonoBehaviour
+public class StageManager : Singleton<StageManager>
 {
     #region field
-    public static StageManager Instance { get; private set; }
     public StageDatabase stageDB;
+    public StageConfigSO selectDB;
     #endregion
 
-    void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else Destroy(gameObject);
+        base.Awake();
     }
 
     void Update()
@@ -36,6 +31,7 @@ public class StageManager : MonoBehaviour
         if (data != null)
         {
             //해당 스테이지 데이터를 불러오기
+            selectDB = data;
         }
     }
     #endregion

@@ -34,6 +34,8 @@ public class StageDatabase : ScriptableObject
     public List<StageConfigSO> stageData = new List<StageConfigSO>();
 
     private Dictionary<int, StageConfigSO> stageDic;
+
+    public int stageLound;
     #endregion
 
     #region method
@@ -58,6 +60,7 @@ public class StageDatabase : ScriptableObject
         if (stageDic == null) Initialization();
         if (stageDic.TryGetValue(num, out StageConfigSO data))
         {
+            stageLound = data.loundDatas.Count;
             return data;
         }
 
