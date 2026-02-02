@@ -1,76 +1,45 @@
 using UnityEngine;
 
-public class SlowModeManager : MonoBehaviour
+public class SlowModeManager : ChainComboDecorator
 {
-    [Header("참조")]
-    [SerializeField] private ChainComboSystem chainComboSystem;
+    private int slowChain;
+    private float slowScale;
+    private float recoverSpeed = 3f;
 
-    [Header("세팅")]
-    [SerializeField] private float slowTimeScale = 0.5f; //얼마나 느려지는지
-    [SerializeField] private int slowChainCount = 5;     //슬로우 들어가는 체인카운트
-    [SerializeField] private float recoverSpeed = 3f;    //슬로우에서 돌아가는 속도
-
-    private bool isSlowMode;
-
-    private void Awake()
+    public SlowModeManager(IChainCombo inner, int slowChain, float slowScale) : base(inner)
     {
-        if (chainComboSystem != null)
+        this.slowChain = slowChain;
+        this.slowScale = slowScale;
+    }
+
+    public override void ChainUp()
+    {
+        base.ChainUp();
+
+        if (inner.CurrentChain >= slowChain)
         {
-            chainComboSystem.OnChainChanged += EnterSlowMode;
-            chainComboSystem.OnChainEnded += EnterCommonMode;
+            Time.timeScale = slowScale;
         }
     }
 
-    private void OnDestroy()
+    public override void Update(float deltaTime)
     {
-        //구독 해제
-        if (chainComboSystem != null)
+        base.Update(deltaTime);
+        //슬로우 상태일 때 서서히 복구하는 로직 복원
+        if (Time.timeScale < 1f)
         {
-            chainComboSystem.OnChainChanged -= EnterSlowMode;
-            chainComboSystem.OnChainEnded -= EnterCommonMode;
-
+            Time.timeScale = Mathf.MoveTowards(Time.timeScale, 1.01f, Time.deltaTime * recoverSpeed);
         }
-    }
-    void Update()
-    {
-        if (!isSlowMode) return;
 
-        //슬로우모드 타임스케일에서 1f까지 서서히 속도 올라가기
-        Time.timeScale = Mathf.Lerp(Time.timeScale, 1.01f, Time.unscaledDeltaTime * recoverSpeed);
-
-        if (Time.timeScale >= 1f)
+        if(Time.timeScale >= 1f)
         {
-            CommonMode();
+            EndChain();
         }
     }
 
-    public void EnterSlowMode(int chain)
+    public override void EndChain()
     {
-        //슬로우체인카운트 넘어가면 슬로우모드
-        if (chain >= slowChainCount)
-        {
-            SlowMode();
-        }
-    }
-
-    private void EnterCommonMode(int finalChain)
-    {
-        CommonMode();
-    }
-
-    private void SlowMode()
-    {
-        //슬로우모드 시작
-        isSlowMode = true;
-        Time.timeScale = slowTimeScale;
-        Debug.Log("슬로우모드");
-    }
-
-    private void CommonMode()
-    {
-        //슬로우모드에서 복귀
-        isSlowMode = false;
         Time.timeScale = 1f;
-        Debug.Log("슬로우복귀");
+        base.EndChain();
     }
 }

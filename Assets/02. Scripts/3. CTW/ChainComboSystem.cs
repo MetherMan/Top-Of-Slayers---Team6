@@ -1,21 +1,20 @@
-using UnityEngine;
-using System;
-
-public class ChainComboSystem : MonoBehaviour
+public class ChainComboSystem : IChainCombo
 {
-    [SerializeField] private float chainRemain = 2f;
+    public int CurrentChain { get; private set; }
+
+    private float chainRemainTime;
     private float chainTimer;
-
     private bool isChain;
-    private int currentChain;
 
-    public event Action<int> OnChainChanged;
-    public event Action<int> OnChainEnded;
+    public ChainComboSystem(float chainRemainTime)
+    {
+        this.chainRemainTime = chainRemainTime;
+    }
 
-    void Update()
+    public void Update(float deltaTime)
     {
         if (!isChain) return;
-        chainTimer -= Time.deltaTime;
+        chainTimer -= deltaTime;
 
         if (chainTimer <= 0)
         {
@@ -28,35 +27,17 @@ public class ChainComboSystem : MonoBehaviour
     {
         if (!isChain)
         {
-            StartChain();
+            isChain = true;
+            CurrentChain = 0;
         }
 
-        currentChain++;
-        chainTimer = chainRemain;
-
-        OnChainChanged?.Invoke(currentChain);
-
-        Debug.Log($"현재체인: {currentChain}");
-        //체인 수에 따라 캐릭터 주변 오오라도 추가하
-    }
-
-    private void StartChain()
-    {
-        isChain = true;
-        currentChain = 0;
+        CurrentChain++;
+        chainTimer = chainRemainTime;
     }
 
     public void EndChain()
     {
-        if (!isChain) return;
-
-        int finalChain = currentChain;
-
         isChain = false;
-        currentChain = 0;
-        chainTimer = 0f;
-
-        OnChainEnded?.Invoke(finalChain);
-        Debug.Log("체인 끝");
+        CurrentChain = 0;
     }
 }
