@@ -6,7 +6,7 @@ public class ScoreManager : MonoBehaviour
     [Header("참조")]
     [SerializeField] private ChainComboSystem chainComboSystem;
 
-    [Header("점수관련")]
+    [Header("세팅")]
     [SerializeField] private int killScore;
     [SerializeField] private float chainBonusRate = 0.1f;
 
@@ -21,9 +21,23 @@ public class ScoreManager : MonoBehaviour
         currentChain = 0;
 
         //콤보시스템 스크립트에서 체인관련 가져오기
-        chainComboSystem.OnChainChanged += UpdateChain;
-        chainComboSystem.OnChainEnded += ChainEnd;
+        if (chainComboSystem != null)
+        {
+            chainComboSystem.OnChainChanged += UpdateChain;
+            chainComboSystem.OnChainEnded += ChainEnd;
+        }
     }
+
+    private void OnDestroy()
+    {
+        //구독해제
+        if (chainComboSystem != null)
+        {
+            chainComboSystem.OnChainChanged -= UpdateChain;
+            chainComboSystem.OnChainEnded -= ChainEnd;
+        }
+    }
+
 
     public void EnemyKillScore()
     {
