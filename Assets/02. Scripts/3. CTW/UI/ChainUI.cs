@@ -10,26 +10,6 @@ public class ChainUI : MonoBehaviour
     [SerializeField] private GameObject chainPanel;
     [SerializeField] private TextMeshProUGUI chainText;
 
-    private void Awake()
-    {
-        chainPanel.SetActive(false);
-
-        if (chainComboSystem != null)
-        {
-            chainComboSystem.OnChainChanged += UpdateChainUI;
-            chainComboSystem.OnChainEnded += HideChainUI;
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (chainComboSystem != null)
-        {
-            chainComboSystem.OnChainChanged -= UpdateChainUI;
-            chainComboSystem.OnChainEnded -= HideChainUI;
-        }
-    }
-
     public void UpdateChainUI(int chain)
     {
         if (chainPanel == null || chainText == null) return;

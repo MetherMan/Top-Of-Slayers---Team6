@@ -1,66 +1,25 @@
 using System;
 using UnityEngine;
 
-public class ScoreManager : MonoBehaviour
+public class ScoreManager : ChainComboDecorator
 {
-    [Header("참조")]
-    [SerializeField] private ChainComboSystem chainComboSystem;
+    private int killScore;
+    private float chainBonusRate;
+    private Action<int> onScore;
 
-    [Header("세팅")]
-    [SerializeField] private int killScore;
-    [SerializeField] private float chainBonusRate = 0.1f;
-
-    private int totalScore;
-    private int currentChain;
-
-    public event Action<int> OnScoreUpdated;
-
-    void Awake()
+    public ScoreManager(IChainCombo inner, int killScore, float chainBonusRate, Action<int> onScore) : base(inner)
     {
-        totalScore = 0;
-        currentChain = 0;
-
-        //콤보시스템 스크립트에서 체인관련 가져오기
-        if (chainComboSystem != null)
-        {
-            chainComboSystem.OnChainChanged += UpdateChain;
-            chainComboSystem.OnChainEnded += ChainEnd;
-        }
+        this.killScore = killScore;
+        this.chainBonusRate = chainBonusRate;
+        this.onScore = onScore;
     }
 
-    private void OnDestroy()
+    public override void ChainUp()
     {
-        //구독해제
-        if (chainComboSystem != null)
-        {
-            chainComboSystem.OnChainChanged -= UpdateChain;
-            chainComboSystem.OnChainEnded -= ChainEnd;
-        }
-    }
+        base.ChainUp();
 
-
-    public void EnemyKillScore()
-    {
-        //1.1, 1.2 ...
-        float multiplier = 1f + (currentChain * chainBonusRate);
-
-        //float 를 int로 변환(반올림)
-        int getScore = Mathf.RoundToInt(killScore * multiplier);
-        totalScore += getScore;
-
-        //스코어 업데이트되면 갱신(UI에 쓰기)
-        OnScoreUpdated?.Invoke(totalScore);
-        Debug.Log($"점수획득: {getScore}, 총 점수: {totalScore}");
-    }
-
-    public void UpdateChain(int chain)
-    {
-        //체인 값이 튀는 것 방지
-        currentChain = Mathf.Max(chain, 0);
-    }
-
-    private void ChainEnd(int finalChain)
-    {
-        currentChain = 0;
+        float multiplier = 1f + inner.CurrentChain * chainBonusRate;
+        //정수로 반올림
+        onScore?.Invoke(Mathf.RoundToInt(killScore * multiplier));
     }
 }
