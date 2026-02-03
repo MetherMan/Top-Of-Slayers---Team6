@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
 {
@@ -10,6 +10,11 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
 
     private void OnEnable()
     {
+        if (targeting == null)
+        {
+            targeting = FindObjectOfType<TargetingSystem>();
+        }
+
         if (targeting != null)
         {
             targeting.RegisterTarget(transform);

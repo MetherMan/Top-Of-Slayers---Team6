@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "AttackSpec_", menuName = "Config/AttackSpec")]
 public class AttackSpecSO : ScriptableObject
