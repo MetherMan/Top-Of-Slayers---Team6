@@ -6,7 +6,7 @@ public enum MonsterType
     Defence,
     Speed,
     Recovery,
-    middleBoss,
+    Elite,
     Boss
 }
 
@@ -20,7 +20,7 @@ public enum Level
 public class EnemyConfigSO : ScriptableObject
 {
     [Header("몬스터 기본 설정")]
-    public Level level; //난이도 별 구분 : 10% or 20% 스펙 값 증감하는 식으로 구현예정
+    public Level level; //난이도 별 구분 : 20% 스펙 값 증감
     public MonsterType monsterType;
     public GameObject monsterPrefab;
 
@@ -30,7 +30,6 @@ public class EnemyConfigSO : ScriptableObject
     public int recoveryHp; //체력 회복 기믹
 
     public int strength; //Str 데미지
-    public int dexterity; //Dex 정확도
     public int defence; //df 방어력
     public int speed; //sd 속도
 

@@ -10,24 +10,48 @@ public class WaveDirectorSystem : MonoBehaviour
     */
 
     #region field
-    [Header("스테이지 데이터")]
-    [SerializeField] private StageConfigSO stageData; //해당 데이터 값 받아오기, 인스펙터 수동 할당 x
-
     [Header("활성화 된 스테이지 룰")]
     [SerializeField] private WaveRule ruleType;
+    public WaveRule RuleType
+    {
+        get { return ruleType; }
+        private set
+        {
+            ruleType = value;
+        }
+    }
     #endregion
 
     void Awake()
     {
-
+        //스테이지 값이 정해질 경우 실행
+        //스테이지가 어떤 룰이 필요할 지 어디서 분별하고 가져올 것인가?
+        if (StageManager.Instance.selectDB != null)
+        {
+            //SetRule();
+        }
     }
 
     void Update()
     {
-        ruleType.TimeOut();
+        if (ruleType != null)
+        {
+            //실패 조건
+            ruleType.TimeOut();
+            ruleType.HpZero(3); //플레이어 상태창 HP 연동필요
+
+            //웨이브 진행 조건
+            ruleType.EnemyDown();
+
+            //클리어 조건
+            ruleType.ClearRule();
+        }
     }
 
     #region method
-
+    public void SetRule(WaveRule newRule)
+    {
+        ruleType = newRule;
+    }
     #endregion
 }
