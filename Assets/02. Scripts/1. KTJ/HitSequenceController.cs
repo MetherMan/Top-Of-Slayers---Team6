@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 public class HitSequenceController : MonoBehaviour
 {
-    [Header("??")]
+    [Header("히트 스톱")]
     [SerializeField] private bool useHitStop = true;
     [SerializeField, Min(0f)] private float hitStopDuration = 0.05f;
     private Coroutine hitStopRoutine;
