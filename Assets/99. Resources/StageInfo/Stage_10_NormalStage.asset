@@ -9,10 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31d53076d73a9f24bbf233d5dff90b68, type: 3}
-  m_Name: Database_Main
+  m_Script: {fileID: 11500000, guid: ea8bb6303b74a4b4e8fc6f63e5dc726b, type: 3}
+  m_Name: Stage_10_NormalStage
   m_EditorClassIdentifier: 
+  stageNum: 10
+  stageType: 0
+  stageRule: {fileID: 11400000, guid: 14a3973d77ec90341a38ed7b70032f15, type: 2}
+  stageTime: 0
   roundDatas: []
-  stageData:
-  - {fileID: 11400000, guid: c69d8756ebe547a4a82426201de29811, type: 2}
-  - {fileID: 11400000, guid: 221e16332b71d0a47be7eb53e6bc6bd3, type: 2}
+  clearResult: 0
+  FirstClearCoin: 
+  ClearCoin: 

@@ -4,8 +4,6 @@ public enum MonsterType
 {
     Attack,
     Defence,
-    Speed,
-    Recovery,
     Elite,
     Boss
 }
@@ -27,11 +25,9 @@ public class EnemyConfigSO : ScriptableObject
     [Header("몬스터 스펙")]
     public int maxHp;
     public int hp;
-    public int recoveryHp; //체력 회복 기믹
 
     public int strength; //Str 데미지
     public int defence; //df 방어력
-    public int speed; //sd 속도
 
     [Header("몬스터 루팅 목록")]
     public int[] NormalDropCoin; //ex. 14~17 coin

@@ -29,13 +29,13 @@ public class StageDatabase : ScriptableObject
             return instance;
         }
     }
+    //스테이지 라운드(웨이브) 데이터
+    public List<StageConfigSO.RoundData> roundDatas;
 
     //stageConfigSO의 창고로 사용할 예정
     public List<StageConfigSO> stageData = new List<StageConfigSO>();
 
     private Dictionary<int, StageConfigSO> stageDic;
-
-    public int stageLound;
     #endregion
 
     #region method
@@ -60,7 +60,6 @@ public class StageDatabase : ScriptableObject
         if (stageDic == null) Initialization();
         if (stageDic.TryGetValue(num, out StageConfigSO data))
         {
-            stageLound = data.loundDatas.Count;
             return data;
         }
 

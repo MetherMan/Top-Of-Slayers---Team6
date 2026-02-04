@@ -6,41 +6,41 @@ public abstract class WaveRule : ScriptableObject
         공통적으로 적용되는 룰
     */
     #region field
-    //조건 체크 변수
-    
 
     #endregion
 
     #region method
-    //실패 조건
-    public void TimeOut()
-    {
-        if (StageFlowManager.Instance.remainingTime <= StageFlowManager.Instance.playTime)
-        {
-            //게임오버
+    public abstract void OnStart(RuleDataContainer data, WaveDirectorSystem context);
 
-            //
-            StageManager.Instance.selectDB.clearResult = (ClearResult)2;
+    public abstract void OnUpdate(RuleDataContainer data, WaveDirectorSystem context);
+
+    //클리어 시 수집해야할 데이터 전송
+    public abstract void OnExit(RuleDataContainer data, WaveDirectorSystem context);
+
+    //실패 조건
+    public void TimeOver(RuleDataContainer data, WaveDirectorSystem context)
+    {
+        if (data.playTime >= data.stageData.stageTime)
+        {
+            context.TimeOver();
         }
     }
 
-    public void HpZero(int hp)
+    public void HpZero(RuleDataContainer data, WaveDirectorSystem context)
     {
         //플레이어 체력 '0' 이하 일 경우 게임 오버
-        if (hp <= 0)
-        {
-            StageManager.Instance.selectDB.clearResult = (ClearResult)2;
-        }
+        context.HpZero();
     }
 
     //웨이브 진행 조건
-    public void EnemyDown()
+    public void WaveClear(RuleDataContainer data, WaveDirectorSystem context)
     {
         //StageConfigSO 각 웨이브 몬스터가 전부 다운 될 경우 조건변수 증감
-        StageManager.Instance.cleardWaveCount++;
+        //에너미 스포너 [인덱스 변수] - 인덱스 변수 값을 증감
+        context.WaveClear();
     }
 
     //클리어 조건
-    public abstract void ClearRule();
+    public abstract void RoundClear(RuleDataContainer data, WaveDirectorSystem context);
     #endregion
 }

@@ -10,21 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ea8bb6303b74a4b4e8fc6f63e5dc726b, type: 3}
-  m_Name: Stage_00_Tutorial
+  m_Name: Stage_11_HardStage
   m_EditorClassIdentifier: 
-  stageNum: 0
-  stageType: 0
-  loundDatas:
-  - monsterSpawnList:
-    - {fileID: 0}
-    meddleBoss: {fileID: 0}
-    boss: {fileID: 0}
-  - monsterSpawnList: []
-    meddleBoss: {fileID: 0}
-    boss: {fileID: 0}
-  - monsterSpawnList: []
-    meddleBoss: {fileID: 0}
-    boss: {fileID: 0}
+  stageNum: 11
+  stageType: 1
+  stageRule: {fileID: 11400000, guid: 14a3973d77ec90341a38ed7b70032f15, type: 2}
+  stageTime: 0
+  roundDatas: []
   clearResult: 0
   FirstClearCoin: 
   ClearCoin: 
