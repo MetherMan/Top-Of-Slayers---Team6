@@ -211,6 +211,18 @@ public class PlayerMoveController : MonoBehaviour
         return direction.normalized;
     }
 
+    public Vector2 GetAimInput()
+    {
+        return GetRealtimeInput();
+    }
+
+    public bool HasAimInput(float deadZone)
+    {
+        if (deadZone < 0f) deadZone = 0f;
+        var input = GetRealtimeInput();
+        return input.sqrMagnitude >= deadZone * deadZone;
+    }
+
     public void ApplyMove(Vector2 input, float deltaTime)
     {
         if (input == Vector2.zero) return;
@@ -236,6 +248,7 @@ public class PlayerMoveController : MonoBehaviour
     public void ApplyStop()
     {
         if (cachedRigidbody == null) return;
+        if (cachedRigidbody.isKinematic) return;
 
         cachedRigidbody.velocity = Vector3.zero;
         cachedRigidbody.angularVelocity = Vector3.zero;
