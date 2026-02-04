@@ -22,7 +22,7 @@ public class ChainComboSystem : IChainCombo
         }
     }
 
-    //에너미 관련 스크립트에서 죽었을 때 메서드 적용
+    //에너미 관련 스크립트에서 데미지 받을 때 메서드 적용
     public void ChainUp()
     {
         if (!isChain)
