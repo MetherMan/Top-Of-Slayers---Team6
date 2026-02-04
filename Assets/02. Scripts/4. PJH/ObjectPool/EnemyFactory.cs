@@ -1,11 +1,11 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyFactory : MonoBehaviour
 {
     [SerializeField] private ObjectPoolManager objectPoolManager;
-    [SerializeField] private StageConfigSO stageSO;
+    [SerializeField] private EnemyConfigSO stageSO;
 
     public GameObject Create(Vector3 position, Quaternion rotation)
     {
