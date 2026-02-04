@@ -14,6 +14,8 @@ public class TargetingLineVisualizer : MonoBehaviour
     [SerializeField] private Vector3 originOffset = new Vector3(0f, 0.1f, 0f);
     [SerializeField] private bool alwaysVisible = true;
     [SerializeField] private bool useDashRange = true;
+    [SerializeField] private bool useAutoSlashAimPreview = true;
+    [SerializeField] private bool useAutoSlashAimOrigin = true;
 
     private void Awake()
     {
@@ -46,7 +48,16 @@ public class TargetingLineVisualizer : MonoBehaviour
         var source = followTarget != null ? followTarget : transform;
         var origin = source.position + originOffset;
         var direction = source.forward;
-        if (moveController != null)
+
+        if (useAutoSlashAimPreview && autoSlash != null && autoSlash.TryGetAimPreview(out var previewOrigin, out var previewDirection))
+        {
+            direction = previewDirection;
+            if (useAutoSlashAimOrigin)
+            {
+                origin = previewOrigin + originOffset;
+            }
+        }
+        else if (moveController != null)
         {
             direction = moveController.GetAimDirection();
         }

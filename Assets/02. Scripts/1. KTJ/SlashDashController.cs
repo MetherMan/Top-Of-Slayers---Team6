@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class SlashDashController : MonoBehaviour
 {
@@ -19,6 +20,11 @@ public class SlashDashController : MonoBehaviour
     [SerializeField, Min(0f)] private float behindOffset = 0.5f;
     [SerializeField] private bool useTargetForwardForBehind = false;
 
+    [Header("체인")]
+    [SerializeField] private ChainCombatController chainCombat;
+    [SerializeField] private bool useChainBehindOffset = true;
+    [SerializeField, Min(0f)] private float chainBehindOffset = 0f;
+
     [Header("연출")]
     [SerializeField, Min(0f)] private float contactDistance = 0.3f;
 
@@ -29,6 +35,7 @@ public class SlashDashController : MonoBehaviour
     private Vector3 dashDirection;
     private Transform pendingTarget;
     private int pendingDamage;
+    private readonly List<Transform> pendingPierceTargets = new List<Transform>();
     private bool contactStopTriggered;
     private Rigidbody cachedRigidbody;
     private bool cachedKinematic;
@@ -52,6 +59,8 @@ public class SlashDashController : MonoBehaviour
         if (hitSequence == null) hitSequence = GetComponent<HitSequenceController>();
         if (moveController == null) moveController = GetComponent<PlayerMoveController>();
         if (moveController == null) moveController = GetComponentInParent<PlayerMoveController>();
+        if (chainCombat == null) chainCombat = GetComponent<ChainCombatController>();
+        if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
         if (targetingSystem == null) targetingSystem = GetComponent<TargetingSystem>();
         if (targetingSystem == null) targetingSystem = GetComponentInParent<TargetingSystem>();
         if (targetingSystem == null) targetingSystem = FindObjectOfType<TargetingSystem>();
@@ -97,17 +106,35 @@ public class SlashDashController : MonoBehaviour
 
     private void ApplyPendingDamage()
     {
-        if (damageSystem == null || pendingTarget == null || pendingDamage <= 0)
+        if (damageSystem == null || pendingDamage <= 0)
         {
-            pendingTarget = null;
-            pendingDamage = 0;
+            ClearPendingDamage();
             return;
         }
 
-        damageSystem.ApplyDamage(pendingTarget, pendingDamage);
+        if (pendingPierceTargets.Count > 0)
+        {
+            for (int i = 0; i < pendingPierceTargets.Count; i++)
+            {
+                var target = pendingPierceTargets[i];
+                if (target == null) continue;
+                damageSystem.ApplyDamage(target, pendingDamage);
+            }
+        }
+        else if (pendingTarget != null)
+        {
+            damageSystem.ApplyDamage(pendingTarget, pendingDamage);
+        }
+
+        ClearPendingDamage();
+    }
+
+    private void ClearPendingDamage()
+    {
         pendingTarget = null;
         pendingDamage = 0;
         contactStopTriggered = false;
+        pendingPierceTargets.Clear();
     }
 
     private void TryTriggerContactStop(Vector3 previousPosition, Vector3 currentPosition)
@@ -149,9 +176,43 @@ public class SlashDashController : MonoBehaviour
         if (grade == TimingGrade.Miss) return true;
         if (spec == null) return true;
 
+        pendingPierceTargets.Clear();
         pendingTarget = target;
         var multiplier = Mathf.Max(0f, damageMultiplier);
         pendingDamage = Mathf.RoundToInt(CalculateDamage(grade, spec) * multiplier);
+        return true;
+    }
+
+    public bool TryStartAutoSlashPierce(Transform target, Vector3 aimDirection, float aimDistance, TimingGrade grade, float damageMultiplier, List<Transform> pierceTargets)
+    {
+        if (target == null) return false;
+        if (!TryStartDash(target, aimDirection, aimDistance, spec)) return false;
+        if (grade == TimingGrade.Miss) return true;
+        if (spec == null) return true;
+
+        pendingPierceTargets.Clear();
+        pendingTarget = target;
+        var multiplier = Mathf.Max(0f, damageMultiplier);
+        pendingDamage = Mathf.RoundToInt(CalculateDamage(grade, spec) * multiplier);
+
+        if (pierceTargets != null)
+        {
+            for (int i = 0; i < pierceTargets.Count; i++)
+            {
+                var candidate = pierceTargets[i];
+                if (candidate == null) continue;
+                if (!pendingPierceTargets.Contains(candidate))
+                {
+                    pendingPierceTargets.Add(candidate);
+                }
+            }
+        }
+
+        if (pendingPierceTargets.Count == 0 && target != null)
+        {
+            pendingPierceTargets.Add(target);
+        }
+
         return true;
     }
 
@@ -170,6 +231,7 @@ public class SlashDashController : MonoBehaviour
         dashRemainingDistance = dashSpeed * dashDuration;
         pendingTarget = null;
         pendingDamage = 0;
+        pendingPierceTargets.Clear();
 
         if (aimDistance > 0f)
         {
@@ -272,7 +334,12 @@ public class SlashDashController : MonoBehaviour
 
     private Vector3 GetBehindPosition(Transform target)
     {
-        var offset = behindOffset > 0f ? behindOffset : 0f;
+        var offset = behindOffset;
+        if (useChainBehindOffset && chainCombat != null && chainCombat.IsSlowActive && chainBehindOffset > 0f)
+        {
+            offset = chainBehindOffset;
+        }
+        offset = Mathf.Max(0f, offset);
         if (offset <= 0f) return target.position;
 
         Vector3 behindDirection;

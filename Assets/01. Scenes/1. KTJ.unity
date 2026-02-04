@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 28400612}
   - component: {fileID: 28400611}
   m_Layer: 0
-  m_Name: DummyTarget (1)
+  m_Name: A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -155,7 +155,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targeting: {fileID: 1100681422}
-  hp: 30
+  hp: 1000
 --- !u!65 &28400612
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1636,7 +1636,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targeting: {fileID: 1100681422}
-  hp: 30
+  hp: 1000
 --- !u!65 &884980857
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2160,7 +2160,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fceb9923a417fd41b8b874e4d4cdc23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxRange: 5
+  maxRange: 6
   coneAngle: 90
   lineWidth: 0.7
   lineEndPadding: 0.1
@@ -2200,7 +2200,11 @@ MonoBehaviour:
   fixedDashTime: 0.15
   ignorePhysicsDuringDash: 1
   lockMovementDuringDash: 1
-  behindOffset: 0.5
+  behindOffset: 1
+  useTargetForwardForBehind: 0
+  chainCombat: {fileID: 0}
+  useChainBehindOffset: 1
+  chainBehindOffset: 0
   contactDistance: 1
 --- !u!114 &1100681431
 MonoBehaviour:
@@ -2242,6 +2246,38 @@ MonoBehaviour:
   detectInterval: 0
   useSpecCooldown: 1
   manualCooldown: 0.2
+  useChainAimConfirm: 1
+  chainAimConfirmTime: 0.03
+  chainAimConfirmAngle: 15
+  chainAimSnapAngle: 60
+  blockAttackWhileAimChanging: 1
+  blockAttackAngle: 15
+  requireInputDuringChain: 1
+  chainInputDeadZone: 0.15
+  chainAimMaxAngle: 35
+  useChainTargetRetention: 1
+  chainRetainTargetAngle: 15
+  useChainTargetConfirm: 1
+  chainTargetConfirmTime: 0.05
+  chainSameTargetConfirmTime: 0.08
+  chainTargetInstantAngle: 6
+  enableAimDebugLog: 0
+  logAimPreview: 0
+  aimLogInterval: 0.25
+  aimLogAngleThreshold: 3
+  aimLogOriginThreshold: 0.2
+  ignoreLastTargetDuringChain: 1
+  allowSameTargetAngle: 12
+  useSameTargetRelease: 1
+  sameTargetReleaseAngle: 25
+  useAimAssist: 1
+  aimAssistOnlyDuringChain: 1
+  aimAssistRadius: 2
+  aimAssistAngle: 15
+  useLastTargetAsAimOrigin: 1
+  useChainLinePierce: 1
+  useChainRangeBoost: 1
+  chainRangeMultiplier: 1.5
   autoGrade: 1
   useTargetingRange: 1
   manualRange: 0
@@ -2366,10 +2402,12 @@ MonoBehaviour:
   followTarget: {fileID: 1100681432}
   dashController: {fileID: 1100681426}
   autoSlash: {fileID: 1100681433}
+  moveController: {fileID: 0}
   originOffset: {x: 0, y: 0.1, z: 0}
   alwaysVisible: 1
-  widthPadding: 0
   useDashRange: 1
+  useAutoSlashAimPreview: 1
+  useAutoSlashAimOrigin: 1
 --- !u!114 &1100681436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2384,11 +2422,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damageSystem: {fileID: 1100681425}
   moveController: {fileID: 1100681440}
+  targetingSystem: {fileID: 0}
+  endChainWhenNoTargets: 1
   damageIncreaseRate: 0.1
   slowTimeScale: 0.9
   firstSlowDuration: 0.8
   chainSlowDuration: 0.8
   lockMovementDuringSlow: 1
+  enableChainLog: 0
 --- !u!114 &1100681440
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2725,7 +2766,7 @@ GameObject:
   - component: {fileID: 1216199712}
   - component: {fileID: 1216199711}
   m_Layer: 0
-  m_Name: DummyTarget (2)
+  m_Name: B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2744,7 +2785,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targeting: {fileID: 1100681422}
-  hp: 30
+  hp: 1000
 --- !u!65 &1216199712
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4533,6 +4574,11 @@ PrefabInstance:
       propertyPath: joystick
       value: 
       objectReference: {fileID: 1621016782}
+    - target: {fileID: 4796758191235481852, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+        type: 3}
+      propertyPath: moveSpeed
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4796758191235481852, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
         type: 3}
       propertyPath: cameraTransform
