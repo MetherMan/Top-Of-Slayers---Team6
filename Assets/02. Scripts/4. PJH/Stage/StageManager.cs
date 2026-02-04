@@ -1,5 +1,3 @@
-using UnityEngine;
-
 /*
     !해당 스테이지에 해당하는 데이터 연결
 
@@ -13,8 +11,6 @@ public class StageManager : Singleton<StageManager>
     public StageDatabase stageDB;
     public StageConfigSO selectDB;
 
-    [Header("스테이지 실시간 데이터 연동")]
-    public int cleardWaveCount;
     #endregion
 
     protected override void Awake()
@@ -28,7 +24,7 @@ public class StageManager : Singleton<StageManager>
     }
 
     #region method
-    //스테이지 오브젝트 클릭시 실행될 매서드
+    //스테이지 오브젝트 클릭 시 실행될 매서드
     public void StageData(int id)
     {
         StageConfigSO data = stageDB.GetStageData(id);
