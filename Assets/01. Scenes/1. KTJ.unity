@@ -2261,11 +2261,12 @@ MonoBehaviour:
   chainTargetConfirmTime: 0.05
   chainSameTargetConfirmTime: 0.08
   chainTargetInstantAngle: 6
-  enableAimDebugLog: 0
-  logAimPreview: 0
-  aimLogInterval: 0.25
-  aimLogAngleThreshold: 3
-  aimLogOriginThreshold: 0.2
+  useInitialTargetConfirm: 1
+  initialTargetConfirmTime: 0.05
+  initialTargetInstantAngle: 6
+  useInitialAimStability: 1
+  initialAimStableTime: 0.05
+  initialAimMaxAngularSpeed: 180
   ignoreLastTargetDuringChain: 1
   allowSameTargetAngle: 12
   useSameTargetRelease: 1
@@ -2281,6 +2282,9 @@ MonoBehaviour:
   autoGrade: 1
   useTargetingRange: 1
   manualRange: 0
+  useReadyDelay: 1
+  readyDelay: 0.2
+  readyDelayOnlyWhenNotChain: 1
 --- !u!120 &1100681434
 LineRenderer:
   serializedVersion: 2
@@ -2429,7 +2433,6 @@ MonoBehaviour:
   firstSlowDuration: 0.8
   chainSlowDuration: 0.8
   lockMovementDuringSlow: 1
-  enableChainLog: 0
 --- !u!114 &1100681440
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2455,6 +2458,40 @@ MonoBehaviour:
   autoFindCamera: 1
   animator: {fileID: 1100681418}
   moveBlendParam: MoveBlend
+--- !u!114 &1100681442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100681416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3da846a70a971fb4ba9f747f05265bab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dashController: {fileID: 0}
+  autoSlash: {fileID: 0}
+  animator: {fileID: 1100681418}
+  readyTrigger: Attack
+  slashTrigger: Slash
+--- !u!114 &1100681443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100681416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c45287c78a17ecf47a11ccc370b8b8c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveController: {fileID: 0}
+  dashController: {fileID: 0}
+  chainCombat: {fileID: 0}
+  moveDeadZone: 0.1
+  lockMovementOnDead: 1
 --- !u!1 &1112059710
 GameObject:
   m_ObjectHideFlags: 0
@@ -4692,6 +4729,14 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1100681440}
+    - targetCorrespondingSourceObject: {fileID: 8084851860919373225, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1100681442}
+    - targetCorrespondingSourceObject: {fileID: 8084851860919373225, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1100681443}
   m_SourcePrefab: {fileID: 100100000, guid: 7ece8dc05b11cc84d82f5c5b019d54d1, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
