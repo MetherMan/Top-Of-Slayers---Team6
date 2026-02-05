@@ -3,6 +3,13 @@ using UnityEngine;
 
 public partial class AutoSlashController
 {
+    private Transform pendingInitialTarget;
+    private Vector3 pendingInitialDirection = Vector3.forward;
+    private float pendingInitialTimer;
+    private Vector3 lastInitialAimDirection = Vector3.forward;
+    private bool hasInitialAimDirection;
+    private float initialAimStableTimer;
+
     private List<Transform> GetPierceTargets(bool isChainActive, Vector3 origin, Vector3 aimDirection, float searchRange, Transform ignoreTarget, Transform selectedTarget)
     {
         if (!useChainLinePierce || !isChainActive) return null;
@@ -50,5 +57,119 @@ public partial class AutoSlashController
         adjustedDirection = normalized;
         assistTarget = target;
         return true;
+    }
+
+    private bool TryConfirmInitialTarget(Transform candidate, Vector3 candidateDirection, Vector3 rawDirection, float deltaTime, out Transform confirmedTarget, out Vector3 confirmedDirection)
+    {
+        confirmedTarget = candidate;
+        confirmedDirection = candidateDirection;
+        if (!useInitialTargetConfirm || initialTargetConfirmTime <= 0f) return candidate != null;
+        if (candidate == null)
+        {
+            ResetInitialTargetConfirm();
+            return false;
+        }
+        if (!IsInitialAimStable())
+        {
+            ResetInitialTargetConfirm();
+            return false;
+        }
+
+        rawDirection.y = 0f;
+        candidateDirection.y = 0f;
+        if (rawDirection.sqrMagnitude <= 0f || candidateDirection.sqrMagnitude <= 0f)
+        {
+            ResetInitialTargetConfirm();
+            return false;
+        }
+
+        var angle = Vector3.Angle(rawDirection, candidateDirection);
+        if (angle <= initialTargetInstantAngle)
+        {
+            pendingInitialTarget = candidate;
+            pendingInitialDirection = candidateDirection;
+            pendingInitialTimer = 0f;
+            return true;
+        }
+
+        if (candidate != pendingInitialTarget)
+        {
+            pendingInitialTarget = candidate;
+            pendingInitialDirection = candidateDirection;
+            pendingInitialTimer = 0f;
+            return false;
+        }
+
+        pendingInitialTimer += deltaTime;
+        if (pendingInitialTimer >= initialTargetConfirmTime)
+        {
+            confirmedTarget = pendingInitialTarget;
+            confirmedDirection = pendingInitialDirection.sqrMagnitude > 0f ? pendingInitialDirection.normalized : candidateDirection.normalized;
+            return true;
+        }
+
+        return false;
+    }
+
+    private void UpdateInitialAimStability(Vector3 rawDirection, float deltaTime, bool isChainActive)
+    {
+        if (isChainActive)
+        {
+            ResetInitialAimStability();
+            return;
+        }
+        if (!useInitialAimStability || initialAimStableTime <= 0f)
+        {
+            initialAimStableTimer = initialAimStableTime;
+            return;
+        }
+        if (deltaTime <= 0f) return;
+
+        rawDirection.y = 0f;
+        if (rawDirection.sqrMagnitude <= 0f)
+        {
+            ResetInitialAimStability();
+            return;
+        }
+
+        var normalized = rawDirection.normalized;
+        if (!hasInitialAimDirection)
+        {
+            hasInitialAimDirection = true;
+            lastInitialAimDirection = normalized;
+            initialAimStableTimer = 0f;
+            return;
+        }
+
+        var angle = Vector3.Angle(lastInitialAimDirection, normalized);
+        lastInitialAimDirection = normalized;
+        var angularSpeed = angle / deltaTime;
+        if (angularSpeed > initialAimMaxAngularSpeed)
+        {
+            initialAimStableTimer = 0f;
+            return;
+        }
+
+        initialAimStableTimer += deltaTime;
+    }
+
+    private bool IsInitialAimStable()
+    {
+        if (!useInitialAimStability || initialAimStableTime <= 0f) return true;
+        return initialAimStableTimer >= initialAimStableTime;
+    }
+
+    private void ResetInitialTargetConfirm()
+    {
+        pendingInitialTarget = null;
+        pendingInitialDirection = Vector3.forward;
+        pendingInitialTimer = 0f;
+    }
+
+    private void ResetInitialAimStability()
+    {
+        initialAimStableTimer = 0f;
+        hasInitialAimDirection = false;
+        lastInitialAimDirection = Vector3.forward;
     }
 }

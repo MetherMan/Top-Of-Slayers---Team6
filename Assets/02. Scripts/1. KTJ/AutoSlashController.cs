@@ -43,12 +43,15 @@ public partial class AutoSlashController : MonoBehaviour
     [SerializeField, Min(0f)] private float chainSameTargetConfirmTime = 0.08f;
     [SerializeField, Range(0f, 45f)] private float chainTargetInstantAngle = 6f;
 
-    [Header("디버그")]
-    [SerializeField] private bool enableAimDebugLog = false;
-    [SerializeField] private bool logAimPreview = false;
-    [SerializeField, Min(0f)] private float aimLogInterval = 0.25f;
-    [SerializeField, Range(0f, 45f)] private float aimLogAngleThreshold = 3f;
-    [SerializeField, Min(0f)] private float aimLogOriginThreshold = 0.2f;
+    [Header("초기 타겟 확정")]
+    [SerializeField] private bool useInitialTargetConfirm = true;
+    [SerializeField, Min(0f)] private float initialTargetConfirmTime = 0.05f;
+    [SerializeField, Range(0f, 45f)] private float initialTargetInstantAngle = 6f;
+
+    [Header("초기 조준 안정")]
+    [SerializeField] private bool useInitialAimStability = true;
+    [SerializeField, Min(0f)] private float initialAimStableTime = 0.05f;
+    [SerializeField, Range(0f, 720f)] private float initialAimMaxAngularSpeed = 180f;
 
     [Header("체인 재타격")]
     [SerializeField] private bool ignoreLastTargetDuringChain = true;
@@ -83,6 +86,8 @@ public partial class AutoSlashController : MonoBehaviour
     private float cooldownTimer;
     private float lastAttackRange;
 
+    public event System.Action OnAttackReady;
+
     private void Awake()
     {
         if (dashController == null) dashController = GetComponent<SlashDashController>();
@@ -95,149 +100,4 @@ public partial class AutoSlashController : MonoBehaviour
         if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
         if (spec == null && dashController != null) spec = dashController.Spec;
     }
-
-    private void Update()
-    {
-        if (dashController == null || targetingSystem == null) return;
-        if (Mathf.Approximately(Time.timeScale, 0f)) return;
-
-        var isChainActive = chainCombat != null && chainCombat.IsSlowActive;
-        var delta = isChainActive ? Time.unscaledDeltaTime : Time.deltaTime;
-
-        if (!isChainActive)
-        {
-            ResetChainTargetConfirm();
-            ResetSameTargetRelease();
-        }
-
-        var rawAimDirection = GetAimDirection();
-        rawAimDirection.y = 0f;
-        if (rawAimDirection.sqrMagnitude <= 0f)
-        {
-            rawAimDirection = transform.forward;
-        }
-        else
-        {
-            rawAimDirection = rawAimDirection.normalized;
-        }
-        UpdateSameTargetRelease(rawAimDirection);
-
-        var searchRange = GetAttackRange();
-        if (isChainActive && useChainRangeBoost)
-        {
-            searchRange *= chainRangeMultiplier;
-        }
-        lastAttackRange = searchRange;
-        var aimOrigin = GetAimOrigin(isChainActive);
-        var previewIgnoreTarget = GetIgnoreTarget(isChainActive, rawAimDirection);
-        var previewDirection = rawAimDirection;
-        if (TryGetAimAssistDirection(isChainActive, aimOrigin, rawAimDirection, searchRange, previewIgnoreTarget, out var previewAdjustedDirection, out _))
-        {
-            previewDirection = previewAdjustedDirection;
-        }
-        UpdateAimPreview(aimOrigin, previewDirection);
-        TryLogAimPreview(aimOrigin, rawAimDirection, previewDirection, searchRange);
-
-        if (isChainActive && requireInputDuringChain && moveController != null)
-        {
-            if (!moveController.HasAimInput(chainInputDeadZone))
-            {
-                ResetChainTargetConfirm();
-                ResetSameTargetRelease();
-                return;
-            }
-        }
-
-        if (!isChainActive && cooldownTimer > 0f) cooldownTimer -= delta;
-
-        if (!isChainActive && detectInterval > 0f)
-        {
-            detectTimer -= delta;
-            if (detectTimer > 0f) return;
-            detectTimer = detectInterval;
-        }
-
-        if (!isChainActive && cooldownTimer > 0f) return;
-        if (dashController.IsDashing) return;
-
-        var baseAimDirection = GetStableAimDirection(isChainActive, delta);
-        if (isChainActive && useChainAimConfirm && blockAttackWhileAimChanging)
-        {
-            var angle = Vector3.Angle(rawAimDirection, baseAimDirection);
-            if (angle > blockAttackAngle)
-            {
-                if (enableAimDebugLog)
-                {
-                    Debug.Log($"[조준] 공격보류 angle:{angle:F1} raw:{rawAimDirection} confirm:{baseAimDirection}");
-                }
-                return;
-            }
-        }
-        var ignoreTarget = GetIgnoreTarget(isChainActive, rawAimDirection);
-        var aimDirection = baseAimDirection;
-        Transform target = null;
-
-        if (isChainActive && targetingSystem != null)
-        {
-            if (TryGetChainPriorityTarget(aimOrigin, rawAimDirection, searchRange, ignoreTarget, out var chainTarget, out var chainDirection))
-            {
-                if (!TryConfirmChainTarget(chainTarget, chainDirection, rawAimDirection, delta, out var confirmedTarget, out var confirmedDirection))
-                {
-                    return;
-                }
-                target = confirmedTarget;
-                aimDirection = confirmedDirection;
-            }
-            else
-            {
-                return;
-            }
-        }
-
-        if (target == null)
-        {
-            Transform assistTarget = null;
-            if (TryGetAimAssistDirection(isChainActive, aimOrigin, baseAimDirection, searchRange, ignoreTarget, out var adjustedDirection, out var resolvedAssistTarget))
-            {
-                aimDirection = adjustedDirection;
-                assistTarget = resolvedAssistTarget;
-            }
-
-            target = assistTarget ?? targetingSystem.GetTarget(aimOrigin, aimDirection, searchRange, ignoreTarget);
-        }
-        if (target == null) return;
-        if (isChainActive && useSameTargetRelease && !sameTargetReleased && target == lastAttackTarget)
-        {
-            LogSameTargetBlock(target);
-            return;
-        }
-
-        var aimDistance = searchRange > 0f ? searchRange : 0f;
-        var damageMultiplier = chainCombat != null ? chainCombat.GetDamageMultiplier(target) : 1f;
-        var pierceTargets = GetPierceTargets(isChainActive, aimOrigin, aimDirection, searchRange, ignoreTarget, target);
-        if (pierceTargets != null && pierceTargets.Count > 1)
-        {
-            if (dashController.TryStartAutoSlashPierce(target, aimDirection, aimDistance, autoGrade, damageMultiplier, pierceTargets))
-            {
-                RegisterAttackTarget(target, rawAimDirection);
-                cooldownTimer = GetCooldown();
-                if (enableAimDebugLog)
-                {
-                    Debug.Log($"[조준] 관통 타겟:{pierceTargets.Count} first:{target.name} aim:{aimDirection} range:{searchRange:F2}");
-                }
-            }
-            return;
-        }
-
-        if (dashController.TryStartAutoSlash(target, aimDirection, aimDistance, autoGrade, damageMultiplier))
-        {
-            RegisterAttackTarget(target, rawAimDirection);
-            cooldownTimer = GetCooldown();
-            if (enableAimDebugLog)
-            {
-                Debug.Log($"[조준] 단일 타겟:{target.name} aim:{aimDirection} range:{searchRange:F2}");
-            }
-        }
-    }
-
 }

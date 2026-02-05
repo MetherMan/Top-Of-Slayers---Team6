@@ -20,9 +20,6 @@ public class ChainCombatController : MonoBehaviour
     [SerializeField, Min(0f)] private float chainSlowDuration = 0.8f;
     [SerializeField] private bool lockMovementDuringSlow = true;
 
-    [Header("디버그")]
-    [SerializeField] private bool enableChainLog = false;
-
     private Transform lastTarget;
     private int currentChain;
     private bool isSlowActive;
@@ -122,7 +119,6 @@ public class ChainCombatController : MonoBehaviour
         isSlowActive = true;
         ApplyMovementLock(true);
         OnSlowStateChanged?.Invoke(true);
-        if (enableChainLog) Debug.Log("[\uCCB4\uC778] \uC9C4\uC785");
         SetTimeScale(slowTimeScale);
         yield return new WaitForSecondsRealtime(duration);
         StopSlow();
@@ -133,7 +129,6 @@ public class ChainCombatController : MonoBehaviour
         isSlowActive = false;
         ApplyMovementLock(false);
         OnSlowStateChanged?.Invoke(false);
-        if (enableChainLog) Debug.Log("[\uCCB4\uC778] \uC885\uB8CC");
         if (slowRoutine != null)
         {
             StopCoroutine(slowRoutine);
