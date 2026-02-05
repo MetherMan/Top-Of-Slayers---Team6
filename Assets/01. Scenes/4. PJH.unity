@@ -251,6 +251,53 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1093437992}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &161138597
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 161138599}
+  - component: {fileID: 161138598}
+  m_Layer: 0
+  m_Name: StageManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &161138598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 161138597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18529d46a376efc45b2b3d91ec1b1da1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DontDestroy: 0
+  stageDB: {fileID: 0}
+  selectDB: {fileID: 0}
+--- !u!4 &161138599
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 161138597}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2091.2883, y: 2071.1262, z: 4259.1504}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &162508462
 GameObject:
   m_ObjectHideFlags: 0
@@ -315,6 +362,8 @@ MonoBehaviour:
   DontDestroy: 0
   remainingTime: 0
   playTime: 0
+  loundLength: 0
+  monsterCount: 0
 --- !u!4 &265866447
 Transform:
   m_ObjectHideFlags: 0
@@ -359,10 +408,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 869bc13c1cedad24ba671ffc22d81e33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ruleList:
-  - {fileID: 11400000, guid: 14a3973d77ec90341a38ed7b70032f15, type: 2}
-  - {fileID: 11400000, guid: 74cf1781b23d7aa4fbbb4acd74b1c284, type: 2}
-  - {fileID: 11400000, guid: 5d8df5eb5178c6a4ba86d3118d8ec312, type: 2}
   ruleType: {fileID: 0}
 --- !u!4 &316171756
 Transform:
@@ -2849,6 +2894,54 @@ Transform:
   - {fileID: 355895208}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1741458365
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1741458367}
+  - component: {fileID: 1741458366}
+  m_Layer: 0
+  m_Name: LoadTest
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1741458366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1741458365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a37473d52ed2e7b4a9a3c2e343fc77d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  monsterSO:
+    m_LabelString: MonsterSO
+  stageSO:
+    m_LabelString: StageSO
+--- !u!4 &1741458367
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1741458365}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2091.2883, y: 2071.1262, z: 4259.1504}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1766381086
 GameObject:
   m_ObjectHideFlags: 0
@@ -2944,7 +3037,6 @@ MonoBehaviour:
   DontDestroy: 1
   stageDB: {fileID: 0}
   selectDB: {fileID: 0}
-  cleardWaveCount: 0
 --- !u!4 &1778156987
 Transform:
   m_ObjectHideFlags: 0
@@ -3147,7 +3239,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 869bc13c1cedad24ba671ffc22d81e33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ruleList: []
   ruleType: {fileID: 0}
 --- !u!4 &1837448420
 Transform:
@@ -3496,3 +3587,5 @@ SceneRoots:
   - {fileID: 407795891}
   - {fileID: 1735946032}
   - {fileID: 316171756}
+  - {fileID: 161138599}
+  - {fileID: 1741458367}

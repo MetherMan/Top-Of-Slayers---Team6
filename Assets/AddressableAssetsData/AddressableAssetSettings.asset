@@ -15,9 +15,9 @@ MonoBehaviour:
   m_DefaultGroup: 5130cfc1001c43b48a3e606fb5fed337
   m_currentHash:
     serializedVersion: 2
-    Hash: a81d4b852d0397c9d233f27583be16c8
+    Hash: d6814a5b9c322356b5f15569385051f9
   m_OptimizeCatalogSize: 0
-  m_BuildRemoteCatalog: 0
+  m_BuildRemoteCatalog: 1
   m_BundleLocalCatalog: 0
   m_CatalogRequestsTimeout: 0
   m_DisableCatalogUpdateOnStart: 0
@@ -44,7 +44,9 @@ MonoBehaviour:
   m_BuildAddressablesWithPlayerBuild: 0
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
+  - {fileID: 11400000, guid: 80d26fed4d27d884bbc2040f63352640, type: 2}
   - {fileID: 11400000, guid: 4a5620213758bc34da10992952ee1c90, type: 2}
+  - {fileID: 11400000, guid: 58ad7a2a51d74fe45bdb4264ce1e5f7d, type: 2}
   - {fileID: 11400000, guid: fbfc96a319babe94fb2d2137ff88b253, type: 2}
   - {fileID: 11400000, guid: 58290d0228685c442897aa7bb65b4a1c, type: 2}
   - {fileID: 11400000, guid: 9ec95ec2fe0e6284a9cd3c8aa62181e5, type: 2}
@@ -69,7 +71,7 @@ MonoBehaviour:
       - m_Id: bbbe235ba38615d4ea3583d756ec648a
         m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
       - m_Id: c57d017ec3b9a9a44b4d2576e2943163
-        m_Value: http://[PrivateIpAddress]:[HostingServicePort]
+        m_Value: http://3.37.62.181/TopOfSlayers/
     m_ProfileEntryNames:
     - m_Id: 00fb249ee64882b47ac49669cb60c8ff
       m_Name: Local.BuildPath
@@ -90,6 +92,8 @@ MonoBehaviour:
   m_LabelTable:
     m_LabelNames:
     - default
+    - MonsterSO
+    - StageSO
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: c91818f3d4d78244b97180f0ad33da1c, type: 2}
@@ -108,5 +112,6 @@ MonoBehaviour:
     m_HostingServiceInfos: []
     m_Settings: {fileID: 11400000}
     m_NextInstanceId: 0
-    m_RegisteredServiceTypeRefs: []
+    m_RegisteredServiceTypeRefs:
+    - UnityEditor.AddressableAssets.HostingServices.HttpHostingService, Unity.Addressables.Editor
     m_PingTimeoutInMilliseconds: 5000
