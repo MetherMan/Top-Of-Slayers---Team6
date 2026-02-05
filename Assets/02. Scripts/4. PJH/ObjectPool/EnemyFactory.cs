@@ -1,15 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyFactory : MonoBehaviour
 {
     [SerializeField] private ObjectPoolManager objectPoolManager;
-    [SerializeField] private EnemyConfigSO stageSO;
 
-    public GameObject Create(Vector3 position, Quaternion rotation)
+    public GameObject Create(EnemyConfigSO enemySO, Vector3 position, Quaternion rotation)
     {
-        GameObject enemy = objectPoolManager.SpawnPool(stageSO.monsterPrefab, position, rotation);
+        GameObject enemy = objectPoolManager.SpawnPool(enemySO.monsterPrefab, position, rotation);
         return enemy;
     }
 }
