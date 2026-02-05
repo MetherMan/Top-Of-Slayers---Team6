@@ -28,7 +28,7 @@ public class PlayerAttackAnimator : MonoBehaviour
             autoSlash.OnAttackReady += HandleAttackReady;
         }
         if (dashController == null) return;
-        dashController.OnDashImpact += HandleDashImpact;
+        dashController.OnDashStarted += HandleDashStarted;
     }
 
     private void OnDisable()
@@ -38,20 +38,23 @@ public class PlayerAttackAnimator : MonoBehaviour
             autoSlash.OnAttackReady -= HandleAttackReady;
         }
         if (dashController == null) return;
-        dashController.OnDashImpact -= HandleDashImpact;
+        dashController.OnDashStarted -= HandleDashStarted;
     }
 
     private void HandleAttackReady()
     {
         if (animator == null) return;
         if (string.IsNullOrEmpty(readyTrigger)) return;
+        if (dashController != null && dashController.IsDashing) return;
+        if (!string.IsNullOrEmpty(slashTrigger)) animator.ResetTrigger(slashTrigger);
         animator.SetTrigger(readyTrigger);
     }
 
-    private void HandleDashImpact()
+    private void HandleDashStarted()
     {
         if (animator == null) return;
         if (string.IsNullOrEmpty(slashTrigger)) return;
+        if (!string.IsNullOrEmpty(readyTrigger)) animator.ResetTrigger(readyTrigger);
         animator.SetTrigger(slashTrigger);
     }
 }
