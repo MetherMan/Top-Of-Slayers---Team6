@@ -1,16 +1,19 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class EnemySpawnManager : MonoBehaviour
 {
-    [Header("ÂüÁ¶")]
+    [Header("ì°¸ì¡°")]
     [SerializeField] private EnemyFactory enemyFactory;
+    [SerializeField] private StageConfigSO stageSO;
 
-    [Header("¼³Á¤")]
+    [Header("ì„¤ì •")]
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private int spawnCount;
 
-    //¸ó½ºÅÍ ¼ö °ü·ÃÀº ¸ó½ºÅÍ¸Å´ÏÀú °°Àº °÷¿¡¼­ ÇÏ´Â °ÍÀÌ ÁÁÀ»µíÇÔ
+    //ëª¬ìŠ¤í„° ìˆ˜ ê´€ë ¨ì€ ëª¬ìŠ¤í„°ë§¤ë‹ˆì € ê°™ì€ ê³³ì—ì„œ í•˜ëŠ” ê²ƒì´ ì¢‹ì„ë“¯í•¨
     private int monsterCount;
+
+    private int currentRound = 0;
 
     void Start()
     {
@@ -21,10 +24,11 @@ public class EnemySpawnManager : MonoBehaviour
 
     private void Spawn()
     {
-        //½ºÆùÄ«¿îÆ®¸¸Å­ »ı¼ºÇÏ°í Ä«¿îÆ® Áõ°¡
-        for (int i = 0; i < spawnCount; i++)
+        var roundData = stageSO.roundDatas[currentRound];
+        //ë¼ìš´ë“œë°ì´í„° ë¦¬ìŠ¤íŠ¸ë§Œí¼ ëª¬ìŠ¤í„° ìƒì„±
+        foreach (var monster in roundData.monsterSpawnList)
         {
-            GameObject monster = enemyFactory.Create(spawnPoint.position, Quaternion.identity);
+            enemyFactory.Create(monster, spawnPoint.position, Quaternion.identity);
 
             monsterCount++;
         }
@@ -32,18 +36,19 @@ public class EnemySpawnManager : MonoBehaviour
 
     private void ReSpawn()
     {
-        //ÇÑ¶ó¿îµå ´Ù Á×ÀÌ¸é ´Ù½Ã ½ºÆù
+        //í•œë¼ìš´ë“œ ë‹¤ ì£½ì´ë©´ ë¼ìš´ë“œ ì¦ê°€, ë‹¤ì‹œ ìŠ¤í°
         if(monsterCount <= 0)
         {
+            currentRound++;
             Spawn();
         }
     }
 
-    //¸ó½ºÅÍ ½ºÅ©¸³Æ®¿¡¼­ Á×¾úÀ» ¶§ È£Ãâ
+    //ëª¬ìŠ¤í„° ìŠ¤í¬ë¦½íŠ¸ì—ì„œ ì£½ì—ˆì„ ë•Œ í˜¸ì¶œ
     public void MonsterDead()
     {
         monsterCount--;
         ReSpawn();
-        //Ç®¹İÈ¯Àº ¸ó½ºÅÍ ½ºÅ©¸³Æ®¿¡¼­ Ã³¸®?
+        //í’€ë°˜í™˜ì€ ëª¬ìŠ¤í„° ìŠ¤í¬ë¦½íŠ¸ì—ì„œ ì²˜ë¦¬?
     }
 }

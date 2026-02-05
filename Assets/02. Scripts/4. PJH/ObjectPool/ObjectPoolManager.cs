@@ -1,10 +1,8 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectPoolManager : MonoBehaviour
+public class ObjectPoolManager : Singleton<ObjectPoolManager>
 {
-    public static ObjectPoolManager Instance;
-
     [System.Serializable]
     public class Pool
     {
@@ -14,21 +12,13 @@ public class ObjectPoolManager : MonoBehaviour
 
     [SerializeField] private List<Pool> pools;
 
-    //ÇÁ¸®ÆÕ°ú ¿ÀºêÁ§Æ® Å¥¸¦ ¸ÅÇÎÇÏ´Â µñ¼Å³Ê¸®
+    //í”„ë¦¬íŒ¹ê³¼ ì˜¤ë¸Œì íŠ¸ íë¥¼ ë§¤í•‘í•˜ëŠ” ë”•ì…”ë„ˆë¦¬
     private Dictionary<GameObject, Queue<GameObject>> poolDictionary
         = new Dictionary<GameObject, Queue<GameObject>>();
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        base.Awake();
 
         if (poolDictionary == null) poolDictionary = new Dictionary<GameObject, Queue<GameObject>>();
         if (pools == null || pools.Count == 0)
@@ -38,24 +28,24 @@ public class ObjectPoolManager : MonoBehaviour
 
         foreach (var pool in pools)
         {
-            //¿ÀºêÁ§Æ® Å¥ »ı¼º
+            //ì˜¤ë¸Œì íŠ¸ í ìƒì„±
             Queue<GameObject> objectQ = new Queue<GameObject>();
 
-            //Ç® »çÀÌÁî¸¸Å­ ¿ÀºêÁ§Æ® »ı¼º
+            //í’€ ì‚¬ì´ì¦ˆë§Œí¼ ì˜¤ë¸Œì íŠ¸ ìƒì„±
             for (int i = 0; i < pool.size; i++)
             {
                 GameObject obj = Instantiate(pool.prefab, transform);
                 obj.SetActive(false);
                 objectQ.Enqueue(obj);
             }
-            //µñ¼Å³Ê¸®¿¡ Å¥ Ãß°¡
+            //ë”•ì…”ë„ˆë¦¬ì— í ì¶”ê°€
             poolDictionary.Add(pool.prefab, objectQ);
         }
     }
 
     public GameObject SpawnPool(GameObject prefab, Vector3 position, Quaternion rotation)
     {
-        //µñ¼Å³Ê¸® ÇÁ¸®ÆÕ Å° ³ª¿­(µğ¹ö±×¿ë)
+        //ë”•ì…”ë„ˆë¦¬ í”„ë¦¬íŒ¹ í‚¤ ë‚˜ì—´(ë””ë²„ê·¸ìš©)
         string keys = string.Join(", ", poolDictionary.Keys);
         if (!poolDictionary.ContainsKey(prefab))
         {
@@ -66,12 +56,12 @@ public class ObjectPoolManager : MonoBehaviour
 
         if (poolDictionary[prefab].Count > 0)
         {
-            //Å¥¿¡¼­ ¿ÀºêÁ§Æ® ²¨³»±â
+            //íì—ì„œ ì˜¤ë¸Œì íŠ¸ êº¼ë‚´ê¸°
             obj = poolDictionary[prefab].Dequeue();
         }
         else
         {
-            //Å¥°¡ ºñ¾îÀÖÀ¸¸é »õ·Î »ı¼º
+            //íê°€ ë¹„ì–´ìˆìœ¼ë©´ ìƒˆë¡œ ìƒì„±
             obj = Instantiate(prefab, transform);
         }
 
@@ -83,7 +73,7 @@ public class ObjectPoolManager : MonoBehaviour
 
     public void ReturnPool(GameObject prefab, GameObject obj)
     {
-        //ÇÁ¸®ÆÕÀÌ µñ¼Å³Ê¸®¿¡ ¾øÀ¸¸é ¹İÈ¯ÇÏÁö ¾ÊÀ½
+        //í”„ë¦¬íŒ¹ì´ ë”•ì…”ë„ˆë¦¬ì— ì—†ìœ¼ë©´ ë°˜í™˜í•˜ì§€ ì•ŠìŒ
         if (!poolDictionary.ContainsKey(prefab)) return;
 
         obj.SetActive(false);
