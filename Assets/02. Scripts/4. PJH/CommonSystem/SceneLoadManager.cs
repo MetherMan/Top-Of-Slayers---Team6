@@ -1,4 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class SceneLoadManager : Singleton<SceneLoadManager>
 {

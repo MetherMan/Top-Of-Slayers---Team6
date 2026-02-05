@@ -25,6 +25,7 @@ public class StageConfigSO : ScriptableObject
         1번 스테이지 하드맵 11
         10번 스테이지 노말 보스맵 103
         10번 스테이지 하드 보스맵 104
+        첼린지 스테이지 05
     */ //넘버링 설정 값
 
     [Header("스테이지 넘버링")]
@@ -33,13 +34,18 @@ public class StageConfigSO : ScriptableObject
     [Header("스테이지 타입")]
     public StageType stageType;
 
+    [Header("스테이지 룰")]
+    public WaveRule stageRule;
+
     [Header("스테이지 시간")]
     public int stageTime;
 
-    //데이터 중심 설계 : 각 스테이지 데이터에서 라운드 값 설정
-    //보스 스테이지 : 배열의 끝에 다다를 경우 다시 0으로 초기화해서 반복한다
+    //데이터 중심 설계 : 각 스테이지 데이터에서 웨이브 값 설정
+    //웨이브 : 각 웨이브 별 스폰될 몬스터 수, 타입
+    //라운드 : 사용되어질 몬스터 타입, 엘리트, 보스 유무
+    //중첩클래스 : https://artiper.tistory.com/125
     [Header("스테이지 웨이브(라운드) 세팅")]
-    public List<RoundData> loundDatas = new List<RoundData>();
+    public List<RoundData> roundDatas = new List<RoundData>();
 
     [System.Serializable] public class RoundData
     {
