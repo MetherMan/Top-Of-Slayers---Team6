@@ -43,6 +43,7 @@ public class SlashDashController : MonoBehaviour
 
     public bool IsDashing => state == DashState.Dashing;
     public AttackSpecSO Spec => spec;
+    public event System.Action OnDashStarted;
     public float DefaultDashDistance
     {
         get
@@ -267,6 +268,7 @@ public class SlashDashController : MonoBehaviour
         state = DashState.Dashing;
         PreparePhysics();
         SetMovementLock(true);
+        OnDashStarted?.Invoke();
         return true;
     }
 
