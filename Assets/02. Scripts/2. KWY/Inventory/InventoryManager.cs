@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 public class InventoryManager : Singleton<InventoryManager>
@@ -9,7 +9,7 @@ public class InventoryManager : Singleton<InventoryManager>
     InventorySlotUI[] slotsUI;
     List<InventorySlot> inventory = new List<InventorySlot>();
 
-    //Å×½ºÆ®¿ë ¾ÆÀÌÅÛ
+    //í…ŒìŠ¤íŠ¸ìš© ì•„ì´í…œ
     [SerializeField] ItemSO testItem1;
     [SerializeField] ItemSO testItem2;
     [SerializeField] ItemSO testItem3;
@@ -19,7 +19,7 @@ public class InventoryManager : Singleton<InventoryManager>
     {
         slotsUI = slotRoot.GetComponentsInChildren<InventorySlotUI>();
 
-        //Å×½ºÆ®¿ë ¾ÆÀÌÅÛ
+        //í…ŒìŠ¤íŠ¸ìš© ì•„ì´í…œ
         AddItem(testItem1, 1000);
         AddItem(testItem2, 1);
         AddItem(testItem3, 1);
@@ -44,6 +44,24 @@ public class InventoryManager : Singleton<InventoryManager>
         inventory.Add(new InventorySlot { item = item, count = amount });
 
         RefreshUI();
+    }
+    public bool UseItem(ItemSO item, int amount = 1)
+    {
+         foreach(var slot in inventory)
+        {
+            if (slot.item == item)
+            {
+                slot.count -= amount;
+                if( slot.count <= 0)
+                {
+                    inventory.Remove(slot);
+                }
+                RefreshUI();
+                return true;
+            }
+            
+        }
+         return false;
     }
 
     public void RefreshUI()
