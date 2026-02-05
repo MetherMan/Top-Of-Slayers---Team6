@@ -136,6 +136,7 @@ public class ChainCombatController : MonoBehaviour
         }
 
         SetTimeScale(1f);
+        ResetChainState();
     }
 
     private void RequestTargetCheck()
@@ -212,6 +213,12 @@ public class ChainCombatController : MonoBehaviour
 
         Time.timeScale = value;
         pendingTimeScale = -1f;
+    }
+
+    private void ResetChainState()
+    {
+        currentChain = 0;
+        lastTarget = null;
     }
 
     private IEnumerator WaitForTimeScaleResume()
