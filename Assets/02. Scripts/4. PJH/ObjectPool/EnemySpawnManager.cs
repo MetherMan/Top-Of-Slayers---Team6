@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemySpawnManager : MonoBehaviour
@@ -11,6 +12,7 @@ public class EnemySpawnManager : MonoBehaviour
     [SerializeField] private Transform player;
     [SerializeField] private float spawnDistance = 5f;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private float spawnInterval = 0.1f;
 
     //몬스터 수 관련은 몬스터매니저 같은 곳에서 하는 것이 좋을듯함
     private int monsterCount;
@@ -33,18 +35,24 @@ public class EnemySpawnManager : MonoBehaviour
         }
     }
 
-    void Start()
+    IEnumerator Start()
     {
         monsterCount = 0;
 
-        Spawn();
+        yield return new WaitForSeconds(1f);
+
+        WaveStart();
     }
 
-    private void Spawn()
+    private void WaveStart()
     {
-        StageFlowManager.Instance.waveIndex = currentRound + 1;
-
         if (currentRound >= stageSO.roundDatas.Count) return;
+        StartCoroutine(SpawnCoroutine());
+    }
+    
+    private IEnumerator SpawnCoroutine()
+    {
+        //StageFlowManager.Instance.waveIndex = currentRound + 1;
 
         var roundData = stageSO.roundDatas[currentRound]; //현재라운드 SO
         int dirCount = spawnDirections.Length; //방향갯수
@@ -66,6 +74,7 @@ public class EnemySpawnManager : MonoBehaviour
             {
                 dirIndex = 0;
             }
+            yield return new WaitForSeconds(spawnInterval); //스폰 간격
         }
     }
 
@@ -87,7 +96,7 @@ public class EnemySpawnManager : MonoBehaviour
         if(monsterCount <= 0)
         {
             currentRound++;
-            Spawn();
+            WaveStart();
         }
     }
 
