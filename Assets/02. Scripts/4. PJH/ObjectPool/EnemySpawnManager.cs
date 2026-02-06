@@ -42,6 +42,8 @@ public class EnemySpawnManager : MonoBehaviour
 
     private void Spawn()
     {
+        StageFlowManager.Instance.waveIndex = currentRound + 1;
+
         if (currentRound >= stageSO.roundDatas.Count) return;
 
         var roundData = stageSO.roundDatas[currentRound]; //현재라운드 SO
