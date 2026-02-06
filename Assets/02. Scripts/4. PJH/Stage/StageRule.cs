@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 [CreateAssetMenu(fileName = "Rule_", menuName = "Rule/StageRule")]
 public class StageRule : WaveRule
@@ -22,12 +22,13 @@ public class StageRule : WaveRule
         
     }
 
-    //Å¬¸®¾î Á¶°Ç
+    //í´ë¦¬ì–´ ì¡°ê±´
     public override void RoundClear(RuleDataContainer data, WaveDirectorSystem context)
     {
-        //StageConfigSO -> StageDatabase -> StageManager -> ObjectPool -> EnemySpawner
-        //EnemyDown() x++ º¯¼ö Áõ°¨ -> StageDatabase.Instance.stageLound º¯¼ö¿Í if¹® ºñ±³
-        context.RoundClear();
+        if (data.stageData.roundDatas.Count < data.waveIndex)
+        {
+            context.RoundClear();
+        }
     }
     #endregion
 }

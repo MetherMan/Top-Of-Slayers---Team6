@@ -1,13 +1,13 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class GameFlowManager : Singleton<GameFlowManager>
 {
     /*
-        »óÅÂÀüÈ¯
+        ìƒíƒœì „í™˜
     */
 
     #region field
-
+    public int waveIndex;
     #endregion
 
     protected override void Awake()
@@ -21,6 +21,12 @@ public class GameFlowManager : Singleton<GameFlowManager>
     }
 
     #region method
-
+    public void RoundClear()
+    {
+        if (StageManager.Instance.selectDB.clearResult == (ClearResult)1)
+        {
+            Debug.Log("GameFlowManager RoundClear()");
+        }
+    }
     #endregion
 }

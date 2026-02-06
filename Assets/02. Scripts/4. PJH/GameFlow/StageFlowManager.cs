@@ -6,7 +6,7 @@
     DontDestroyOnLoad : false
 
     *변수 데이터 -> WaveDirectorySystem.cs 보내고 -> GameFlowManager에서 결과에 따라 메서드 실행
-    *상태전환 <- GameStateMachine(상태머신)
+    *상태전환 <- GameStateMachine(상태머신) <- GameFlowManager 메서드 실행
 */
 
 public class StageFlowManager : Singleton<StageFlowManager>
@@ -17,8 +17,9 @@ public class StageFlowManager : Singleton<StageFlowManager>
     public int playTime;
 
     //웨이브
-    public int loundLength;
+    public int waveLength;
     public int monsterCount;
+    public int waveIndex; //EnemySpawnManager에서 값 변경
     #endregion
 
     protected override void Awake()
@@ -33,7 +34,7 @@ public class StageFlowManager : Singleton<StageFlowManager>
         //웨이브
         if (StageManager.Instance.stageDB != null)
         {
-            loundLength = StageManager.Instance.stageDB.roundDatas.Count;
+            waveLength = StageManager.Instance.stageDB.roundDatas.Count;
         }
     }
 
@@ -48,6 +49,14 @@ public class StageFlowManager : Singleton<StageFlowManager>
     }
 
     #region method
+    public void WaveClear()
+    {
+        //상태전환 : UI 등등
+    }
 
+    public void RoundClear()
+    {
+        //상태전환 : 씬 이동
+    }
     #endregion
 }
