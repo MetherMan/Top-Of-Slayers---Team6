@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 100000, guid: fa408bc4676ff234f818bfd0f5ebcd9f, type: 3}
       propertyPath: m_Name
-      value: Dragon
+      value: DragonPrefab
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: fa408bc4676ff234f818bfd0f5ebcd9f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1051,7 +1051,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100000, guid: fa408bc4676ff234f818bfd0f5ebcd9f,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4553544158397732773}
+      addedObject: {fileID: -1541161237399037923}
   m_SourcePrefab: {fileID: 100100000, guid: fa408bc4676ff234f818bfd0f5ebcd9f, type: 3}
 --- !u!1 &1323438947623838973 stripped
 GameObject:
@@ -1059,7 +1059,7 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1323438947623805533}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &4553544158397732773
+--- !u!114 &-1541161237399037923
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1068,7 +1068,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1323438947623838973}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56931afe2fab00545a77b8dfbaf2ee54, type: 3}
+  m_Script: {fileID: 11500000, guid: 25e413c622aaaea47b5d7cc709817d19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   targetingSystem: {fileID: 0}
