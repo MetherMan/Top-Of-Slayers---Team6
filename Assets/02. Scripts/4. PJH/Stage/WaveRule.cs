@@ -29,7 +29,7 @@ public abstract class WaveRule : ScriptableObject
     public void HpZero(RuleDataContainer data, WaveDirectorSystem context)
     {
         //플레이어 체력 '0' 이하 일 경우 게임 오버
-        context.HpZero();
+        //context.HpZero();
     }
 
     //웨이브 진행 조건

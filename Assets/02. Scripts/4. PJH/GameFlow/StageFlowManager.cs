@@ -25,15 +25,13 @@ public class StageFlowManager : Singleton<StageFlowManager>
     protected override void Awake()
     {
         base.Awake();
-        //선택된 스테이지의 StageConfigSO에서 stageTime 변수 값을 가져와서 할당
+    }
+
+    void Start()
+    {
         if (StageManager.Instance.selectDB != null)
         {
             remainingTime = StageManager.Instance.selectDB.stageTime;
-        }
-
-        //웨이브
-        if (StageManager.Instance.stageDB != null)
-        {
             waveLength = StageManager.Instance.stageDB.roundDatas.Count;
         }
     }
@@ -49,6 +47,11 @@ public class StageFlowManager : Singleton<StageFlowManager>
     }
 
     #region method
+    public void MonsterCleared(int monsterIndex)
+    {
+        
+    }
+
     public void WaveClear()
     {
         //상태전환 : UI 등등
