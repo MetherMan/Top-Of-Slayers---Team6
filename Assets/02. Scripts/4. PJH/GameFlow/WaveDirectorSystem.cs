@@ -34,6 +34,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 
     [Header("스테이지 실시간 데이터 연동")]
     RuleDataContainer ruleDataContainer = new RuleDataContainer();
+    private bool isRoundClearResolved;
     #endregion
 
    protected override void Awake()
@@ -48,8 +49,8 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 
     void Update()
     {
-        if (ruleType != null) ruleType.OnUpdate(ruleDataContainer ,this);
         ConnectData();
+        if (ruleType != null) ruleType.OnUpdate(ruleDataContainer ,this);
 
         //ruleType.OnExit(ruleDataContainer, this);
     }
@@ -59,6 +60,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
     {
         SetRule();
         ruleDataContainer.stageData = StageManager.Instance.selectDB;
+        isRoundClearResolved = false;
     }
 
     private void SetRule()
@@ -88,12 +90,15 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 
     public void WaveClear()
     {
-        //상태 전환 메니저에 보내는 값 : 아직 상태머신 작업되지 않음 구현만 되게 나중에 수정
+        //웨이브 전환 시점에만 호출
         GameFlowManager.Instance.waveIndex = ruleDataContainer.waveIndex;
     }
 
     public void RoundClear()
     {
+        if (isRoundClearResolved) return;
+
+        isRoundClearResolved = true;
         StageManager.Instance.selectDB.clearResult = (ClearResult)1;
         GameFlowManager.Instance.RoundClear();
     }

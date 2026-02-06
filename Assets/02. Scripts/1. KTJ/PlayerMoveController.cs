@@ -20,6 +20,7 @@ public partial class PlayerMoveController : MonoBehaviour
     [SerializeField] private bool useCameraRelative = true;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private bool autoFindCamera = true;
+    [SerializeField, Min(0.05f)] private float cameraResolveInterval = 0.5f;
 
     [Header("애니메이션")]
     [SerializeField] private Animator animator;
@@ -36,6 +37,7 @@ public partial class PlayerMoveController : MonoBehaviour
     private bool chainLockApplied;
     private bool rotationLocked;
     private int rotationLockCount;
+    private float nextCameraResolveTime;
 
     private void Awake()
     {
@@ -44,12 +46,16 @@ public partial class PlayerMoveController : MonoBehaviour
         stopCommand = new StopCommand();
         currentCommand = stopCommand;
 
+        ResolveJoystick();
         ResolveCameraTransform();
         ResolveChainCombat();
+        ResolveAnimator();
     }
 
     private void OnEnable()
     {
+        ResolveJoystick();
+        ResolveAnimator();
         if (joystick != null)
         {
             joystick.OnInputChanged += HandleInputChanged;
@@ -102,5 +108,12 @@ public partial class PlayerMoveController : MonoBehaviour
         {
             ExecuteNextCommand(Time.fixedDeltaTime);
         }
+    }
+
+    private void ResolveAnimator()
+    {
+        if (animator != null) return;
+        animator = GetComponent<Animator>();
+        if (animator == null) animator = GetComponentInChildren<Animator>(true);
     }
 }

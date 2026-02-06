@@ -52,6 +52,9 @@ public partial class SlashDashController
             if (dashTimer <= 0f) return false;
         }
 
+        dashTotalTime = dashTimer;
+        dashTotalDistance = dashRemainingDistance;
+
         state = DashState.Dashing;
         PreparePhysics();
         SetMovementLock(true);
@@ -63,7 +66,9 @@ public partial class SlashDashController
     {
         state = DashState.Idle;
         dashTimer = 0f;
+        dashTotalTime = 0f;
         dashRemainingDistance = 0f;
+        dashTotalDistance = 0f;
         pendingTarget = null;
         pendingDamage = 0;
         contactStopTriggered = false;
@@ -111,9 +116,24 @@ public partial class SlashDashController
 
     private void SetMovementLock(bool locked)
     {
-        if (!lockMovementDuringDash) return;
         if (moveController == null) return;
-        moveController.SetMovementLocked(locked);
+
+        if (lockMovementDuringDash)
+        {
+            moveController.SetMovementLocked(locked);
+        }
+
+        if (locked)
+        {
+            if (dashRotationLockApplied) return;
+            dashRotationLockApplied = true;
+            moveController.AddRotationLock();
+            return;
+        }
+
+        if (!dashRotationLockApplied) return;
+        dashRotationLockApplied = false;
+        moveController.RemoveRotationLock();
     }
 
     private void SyncMoveRotation()

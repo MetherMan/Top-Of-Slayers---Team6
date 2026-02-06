@@ -167,7 +167,6 @@ public partial class AutoSlashController
                 return;
             }
 
-            OnAttackReady?.Invoke();
             if (dashController.TryStartAutoSlashPierce(target, aimDirection, aimDistance, autoGrade, damageMultiplier, pierceTargets))
             {
                 RegisterAttackTarget(target, rawAimDirection);
@@ -182,7 +181,6 @@ public partial class AutoSlashController
             return;
         }
 
-        OnAttackReady?.Invoke();
         if (dashController.TryStartAutoSlash(target, aimDirection, aimDistance, autoGrade, damageMultiplier))
         {
             RegisterAttackTarget(target, rawAimDirection);
