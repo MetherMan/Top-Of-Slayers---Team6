@@ -63,7 +63,7 @@ public class EnemySpawnManager : MonoBehaviour
         {
             Vector3 dir = spawnDirections[dirIndex];
             Vector3 spawnPos = player.position + dir * spawnDistance;
-            Vector3 finalSpawnPos = OnGround(spawnPos); //땅이 굴곡져도 땅 위에 있게하기
+            Vector3 finalSpawnPos = OnGround(spawnPos); //최종 스폰위치는 땅에
             enemyFactory.Create(monster, finalSpawnPos, Quaternion.identity);
 
             monsterCount++;
@@ -78,16 +78,17 @@ public class EnemySpawnManager : MonoBehaviour
         }
     }
 
+    //땅 위에 스폰 위치 반환
     private Vector3 OnGround(Vector3 groundPos)
     {
-        Vector3 ray = groundPos + Vector3.up * 5f; //5f 위에서 레이쏘기
+        Vector3 ray = groundPos + Vector3.up * 10f; //10f 위에서 레이쏘기
 
-        //레이를 아래로 쏴서 맞은 벡터값 리턴하기
-        if(Physics.Raycast(ray, Vector3.down, out RaycastHit hit, 7f, groundLayer))
+        //레이를 아래로 쏴서 맞은 그라운드 레이어 벡터값 리턴하기
+        if(Physics.Raycast(ray, Vector3.down, out RaycastHit hit, 15f, groundLayer))
         {
             return hit.point;
         }
-        return groundPos;
+        else return groundPos;
     }
 
     private void ReSpawn()
