@@ -52,7 +52,7 @@ public class EnemySpawnManager : MonoBehaviour
     
     private IEnumerator SpawnCoroutine()
     {
-        //StageFlowManager.Instance.waveIndex = currentRound + 1;
+        StageFlowManager.Instance.waveIndex = currentRound + 1;
 
         var roundData = stageSO.roundDatas[currentRound]; //현재라운드 SO
         int dirCount = spawnDirections.Length; //방향갯수
@@ -67,6 +67,7 @@ public class EnemySpawnManager : MonoBehaviour
             enemyFactory.Create(monster, finalSpawnPos, Quaternion.identity);
 
             monsterCount++;
+            StageFlowManager.Instance.monsterCount = monsterCount;
             dirIndex++; //방향 인덱스 추가로 다음 스폰 방향 가져오기
 
             //만약 8마리 이상일 때 처음부터 다시
@@ -105,6 +106,7 @@ public class EnemySpawnManager : MonoBehaviour
     public void MonsterDead()
     {
         monsterCount--;
+        StageFlowManager.Instance.monsterCount = monsterCount;
         ReSpawn();
         //풀반환은 몬스터 스크립트에서 처리?
     }
