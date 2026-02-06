@@ -973,6 +973,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: BloomPrefab
       objectReference: {fileID: 0}
+    - target: {fileID: 7160668322234071091, guid: a87f651b28f3d234db143fa6b87bea0c,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 7160668322234071119, guid: a87f651b28f3d234db143fa6b87bea0c,
         type: 3}
       propertyPath: m_IsActive
@@ -995,7 +1000,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7160668322234071085, guid: a87f651b28f3d234db143fa6b87bea0c,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7734208712513396397}
+      addedObject: {fileID: 3287881678492682111}
     - targetCorrespondingSourceObject: {fileID: 7160668322234071091, guid: a87f651b28f3d234db143fa6b87bea0c,
         type: 3}
       insertIndex: -1
@@ -1054,7 +1059,7 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 5165249633511113308}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7734208712513396397
+--- !u!114 &3287881678492682111
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1063,7 +1068,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2662026273664203377}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56931afe2fab00545a77b8dfbaf2ee54, type: 3}
+  m_Script: {fileID: 11500000, guid: 25e413c622aaaea47b5d7cc709817d19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   targetingSystem: {fileID: 0}
