@@ -1,9 +1,9 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public abstract class WaveRule : ScriptableObject
 {
     /*
-        °øÅëÀûÀ¸·Î Àû¿ëµÇ´Â ·ê
+        ê³µí†µì ìœ¼ë¡œ ì ìš©ë˜ëŠ” ë£°
     */
     #region field
 
@@ -14,10 +14,10 @@ public abstract class WaveRule : ScriptableObject
 
     public abstract void OnUpdate(RuleDataContainer data, WaveDirectorSystem context);
 
-    //Å¬¸®¾î ½Ã ¼öÁıÇØ¾ßÇÒ µ¥ÀÌÅÍ Àü¼Û
+    //í´ë¦¬ì–´ ì‹œ ìˆ˜ì§‘í•´ì•¼í•  ë°ì´í„° ì „ì†¡
     public abstract void OnExit(RuleDataContainer data, WaveDirectorSystem context);
 
-    //½ÇÆĞ Á¶°Ç
+    //ì‹¤íŒ¨ ì¡°ê±´
     public void TimeOver(RuleDataContainer data, WaveDirectorSystem context)
     {
         if (data.playTime >= data.stageData.stageTime)
@@ -28,19 +28,17 @@ public abstract class WaveRule : ScriptableObject
 
     public void HpZero(RuleDataContainer data, WaveDirectorSystem context)
     {
-        //ÇÃ·¹ÀÌ¾î Ã¼·Â '0' ÀÌÇÏ ÀÏ °æ¿ì °ÔÀÓ ¿À¹ö
+        //í”Œë ˆì´ì–´ ì²´ë ¥ '0' ì´í•˜ ì¼ ê²½ìš° ê²Œì„ ì˜¤ë²„
         context.HpZero();
     }
 
-    //¿şÀÌºê ÁøÇà Á¶°Ç
+    //ì›¨ì´ë¸Œ ì§„í–‰ ì¡°ê±´
     public void WaveClear(RuleDataContainer data, WaveDirectorSystem context)
     {
-        //StageConfigSO °¢ ¿şÀÌºê ¸ó½ºÅÍ°¡ ÀüºÎ ´Ù¿î µÉ °æ¿ì Á¶°Çº¯¼ö Áõ°¨
-        //¿¡³Ê¹Ì ½ºÆ÷³Ê [ÀÎµ¦½º º¯¼ö] - ÀÎµ¦½º º¯¼ö °ªÀ» Áõ°¨
         context.WaveClear();
     }
 
-    //Å¬¸®¾î Á¶°Ç
+    //í´ë¦¬ì–´ ì¡°ê±´
     public abstract void RoundClear(RuleDataContainer data, WaveDirectorSystem context);
     #endregion
 }
