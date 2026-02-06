@@ -6,7 +6,7 @@ public partial class ChainVisualController
 {
     private void ShowChain(int chain)
     {
-        if (chainUI != null)
+        if (chainUI != null && chainUI.IsReady)
         {
             chainUI.UpdateChainUI(chain);
             return;
@@ -24,7 +24,7 @@ public partial class ChainVisualController
 
     private void HideChain()
     {
-        if (chainUI != null)
+        if (chainUI != null && chainUI.IsReady)
         {
             chainUI.HideChainUI(lastChain);
             return;
@@ -49,9 +49,28 @@ public partial class ChainVisualController
 
     private bool IsChainVisible()
     {
-        if (chainUI != null) return true;
+        if (chainUI != null && chainUI.IsReady) return chainUI.IsVisible;
         if (chainPanel == null) return false;
         return chainPanel.activeSelf;
+    }
+
+    private void HideChainImmediate()
+    {
+        if (chainUI != null && chainUI.IsReady)
+        {
+            chainUI.HideChainUI(lastChain);
+        }
+
+        if (chainTextGroup != null)
+        {
+            chainTextGroup.DOKill();
+            chainTextGroup.alpha = 0f;
+        }
+
+        if (chainPanel != null)
+        {
+            chainPanel.SetActive(false);
+        }
     }
 
     private void PlayChainText()

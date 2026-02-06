@@ -35,6 +35,10 @@ public partial class AutoSlashController
         if (targetingSystem == null) return false;
 
         var target = targetingSystem.GetTarget(aimOrigin, baseAimDirection, searchRange, ignoreTarget);
+        if (target == null)
+        {
+            target = targetingSystem.GetTargetByAngle(aimOrigin, baseAimDirection, searchRange, ignoreTarget);
+        }
         if (target == null && aimAssistRadius > 0f)
         {
             var range = searchRange > 0f ? searchRange : targetingSystem.MaxRange;

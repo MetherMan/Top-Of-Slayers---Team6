@@ -101,13 +101,6 @@ public class PlayerStateMachine : MonoBehaviour
             return;
         }
 
-        if (chainCombat != null && chainCombat.IsSlowActive)
-        {
-            var allowRotation = dashController != null && dashController.IsDashing;
-            moveController.SetRotationLocked(!allowRotation);
-            return;
-        }
-
         moveController.SetRotationLocked(false);
     }
 }

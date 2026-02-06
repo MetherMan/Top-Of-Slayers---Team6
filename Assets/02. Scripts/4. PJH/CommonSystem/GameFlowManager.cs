@@ -25,7 +25,7 @@ public class GameFlowManager : Singleton<GameFlowManager>
     {
         if (StageManager.Instance.selectDB.clearResult == (ClearResult)1)
         {
-            Debug.Log("GameFlowManager RoundClear()");
+            Debug.Log("스테이지 클리어.");
         }
     }
     #endregion

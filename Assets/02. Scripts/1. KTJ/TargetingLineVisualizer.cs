@@ -90,7 +90,7 @@ public class TargetingLineVisualizer : MonoBehaviour
     {
         if (autoSlash != null)
         {
-            var attackRange = autoSlash.AttackRange;
+            var attackRange = autoSlash.GetPreviewRange();
             if (attackRange > 0f) return attackRange;
         }
 

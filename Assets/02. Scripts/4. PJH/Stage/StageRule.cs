@@ -13,7 +13,6 @@ public class StageRule : WaveRule
     {
         TimeOver(data, context);
         HpZero(data, context);
-        WaveClear(data, context);
         RoundClear(data, context);
     }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public partial class SlashDashController : MonoBehaviour
 {
@@ -27,11 +28,16 @@ public partial class SlashDashController : MonoBehaviour
 
     [Header("연출")]
     [SerializeField, Min(0f)] private float contactDistance = 0.3f;
+    [SerializeField] private bool useDashEase = true;
+    [SerializeField] private bool dashEaseOnlyDuringChain = true;
+    [SerializeField] private Ease dashEase = Ease.InOutQuad;
 
     private DashState state = DashState.Idle;
     private float dashSpeed;
     private float dashTimer;
+    private float dashTotalTime;
     private float dashRemainingDistance;
+    private float dashTotalDistance;
     private Vector3 dashDirection;
     private Transform pendingTarget;
     private int pendingDamage;
@@ -41,6 +47,7 @@ public partial class SlashDashController : MonoBehaviour
     private Rigidbody cachedRigidbody;
     private bool cachedKinematic;
     private bool cachedUseGravity;
+    private bool dashRotationLockApplied;
 
     public bool IsDashing => state == DashState.Dashing;
     public AttackSpecSO Spec => spec;
@@ -74,5 +81,10 @@ public partial class SlashDashController : MonoBehaviour
     {
         Idle,
         Dashing
+    }
+
+    private void OnDisable()
+    {
+        ForceStop();
     }
 }
