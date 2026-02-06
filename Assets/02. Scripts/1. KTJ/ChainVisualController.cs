@@ -41,6 +41,7 @@ public partial class ChainVisualController : MonoBehaviour
     private Tween darkenTween;
     private bool isChainActive;
     private Vector3 darkenBaseScale = Vector3.one;
+    private int pendingTextRefreshFrames;
 
     private void Awake()
     {
@@ -69,17 +70,14 @@ public partial class ChainVisualController : MonoBehaviour
             darkenSprite = darkenRoot.GetComponent<SpriteRenderer>();
         }
 
-        if (chainTextGroup != null) chainTextGroup.alpha = 0f;
-        if (chainUI == null && chainPanel != null)
-        {
-            chainPanel.SetActive(false);
-        }
         if (darkenRoot != null) darkenBaseScale = darkenRoot.localScale;
-        SetDarkenAlpha(0f);
+        ForceResetVisualState();
     }
 
     private void OnEnable()
     {
+        ForceResetVisualState();
+
         if (chainCombat != null)
         {
             chainCombat.OnSlowStateChanged += HandleSlowStateChanged;
@@ -103,36 +101,110 @@ public partial class ChainVisualController : MonoBehaviour
         }
 
         KillTweens();
+        ForceResetVisualState();
     }
 
     private void HandleSlowStateChanged(bool isActive)
     {
-        if (isActive == isChainActive) return;
+        if (isActive == isChainActive)
+        {
+            if (isActive)
+            {
+                UpdateChainText();
+            }
+            return;
+        }
+
         isChainActive = isActive;
         if (!isActive)
         {
             PlayDarken(false);
             HideChain();
             lastChain = -1;
+            pendingTextRefreshFrames = 0;
             return;
         }
 
         PlayDarken(true);
-        UpdateChainText();
     }
 
     private void HandleDamageApplied(DamageSystem.DamageResult result)
     {
+        if (result.IsDead)
+        {
+            pendingTextRefreshFrames = 0;
+            return;
+        }
+
+        pendingTextRefreshFrames = 3;
         UpdateChainText();
     }
 
     private void UpdateChainText()
     {
         if (chainCombat == null) return;
+        if (!chainCombat.IsSlowActive) return;
         var chain = chainCombat.CurrentChain;
         if (chain <= 0) return;
         if (chain == lastChain && IsChainVisible()) return;
         lastChain = chain;
         ShowChain(chain);
+    }
+
+    private void LateUpdate()
+    {
+        if (pendingTextRefreshFrames <= 0) return;
+
+        UpdateChainText();
+        if (IsChainVisible())
+        {
+            pendingTextRefreshFrames = 0;
+            return;
+        }
+
+        pendingTextRefreshFrames--;
+    }
+
+    private void ForceResetVisualState()
+    {
+        HideChainImmediate();
+        ResetDarkenImmediate();
+        isChainActive = false;
+        lastChain = -1;
+        pendingTextRefreshFrames = 0;
+    }
+
+    public void BindSceneRefs(
+        ChainUI externalChainUI,
+        GameObject externalPanel,
+        TextMeshProUGUI externalText,
+        Transform externalDarkenRoot,
+        SpriteRenderer externalDarkenSprite,
+        ChainCombatController externalChainCombat = null,
+        DamageSystem externalDamageSystem = null)
+    {
+        if (externalChainCombat != null) chainCombat = externalChainCombat;
+        if (externalDamageSystem != null) damageSystem = externalDamageSystem;
+        if (externalChainUI != null) chainUI = externalChainUI;
+        if (externalPanel != null) chainPanel = externalPanel;
+        if (externalText != null) chainText = externalText;
+        if (externalDarkenRoot != null) darkenRoot = externalDarkenRoot;
+        if (externalDarkenSprite != null) darkenSprite = externalDarkenSprite;
+
+        if (chainTextRoot == null && chainText != null) chainTextRoot = chainText.rectTransform;
+        if (chainTextRoot == null && chainPanel != null) chainTextRoot = chainPanel.GetComponent<RectTransform>();
+        if (chainTextGroup == null && chainPanel != null) chainTextGroup = chainPanel.GetComponent<CanvasGroup>();
+
+        if (darkenGraphic == null && darkenGroup == null && darkenRoot != null)
+        {
+            darkenGraphic = darkenRoot.GetComponent<Graphic>();
+        }
+        if (darkenSprite == null && darkenGroup == null && darkenRoot != null)
+        {
+            darkenSprite = darkenRoot.GetComponent<SpriteRenderer>();
+        }
+        if (darkenRoot != null) darkenBaseScale = darkenRoot.localScale;
+
+        ForceResetVisualState();
     }
 }
