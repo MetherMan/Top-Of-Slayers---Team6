@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement;
 
 [CreateAssetMenu (fileName = "Database_", menuName = "Config/StageDatabase")]
 public class StageDatabase : ScriptableObject
@@ -13,18 +14,14 @@ public class StageDatabase : ScriptableObject
         {
             if (instance == null)
             {
-                //현재 사용
                 instance = Resources.Load<StageDatabase>("StageInfo/Database_Main");
 
-                /*
-                    StageDatabase handle = Addressables.LoadAssetAsyne<StageDatabase>("");
-                    instance = handle.WaitForCompletion();
-                */ //Addressables 용
+                //StageDatabase handle = Addressables.LoadAssetAsync<StageDatabase>("");
+                //instance = handle.WaitForCompletion();
 
                 if (instance == null)
                 {
-                    Debug.LogError("StageDatabase 에셋을 찾을 수 없습니다." +
-                        "99. Resources 폴더를 확인하세요");
+
                 }
             }
             return instance;
@@ -39,16 +36,6 @@ public class StageDatabase : ScriptableObject
 
     private Dictionary<int, StageConfigSO> stageDic;
     #endregion
-
-    private void Awake()
-    {
-        
-    }
-
-    void start()
-    {
-
-    }
 
     #region method
     public void Initialization()

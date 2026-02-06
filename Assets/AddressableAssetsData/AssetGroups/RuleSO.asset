@@ -10,40 +10,34 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: StageSO
+  m_Name: RuleSO
   m_EditorClassIdentifier: 
-  m_GroupName: StageSO
+  m_GroupName: RuleSO
   m_Data:
     m_SerializedData: []
-  m_GUID: 82019825c3caf44478294becc488c20a
+  m_GUID: 853f3c2eb33a52045ad4cf80ac10bc8d
   m_SerializeEntries:
-  - m_GUID: 221e16332b71d0a47be7eb53e6bc6bd3
-    m_Address: StageInfo/Stage_11_HardStage
+  - m_GUID: 14a3973d77ec90341a38ed7b70032f15
+    m_Address: GameRule/Rule_StageRule
     m_ReadOnly: 0
     m_SerializedLabels:
-    - StageSO
+    - RuleSO
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 832fa5e36f0bfe3438f71cd5d0b79184
-    m_Address: StageInfo/ForestStage
+  - m_GUID: 5d8df5eb5178c6a4ba86d3118d8ec312
+    m_Address: GameRule/Rule_ChellengeRule
     m_ReadOnly: 0
     m_SerializedLabels:
-    - StageSO
+    - RuleSO
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c69d8756ebe547a4a82426201de29811
-    m_Address: StageInfo/Stage_10_NormalStage
+  - m_GUID: 74cf1781b23d7aa4fbbb4acd74b1c284
+    m_Address: GameRule/Rule_BossRule
     m_ReadOnly: 0
     m_SerializedLabels:
-    - StageSO
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e862fe671570af0468f6882e620595a8
-    m_Address: StageInfo/Database_Main
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - StageSO
+    - RuleSO
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: e0b7358ee87b24748b7545f07d4b3daf, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: b3991b6607634a54d86f10238c8449d1, type: 2}
-    - {fileID: 11400000, guid: ca80bff094c835c45a725d9904fb5ebe, type: 2}
+    - {fileID: 11400000, guid: 0c7bd2fc50172ac4798c04c6b64a3267, type: 2}
+    - {fileID: 11400000, guid: 5cb9ffa4f35269e48839ea3f2dc2021c, type: 2}
