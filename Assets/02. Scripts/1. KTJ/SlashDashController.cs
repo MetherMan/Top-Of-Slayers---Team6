@@ -53,6 +53,7 @@ public partial class SlashDashController : MonoBehaviour
     public AttackSpecSO Spec => spec;
     public event System.Action OnDashStarted;
     public event System.Action OnDashImpact;
+    public event System.Action<Transform> OnDashImpactTarget;
 
     public float DefaultDashDistance
     {
