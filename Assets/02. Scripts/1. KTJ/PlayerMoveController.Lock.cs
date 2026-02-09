@@ -59,6 +59,10 @@ public partial class PlayerMoveController
     public void RemoveRotationLock()
     {
         rotationLockCount = Mathf.Max(0, rotationLockCount - 1);
+        if (rotationLockCount == 0 && !rotationLocked)
+        {
+            ForceSyncRotation();
+        }
     }
 
     public void AddMovementLock()

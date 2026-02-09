@@ -6178,6 +6178,7 @@ GameObject:
   - component: {fileID: 1175399574350167929}
   - component: {fileID: 5680457019729186227}
   - component: {fileID: 5235778052283311294}
+  - component: {fileID: 5583937270935332834}
   m_Layer: 0
   m_Name: 1.Main Char
   m_TagString: Untagged
@@ -6599,6 +6600,10 @@ MonoBehaviour:
   animator: {fileID: 6468566345758626885}
   readyTrigger: Attack
   slashTrigger: Slash
+  readyStateName: Attack Ready
+  hitStateName: Attack Hit
+  forceTransitionTime: 0.02
+  useDirectStatePlay: 1
 --- !u!114 &5235778052283311294
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6616,6 +6621,30 @@ MonoBehaviour:
   chainCombat: {fileID: 0}
   moveDeadZone: 0.1
   lockMovementOnDead: 1
+--- !u!114 &5583937270935332834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8084851860919373225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a79bc266f353b145a90a9972a9626f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveController: {fileID: 0}
+  chainCombat: {fileID: 0}
+  chainVisual: {fileID: 0}
+  joystick: {fileID: 0}
+  cameraTransform: {fileID: 0}
+  chainUI: {fileID: 0}
+  chainPanel: {fileID: 0}
+  chainText: {fileID: 0}
+  darkenRoot: {fileID: 0}
+  darkenSprite: {fileID: 0}
+  autoFindSceneRefs: 1
+  maxBindFrames: 30
 --- !u!1 &8104052154759113481
 GameObject:
   m_ObjectHideFlags: 0

@@ -2221,12 +2221,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1073952188}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &1100681418 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 6468566345758626885, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
-    type: 3}
-  m_PrefabInstance: {fileID: 8904962930935415645}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1100681422 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4401182446513935021, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
@@ -4426,19 +4420,9 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4796758191235481852, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
         type: 3}
-      propertyPath: animator
-      value: 
-      objectReference: {fileID: 1100681418}
-    - target: {fileID: 4796758191235481852, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
-        type: 3}
       propertyPath: joystick
       value: 
       objectReference: {fileID: 1621016782}
-    - target: {fileID: 4796758191235481852, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
-        type: 3}
-      propertyPath: moveSpeed
-      value: 4.5
-      objectReference: {fileID: 0}
     - target: {fileID: 4796758191235481852, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
         type: 3}
       propertyPath: cameraTransform
