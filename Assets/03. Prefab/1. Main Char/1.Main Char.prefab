@@ -6290,6 +6290,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   useHitStop: 0
   hitStopDuration: 0.05
+  useHitZoom: 1
+  targetCamera: {fileID: 0}
+  hitZoomStrength: 0.12
+  hitZoomInDuration: 0.04
+  hitZoomOutDuration: 0.12
+  hitZoomInEase: 6
+  hitZoomOutEase: 9
+  useUnscaledZoom: 1
 --- !u!114 &5512813492165027518
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6514,6 +6522,12 @@ MonoBehaviour:
   animator: {fileID: 6468566345758626885}
   readyTrigger: Attack
   slashTrigger: Slash
+  hitVfxPrefab: {fileID: 1429954232896169633, guid: 83036083a4ebcd34f98131bd3cf6f4d2,
+    type: 3}
+  hitVfxSpawnPoint: {fileID: 0}
+  hitVfxOffset: {x: 0, y: 0.6, z: 0.8}
+  hitVfxFollowSpawnPoint: 0
+  hitVfxAutoDestroyTime: 2
 --- !u!114 &5235778052283311294
 MonoBehaviour:
   m_ObjectHideFlags: 0

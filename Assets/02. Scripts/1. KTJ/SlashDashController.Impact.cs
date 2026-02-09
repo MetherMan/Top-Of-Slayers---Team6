@@ -41,6 +41,12 @@ public partial class SlashDashController
     {
         if (impactTriggered) return;
         impactTriggered = true;
+        var impactTarget = pendingTarget;
+        if (impactTarget == null && pendingPierceTargets.Count > 0)
+        {
+            impactTarget = pendingPierceTargets[0];
+        }
+        OnDashImpactTarget?.Invoke(impactTarget);
         OnDashImpact?.Invoke();
     }
 }

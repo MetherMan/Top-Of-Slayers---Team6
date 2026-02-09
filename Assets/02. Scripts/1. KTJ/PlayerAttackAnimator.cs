@@ -11,6 +11,13 @@ public class PlayerAttackAnimator : MonoBehaviour
     [SerializeField] private string readyTrigger = "Attack";
     [SerializeField] private string slashTrigger = "Slash";
 
+    [Header("타격 VFX")]
+    [SerializeField] private GameObject hitVfxPrefab;
+    [SerializeField] private Transform hitVfxSpawnPoint;
+    [SerializeField] private Vector3 hitVfxOffset = new Vector3(0f, 0.6f, 0.8f);
+    [SerializeField] private bool hitVfxFollowSpawnPoint = false;
+    [SerializeField, Min(0f)] private float hitVfxAutoDestroyTime = 2f;
+
     private bool isAutoSlashSubscribed;
     private bool isImpactSubscribed;
     private int pendingReadyRetry;
@@ -49,7 +56,7 @@ public class PlayerAttackAnimator : MonoBehaviour
         FireReadyTrigger();
     }
 
-    private void HandleDashStarted()
+    private void HandleDashImpact(Transform hitTarget)
     {
         if (animator == null) ResolveReferences();
         if (animator == null) return;
@@ -57,6 +64,7 @@ public class PlayerAttackAnimator : MonoBehaviour
         pendingReadyRetry = 0;
         pendingSlashRetry = 3;
         FireSlashTrigger();
+        PlayHitVfx(hitTarget);
     }
 
     private void Update()
@@ -121,6 +129,43 @@ public class PlayerAttackAnimator : MonoBehaviour
         animator.SetTrigger(slashTrigger);
     }
 
+    private void PlayHitVfx(Transform hitTarget)
+    {
+        if (hitVfxPrefab == null) return;
+
+        var spawnPoint = hitVfxSpawnPoint != null ? hitVfxSpawnPoint : transform;
+        var useTargetAnchor = hitTarget != null;
+        var anchor = useTargetAnchor ? hitTarget : spawnPoint;
+        var position = anchor.position + anchor.TransformDirection(hitVfxOffset);
+
+        Quaternion rotation;
+        if (useTargetAnchor)
+        {
+            var look = transform.position - anchor.position;
+            look.y = 0f;
+            rotation = look.sqrMagnitude > 0.0001f
+                ? Quaternion.LookRotation(look.normalized, Vector3.up)
+                : anchor.rotation;
+        }
+        else
+        {
+            rotation = spawnPoint.rotation;
+        }
+
+        var instance = Instantiate(hitVfxPrefab, position, rotation);
+        if (instance == null) return;
+
+        if (hitVfxFollowSpawnPoint)
+        {
+            instance.transform.SetParent(anchor, true);
+        }
+
+        if (!hitVfxFollowSpawnPoint && hitVfxAutoDestroyTime > 0f)
+        {
+            Destroy(instance, hitVfxAutoDestroyTime);
+        }
+    }
+
     private bool IsStateActive(int shortNameHash)
     {
         if (shortNameHash == 0) return false;
@@ -143,7 +188,7 @@ public class PlayerAttackAnimator : MonoBehaviour
 
         if (!isImpactSubscribed && dashController != null)
         {
-            dashController.OnDashImpact += HandleDashStarted;
+            dashController.OnDashImpactTarget += HandleDashImpact;
             isImpactSubscribed = true;
         }
     }
@@ -157,7 +202,7 @@ public class PlayerAttackAnimator : MonoBehaviour
 
         if (isImpactSubscribed && dashController != null)
         {
-            dashController.OnDashImpact -= HandleDashStarted;
+            dashController.OnDashImpactTarget -= HandleDashImpact;
         }
 
         isAutoSlashSubscribed = false;
