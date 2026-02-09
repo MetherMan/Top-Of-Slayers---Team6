@@ -84,7 +84,11 @@ public class PlayerSceneBinder : MonoBehaviour
         if (chainVisual == null) chainVisual = GetComponent<ChainVisualController>();
         if (chainVisual == null) chainVisual = GetComponentInParent<ChainVisualController>();
         if (chainVisual == null) chainVisual = GetComponentInChildren<ChainVisualController>(true);
-        if (chainVisual == null) chainVisual = FindObjectOfType<ChainVisualController>(true);
+        if (chainVisual == null)
+        {
+            var visuals = FindObjectsOfType<ChainVisualController>(true);
+            if (visuals != null && visuals.Length > 0) chainVisual = visuals[0];
+        }
 
         if (damageSystem == null) damageSystem = GetComponent<DamageSystem>();
         if (damageSystem == null) damageSystem = GetComponentInParent<DamageSystem>();

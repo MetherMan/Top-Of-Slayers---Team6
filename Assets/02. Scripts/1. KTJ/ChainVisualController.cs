@@ -140,6 +140,44 @@ public partial class ChainVisualController : MonoBehaviour
         UpdateChainText();
     }
 
+    public void BindSceneRefs(
+        ChainUI externalChainUI,
+        GameObject externalChainPanel,
+        TextMeshProUGUI externalChainText,
+        Transform externalDarkenRoot,
+        SpriteRenderer externalDarkenSprite,
+        ChainCombatController externalChainCombat = null,
+        DamageSystem externalDamageSystem = null)
+    {
+        if (externalChainCombat != null && chainCombat != externalChainCombat)
+        {
+            if (chainCombat != null) chainCombat.OnSlowStateChanged -= HandleSlowStateChanged;
+            chainCombat = externalChainCombat;
+            if (isActiveAndEnabled) chainCombat.OnSlowStateChanged += HandleSlowStateChanged;
+        }
+
+        if (externalDamageSystem != null && damageSystem != externalDamageSystem)
+        {
+            if (damageSystem != null) damageSystem.OnDamageApplied -= HandleDamageApplied;
+            damageSystem = externalDamageSystem;
+            if (isActiveAndEnabled) damageSystem.OnDamageApplied += HandleDamageApplied;
+        }
+
+        if (externalChainUI != null) chainUI = externalChainUI;
+        if (externalChainPanel != null) chainPanel = externalChainPanel;
+        if (externalChainText != null) chainText = externalChainText;
+        if (externalDarkenRoot != null) darkenRoot = externalDarkenRoot;
+        if (externalDarkenSprite != null) darkenSprite = externalDarkenSprite;
+
+        if (chainTextRoot == null && chainText != null) chainTextRoot = chainText.rectTransform;
+        if (chainTextRoot == null && chainPanel != null) chainTextRoot = chainPanel.GetComponent<RectTransform>();
+        if (chainTextGroup == null && chainPanel != null) chainTextGroup = chainPanel.GetComponent<CanvasGroup>();
+        if (darkenGroup == null && darkenRoot != null) darkenGroup = darkenRoot.GetComponent<CanvasGroup>();
+        if (darkenGraphic == null && darkenRoot != null) darkenGraphic = darkenRoot.GetComponent<Graphic>();
+        if (darkenSprite == null && darkenRoot != null) darkenSprite = darkenRoot.GetComponent<SpriteRenderer>();
+        if (darkenRoot != null) darkenBaseScale = darkenRoot.localScale;
+    }
+
     private void UpdateChainText()
     {
         if (chainCombat == null) return;
