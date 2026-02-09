@@ -427,12 +427,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &710271463 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2022878298229553003, guid: cf95b8ca829b54e4695b6eef8dc71803,
-    type: 3}
-  m_PrefabInstance: {fileID: 984942489}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &728771385
 GameObject:
   m_ObjectHideFlags: 0
@@ -842,7 +836,7 @@ MonoBehaviour:
   enemyFactory: {fileID: 748532136}
   stageSO: {fileID: 11400000, guid: 832fa5e36f0bfe3438f71cd5d0b79184, type: 2}
   damageSystem: {fileID: 0}
-  player: {fileID: 710271463}
+  player: {fileID: 0}
   spawnDistance: 5
   groundLayer:
     serializedVersion: 2

@@ -67,11 +67,15 @@ public partial class SlashDashController : MonoBehaviour
     private void Awake()
     {
         cachedRigidbody = GetComponent<Rigidbody>();
+        if (damageSystem == null) damageSystem = GetComponent<DamageSystem>();
+        if (damageSystem == null) damageSystem = GetComponentInParent<DamageSystem>();
+        if (damageSystem == null) damageSystem = FindObjectOfType<DamageSystem>();
         if (hitSequence == null) hitSequence = GetComponent<HitSequenceController>();
         if (moveController == null) moveController = GetComponent<PlayerMoveController>();
         if (moveController == null) moveController = GetComponentInParent<PlayerMoveController>();
         if (chainCombat == null) chainCombat = GetComponent<ChainCombatController>();
         if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
+        if (chainCombat == null) chainCombat = FindObjectOfType<ChainCombatController>();
         if (targetingSystem == null) targetingSystem = GetComponent<TargetingSystem>();
         if (targetingSystem == null) targetingSystem = GetComponentInParent<TargetingSystem>();
         if (targetingSystem == null) targetingSystem = FindObjectOfType<TargetingSystem>();

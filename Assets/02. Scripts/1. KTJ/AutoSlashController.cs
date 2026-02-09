@@ -98,6 +98,7 @@ public partial class AutoSlashController : MonoBehaviour
         if (moveController == null) moveController = GetComponentInParent<PlayerMoveController>();
         if (chainCombat == null) chainCombat = GetComponent<ChainCombatController>();
         if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
+        if (chainCombat == null) chainCombat = FindObjectOfType<ChainCombatController>();
         if (spec == null && dashController != null) spec = dashController.Spec;
     }
 }

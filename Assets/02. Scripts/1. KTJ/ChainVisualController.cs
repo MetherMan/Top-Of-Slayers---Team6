@@ -37,6 +37,13 @@ public partial class ChainVisualController : MonoBehaviour
     [SerializeField, Min(0f)] private float darkenSettleTime = 0.08f;
     [SerializeField] private bool useUnscaledTime = true;
 
+    [Header("지형 어둡게")]
+    [SerializeField] private bool useEnvironmentDarken = true;
+    [SerializeField] private bool useSpriteDarkenWithEnvironment;
+    [SerializeField] private bool environmentOnlyStaticRenderers;
+    [SerializeField] private LayerMask environmentLayerMask = ~0;
+    [SerializeField, Range(0f, 1f)] private float environmentDarkenStrength = 0.22f;
+
     private int lastChain = -1;
     private Tween darkenTween;
     private bool isChainActive;
@@ -47,8 +54,10 @@ public partial class ChainVisualController : MonoBehaviour
     {
         if (chainCombat == null) chainCombat = GetComponent<ChainCombatController>();
         if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
+        if (chainCombat == null) chainCombat = FindObjectOfType<ChainCombatController>();
         if (damageSystem == null) damageSystem = GetComponent<DamageSystem>();
         if (damageSystem == null) damageSystem = GetComponentInParent<DamageSystem>();
+        if (damageSystem == null) damageSystem = FindObjectOfType<DamageSystem>();
         if (chainUI == null) chainUI = GetComponentInChildren<ChainUI>(true);
 
         if (chainTextRoot == null && chainText != null) chainTextRoot = chainText.rectTransform;
