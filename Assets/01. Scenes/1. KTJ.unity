@@ -414,7 +414,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8084851860919373225, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1475095584}
   m_SourcePrefab: {fileID: 100100000, guid: 7ece8dc05b11cc84d82f5c5b019d54d1, type: 3}
 --- !u!1 &409137366
 GameObject:
@@ -856,6 +860,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1475095583 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8084851860919373225, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+    type: 3}
+  m_PrefabInstance: {fileID: 394842067}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1475095584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1475095583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8379cfca733ecb14385c892a6a49e57e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useHitStop: 1
+  hitStopDuration: 0.05
+  useHitZoom: 1
+  targetCamera: {fileID: 0}
+  hitZoomStrength: 0.12
+  hitZoomInDuration: 0.04
+  hitZoomOutDuration: 0.12
+  hitZoomInEase: 6
+  hitZoomOutEase: 9
+  useUnscaledZoom: 1
 --- !u!1 &1565499060
 GameObject:
   m_ObjectHideFlags: 0
