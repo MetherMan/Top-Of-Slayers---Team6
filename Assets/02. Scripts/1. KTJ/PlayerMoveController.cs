@@ -88,6 +88,48 @@ public partial class PlayerMoveController : MonoBehaviour
         ApplyChainLock(false);
     }
 
+    public void BindSceneRefs(
+        VirtualJoystickController externalJoystick,
+        Transform externalCameraTransform,
+        ChainCombatController externalChainCombat)
+    {
+        if (externalJoystick != null && joystick != externalJoystick)
+        {
+            if (joystick != null)
+            {
+                joystick.OnInputChanged -= HandleInputChanged;
+                joystick.OnInputReleased -= HandleInputReleased;
+            }
+
+            joystick = externalJoystick;
+            if (isActiveAndEnabled)
+            {
+                joystick.OnInputChanged += HandleInputChanged;
+                joystick.OnInputReleased += HandleInputReleased;
+            }
+        }
+
+        if (externalCameraTransform != null)
+        {
+            cameraTransform = externalCameraTransform;
+        }
+
+        if (externalChainCombat != null && chainCombat != externalChainCombat)
+        {
+            if (chainCombat != null)
+            {
+                chainCombat.OnSlowStateChanged -= HandleChainSlowStateChanged;
+            }
+
+            chainCombat = externalChainCombat;
+            if (lockMovementDuringChain && isActiveAndEnabled)
+            {
+                chainCombat.OnSlowStateChanged += HandleChainSlowStateChanged;
+                ApplyChainLock(chainCombat.IsSlowActive);
+            }
+        }
+    }
+
     private void Update()
     {
         if (!useFixedUpdate)
