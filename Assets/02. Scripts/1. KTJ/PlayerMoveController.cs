@@ -116,22 +116,4 @@ public partial class PlayerMoveController : MonoBehaviour
         animator = GetComponent<Animator>();
         if (animator == null) animator = GetComponentInChildren<Animator>(true);
     }
-
-    public void BindSceneRefs(VirtualJoystickController sceneJoystick, Transform sceneCamera, ChainCombatController sceneChainCombat)
-    {
-        if (sceneJoystick != null)
-        {
-            joystick = sceneJoystick;
-        }
-
-        if (sceneCamera != null)
-        {
-            cameraTransform = sceneCamera;
-        }
-
-        if (sceneChainCombat != null)
-        {
-            chainCombat = sceneChainCombat;
-        }
-    }
 }
