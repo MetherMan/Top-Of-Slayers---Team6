@@ -173,38 +173,4 @@ public partial class ChainVisualController : MonoBehaviour
         lastChain = -1;
         pendingTextRefreshFrames = 0;
     }
-
-    public void BindSceneRefs(
-        ChainUI externalChainUI,
-        GameObject externalPanel,
-        TextMeshProUGUI externalText,
-        Transform externalDarkenRoot,
-        SpriteRenderer externalDarkenSprite,
-        ChainCombatController externalChainCombat = null,
-        DamageSystem externalDamageSystem = null)
-    {
-        if (externalChainCombat != null) chainCombat = externalChainCombat;
-        if (externalDamageSystem != null) damageSystem = externalDamageSystem;
-        if (externalChainUI != null) chainUI = externalChainUI;
-        if (externalPanel != null) chainPanel = externalPanel;
-        if (externalText != null) chainText = externalText;
-        if (externalDarkenRoot != null) darkenRoot = externalDarkenRoot;
-        if (externalDarkenSprite != null) darkenSprite = externalDarkenSprite;
-
-        if (chainTextRoot == null && chainText != null) chainTextRoot = chainText.rectTransform;
-        if (chainTextRoot == null && chainPanel != null) chainTextRoot = chainPanel.GetComponent<RectTransform>();
-        if (chainTextGroup == null && chainPanel != null) chainTextGroup = chainPanel.GetComponent<CanvasGroup>();
-
-        if (darkenGraphic == null && darkenGroup == null && darkenRoot != null)
-        {
-            darkenGraphic = darkenRoot.GetComponent<Graphic>();
-        }
-        if (darkenSprite == null && darkenGroup == null && darkenRoot != null)
-        {
-            darkenSprite = darkenRoot.GetComponent<SpriteRenderer>();
-        }
-        if (darkenRoot != null) darkenBaseScale = darkenRoot.localScale;
-
-        ForceResetVisualState();
-    }
 }

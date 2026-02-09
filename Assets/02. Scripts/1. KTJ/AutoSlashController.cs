@@ -100,12 +100,4 @@ public partial class AutoSlashController : MonoBehaviour
         if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
         if (spec == null && dashController != null) spec = dashController.Spec;
     }
-
-    private void OnDisable()
-    {
-        ClearReadyDelay();
-        ResetChainTargetConfirm();
-        ResetInitialTargetConfirm();
-        ResetSameTargetRelease();
-    }
 }

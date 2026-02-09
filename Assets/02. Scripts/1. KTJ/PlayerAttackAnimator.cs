@@ -10,19 +10,6 @@ public class PlayerAttackAnimator : MonoBehaviour
     [Header("파라미터")]
     [SerializeField] private string readyTrigger = "Attack";
     [SerializeField] private string slashTrigger = "Slash";
-    [SerializeField] private string readyStateName = "Attack Ready";
-    [SerializeField] private string hitStateName = "Attack Hit";
-    [SerializeField, Min(0f)] private float forceTransitionTime = 0.02f;
-    [SerializeField] private bool useDirectStatePlay = true;
-
-    private bool isAutoSlashSubscribed;
-    private bool isImpactSubscribed;
-    private int pendingReadyRetry;
-    private int pendingSlashRetry;
-    private int attackReadyHash;
-    private int attackHitHash;
-    private int attackReadyFullPathHash;
-    private int attackHitFullPathHash;
 
     private bool isAutoSlashSubscribed;
     private bool isImpactSubscribed;
@@ -33,10 +20,8 @@ public class PlayerAttackAnimator : MonoBehaviour
 
     private void Awake()
     {
-        attackReadyHash = Animator.StringToHash(readyStateName);
-        attackHitHash = Animator.StringToHash(hitStateName);
-        attackReadyFullPathHash = Animator.StringToHash($"Base Layer.{readyStateName}");
-        attackHitFullPathHash = Animator.StringToHash($"Base Layer.{hitStateName}");
+        attackReadyHash = Animator.StringToHash("Attack Ready");
+        attackHitHash = Animator.StringToHash("Attack Hit");
         ResolveReferences();
     }
 
@@ -57,19 +42,21 @@ public class PlayerAttackAnimator : MonoBehaviour
     {
         if (animator == null) ResolveReferences();
         if (animator == null) return;
+        if (string.IsNullOrEmpty(readyTrigger)) return;
         if (dashController != null && dashController.IsDashing) return;
         pendingSlashRetry = 0;
         pendingReadyRetry = 3;
-        PlayReadyState();
+        FireReadyTrigger();
     }
 
     private void HandleDashStarted()
     {
         if (animator == null) ResolveReferences();
         if (animator == null) return;
+        if (string.IsNullOrEmpty(slashTrigger)) return;
         pendingReadyRetry = 0;
         pendingSlashRetry = 3;
-        PlayHitState();
+        FireSlashTrigger();
     }
 
     private void Update()
@@ -84,13 +71,8 @@ public class PlayerAttackAnimator : MonoBehaviour
             }
             else
             {
-                PlayReadyState();
+                FireReadyTrigger();
                 pendingReadyRetry--;
-            }
-
-            if (pendingReadyRetry == 0 && !IsStateActive(attackReadyHash))
-            {
-                ForceState(readyStateName);
             }
         }
 
@@ -102,13 +84,8 @@ public class PlayerAttackAnimator : MonoBehaviour
             }
             else
             {
-                PlayHitState();
+                FireSlashTrigger();
                 pendingSlashRetry--;
-            }
-
-            if (pendingSlashRetry == 0 && !IsStateActive(attackHitHash))
-            {
-                ForceState(hitStateName);
             }
         }
     }
@@ -130,7 +107,6 @@ public class PlayerAttackAnimator : MonoBehaviour
 
     private void FireReadyTrigger()
     {
-        if (animator == null) ResolveReferences();
         if (animator == null) return;
         if (string.IsNullOrEmpty(readyTrigger)) return;
         if (!string.IsNullOrEmpty(slashTrigger)) animator.ResetTrigger(slashTrigger);
@@ -155,51 +131,6 @@ public class PlayerAttackAnimator : MonoBehaviour
 
         var next = animator.GetNextAnimatorStateInfo(0);
         return next.shortNameHash == shortNameHash;
-    }
-
-    private void ForceState(string stateName)
-    {
-        if (animator == null) return;
-        if (string.IsNullOrEmpty(stateName)) return;
-        animator.CrossFadeInFixedTime(stateName, forceTransitionTime, 0, 0f);
-    }
-
-    private void PlayReadyState()
-    {
-        if (useDirectStatePlay)
-        {
-            if (attackReadyFullPathHash != 0)
-            {
-                animator.CrossFadeInFixedTime(attackReadyFullPathHash, forceTransitionTime, 0, 0f);
-                return;
-            }
-            ForceState(readyStateName);
-            return;
-        }
-
-        if (!string.IsNullOrEmpty(readyTrigger))
-        {
-            FireReadyTrigger();
-        }
-    }
-
-    private void PlayHitState()
-    {
-        if (useDirectStatePlay)
-        {
-            if (attackHitFullPathHash != 0)
-            {
-                animator.CrossFadeInFixedTime(attackHitFullPathHash, forceTransitionTime, 0, 0f);
-                return;
-            }
-            ForceState(hitStateName);
-            return;
-        }
-
-        if (!string.IsNullOrEmpty(slashTrigger))
-        {
-            FireSlashTrigger();
-        }
     }
 
     private void SubscribeEvents()
