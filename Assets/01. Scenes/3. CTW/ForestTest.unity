@@ -354,7 +354,7 @@ MonoBehaviour:
   player: {fileID: 0}
   followSpeed: 5
   maxXDistance: 10
-  maxZDistance: 10
+  maxZDistance: 0
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -554,7 +554,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DontDestroy: 1
   stageDB: {fileID: 0}
-  selectDB: {fileID: 11400000, guid: 282617c619d29934b83a7acbd3a6f52a, type: 2}
+  selectDB: {fileID: 0}
 --- !u!4 &728771387
 Transform:
   m_ObjectHideFlags: 0
@@ -1249,6 +1249,9 @@ MonoBehaviour:
   DontDestroy: 1
   pools:
   - prefab: {fileID: 2662026273664203377, guid: e406a36e5521e104bbbf8285067074a7,
+      type: 3}
+    size: 8
+  - prefab: {fileID: 2920899522890661102, guid: ff48af061e135cf41b829b024a5d7030,
       type: 3}
     size: 8
 --- !u!4 &1831711352
