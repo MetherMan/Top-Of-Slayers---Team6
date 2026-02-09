@@ -1,23 +1,27 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class RuleDataContainer
 {
-    public StageConfigSO stageData; //½ºÅ×ÀÌÁö ±âº»ÀÚ·á
-    public int playTime; //½ºÅ×ÀÌÁö ÁøÇà½Ã°£ -> Å¸ÀÓ¿À¹ö
-    public int currentPlayerHp; //ÇÃ·¹ÀÌ¾î Ã¼·Â -> RIP
-    public int killCount; //¿şÀÌºê ÁøÇà Á¶°Ç
+    public StageConfigSO stageData; //ìŠ¤í…Œì´ì§€ ë‚¨ì€ ì‹œê°„
+    public int playTime; //ìŠ¤í…Œì´ì§€ ì§„í–‰ì‹œê°„ -> íƒ€ì„ì˜¤ë²„
+
+    public int currentPlayerHp; //í”Œë ˆì´ì–´ ì²´ë ¥ -> RIP
+
+    public int waveCount; //í•´ë‹¹ ë¼ìš´ë“œ ì›¨ì´ë¸Œ ìˆ˜
+    public int waveIndex; //ì›¨ì´ë¸Œ í´ë¦¬ì–´ í™•ì¸
 }
 
-public class WaveDirectorSystem : MonoBehaviour
+public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 {
     /*
-        !Àü·«ÆĞÅÏ ·ê ¸Å´ÏÀú
+        ìŠ¤í…Œì´ì§€ í•œì • ì‹±ê¸€í†¤
+        !ì „ëµíŒ¨í„´ ë£° ë§¤ë‹ˆì €
 
-        ½ºÅ×ÀÌÁö ¸Ê Hierarchy¿¡ »ı¼º
+        ìŠ¤í…Œì´ì§€ ë§µ Hierarchyì— ìƒì„±
     */
 
     #region field
-    [Header("È°¼ºÈ­ µÈ ½ºÅ×ÀÌÁö ·ê")]
+    [Header("í™œì„±í™” ëœ ìŠ¤í…Œì´ì§€ ë£°")]
     [SerializeField] private WaveRule ruleType;
     public WaveRule RuleType
     {
@@ -28,13 +32,15 @@ public class WaveDirectorSystem : MonoBehaviour
         }
     }
 
-    [Header("½ºÅ×ÀÌÁö ½Ç½Ã°£ µ¥ÀÌÅÍ ¿¬µ¿")]
+    [Header("ìŠ¤í…Œì´ì§€ ì‹¤ì‹œê°„ ë°ì´í„° ì—°ë™")]
     RuleDataContainer ruleDataContainer = new RuleDataContainer();
+    private bool isRoundClearResolved;
     #endregion
 
-    void Awake()
+   protected override void Awake()
     {
-        //½ºÅ×ÀÌÁö °ªÀÌ Á¤ÇØÁú °æ¿ì ½ÇÇà
+        base.Awake();
+        //ìŠ¤í…Œì´ì§€ ê°’ì´ ì •í•´ì§ˆ ê²½ìš° ì‹¤í–‰
         if (StageManager.Instance.selectDB != null)
         {
            SetData();
@@ -43,33 +49,33 @@ public class WaveDirectorSystem : MonoBehaviour
 
     void Update()
     {
-        if (ruleType != null) ruleType.OnUpdate(ruleDataContainer ,this);
         ConnectData();
+        if (ruleType != null) ruleType.OnUpdate(ruleDataContainer ,this);
 
         //ruleType.OnExit(ruleDataContainer, this);
     }
 
     #region method
-    public void SetData()
+    private void SetData()
     {
         SetRule();
         ruleDataContainer.stageData = StageManager.Instance.selectDB;
-
+        isRoundClearResolved = false;
     }
 
-    public void SetRule()
+    private void SetRule()
     {
         ruleType = StageManager.Instance.selectDB.stageRule;
         ruleType.OnStart(ruleDataContainer ,this);
     }
 
 
-    //½Ç½Ã°£ µ¥ÀÌÅÍ ¿¬µ¿
-    public void ConnectData()
+    //ì‹¤ì‹œê°„ ë°ì´í„° ì—°ë™
+    private void ConnectData()
     {
         ruleDataContainer.playTime = StageFlowManager.Instance.playTime;
-        //ruleDataContainer.currentPlayerHp = ÇÃ·¹ÀÌ¾î ½ºÅİ ¿¬µ¿
-        //ruleDataContainer.killCount = ¿ÀºêÁ§Æ® Ç®, ¿¡³Ê¹Ì ½ºÆ÷³Ê ¿Ï·á ÈÄ ÀÛ¼º
+        ruleDataContainer.waveIndex = StageFlowManager.Instance.waveIndex;
+        //ruleDataContainer.currentPlayerHp = í”Œë ˆì´ì–´ ìŠ¤í…Ÿ ì—°ë™
     }
 
     public void TimeOver()
@@ -84,12 +90,17 @@ public class WaveDirectorSystem : MonoBehaviour
 
     public void WaveClear()
     {
-
+        //ì›¨ì´ë¸Œ ì „í™˜ ì‹œì ì—ë§Œ í˜¸ì¶œ
+        GameFlowManager.Instance.waveIndex = ruleDataContainer.waveIndex;
     }
 
     public void RoundClear()
     {
+        if (isRoundClearResolved) return;
+
+        isRoundClearResolved = true;
         StageManager.Instance.selectDB.clearResult = (ClearResult)1;
+        GameFlowManager.Instance.RoundClear();
     }
     #endregion
 }

@@ -2,6 +2,11 @@
 
 public partial class AutoSlashController
 {
+    private bool IsChainActive()
+    {
+        return chainCombat != null && chainCombat.IsSlowActive;
+    }
+
     private float GetCooldown()
     {
         if (useSpecCooldown && spec != null)
@@ -43,5 +48,16 @@ public partial class AutoSlashController
         return 0f;
     }
 
-    public float AttackRange => lastAttackRange > 0f ? lastAttackRange : GetAttackRange();
+    public float GetPreviewRange()
+    {
+        var range = GetAttackRange();
+        if (IsChainActive() && useChainRangeBoost)
+        {
+            range *= chainRangeMultiplier;
+        }
+
+        return Mathf.Max(0f, range);
+    }
+
+    public float AttackRange => lastAttackRange > 0f ? lastAttackRange : GetPreviewRange();
 }

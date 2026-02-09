@@ -7,6 +7,11 @@ public partial class ChainVisualController
     private void PlayDarken(bool isActive)
     {
         if (darkenGroup == null && darkenGraphic == null && darkenSprite == null) return;
+        var darkenHost = ResolveDarkenHost();
+        if (isActive && darkenHost != null && !darkenHost.activeSelf)
+        {
+            darkenHost.SetActive(true);
+        }
 
         if (darkenGroup != null) darkenGroup.DOKill();
         if (darkenGraphic != null) darkenGraphic.DOKill();
@@ -16,9 +21,18 @@ public partial class ChainVisualController
         if (!isActive)
         {
             darkenTween = CreateDarkenFade(0f);
-            if (darkenGroup != null)
+            if (darkenTween != null)
             {
-                darkenTween.OnComplete(() => darkenGroup.blocksRaycasts = false);
+                darkenTween.OnComplete(() =>
+                {
+                    if (darkenGroup != null) darkenGroup.blocksRaycasts = false;
+                    var host = ResolveDarkenHost();
+                    if (host != null) host.SetActive(false);
+                });
+            }
+            else if (darkenHost != null)
+            {
+                darkenHost.SetActive(false);
             }
             return;
         }
@@ -81,11 +95,40 @@ public partial class ChainVisualController
     private void KillTweens()
     {
         if (darkenTween != null) darkenTween.Kill();
+        darkenTween = null;
         if (darkenRoot != null) darkenRoot.DOKill();
         if (darkenGroup != null) darkenGroup.DOKill();
         if (darkenGraphic != null) darkenGraphic.DOKill();
         if (darkenSprite != null) darkenSprite.DOKill();
         if (chainTextRoot != null) chainTextRoot.DOKill();
         if (chainTextGroup != null) chainTextGroup.DOKill();
+    }
+
+    private void ResetDarkenImmediate()
+    {
+        if (darkenRoot != null)
+        {
+            darkenRoot.localScale = darkenBaseScale;
+        }
+        SetDarkenAlpha(0f);
+        if (darkenGroup != null)
+        {
+            darkenGroup.blocksRaycasts = false;
+        }
+
+        var darkenHost = ResolveDarkenHost();
+        if (darkenHost != null)
+        {
+            darkenHost.SetActive(false);
+        }
+    }
+
+    private GameObject ResolveDarkenHost()
+    {
+        if (darkenRoot != null) return darkenRoot.gameObject;
+        if (darkenGroup != null) return darkenGroup.gameObject;
+        if (darkenGraphic != null) return darkenGraphic.gameObject;
+        if (darkenSprite != null) return darkenSprite.gameObject;
+        return null;
     }
 }

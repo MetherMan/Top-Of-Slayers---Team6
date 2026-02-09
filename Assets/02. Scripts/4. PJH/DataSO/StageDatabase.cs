@@ -1,5 +1,7 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement;
 
 [CreateAssetMenu (fileName = "Database_", menuName = "Config/StageDatabase")]
 public class StageDatabase : ScriptableObject
@@ -12,27 +14,24 @@ public class StageDatabase : ScriptableObject
         {
             if (instance == null)
             {
-                //ÇöÀç »ç¿ë
-                instance = Resources.Load<StageDatabase>("StageInfo/");
+                instance = Resources.Load<StageDatabase>("StageInfo/Database_Main");
 
-                /*
-                    StageDatabase handle = Addressables.LoadAssetAsyne<StageDatabase>("");
-                    instance = handle.WaitForCompletion();
-                */ //Addressables ¿ë
+                //StageDatabase handle = Addressables.LoadAssetAsync<StageDatabase>("");
+                //instance = handle.WaitForCompletion();
 
                 if (instance == null)
                 {
-                    Debug.LogError("StageDatabase ¿¡¼ÂÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù." +
-                        "99. Resources Æú´õ¸¦ È®ÀÎÇÏ¼¼¿ä");
+
                 }
             }
             return instance;
         }
     }
-    //½ºÅ×ÀÌÁö ¶ó¿îµå(¿şÀÌºê) µ¥ÀÌÅÍ
+    //ìŠ¤í…Œì´ì§€ ë¼ìš´ë“œ(ì›¨ì´ë¸Œ) ë°ì´í„°
     public List<StageConfigSO.RoundData> roundDatas;
+    public StageConfigSO.RoundData roundData;
 
-    //stageConfigSOÀÇ Ã¢°í·Î »ç¿ëÇÒ ¿¹Á¤
+    //stageConfigSOì˜ ì°½ê³ ë¡œ ì‚¬ìš©í•  ì˜ˆì •
     public List<StageConfigSO> stageData = new List<StageConfigSO>();
 
     private Dictionary<int, StageConfigSO> stageDic;
@@ -41,7 +40,7 @@ public class StageDatabase : ScriptableObject
     #region method
     public void Initialization()
     {
-        if (stageDic != null) return; //Áßº¹½ÇÇà ¹æÁö
+        if (stageDic != null) return; //ì¤‘ë³µì‹¤í–‰ ë°©ì§€
 
         stageDic = new Dictionary<int, StageConfigSO>();
 
@@ -60,10 +59,11 @@ public class StageDatabase : ScriptableObject
         if (stageDic == null) Initialization();
         if (stageDic.TryGetValue(num, out StageConfigSO data))
         {
+            roundDatas = data.roundDatas;
             return data;
         }
 
-        Debug.LogWarning($"StageNum {num}¿¡ ÇØ´çÇÏ´Â µ¥ÀÌÅÍ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+        Debug.LogWarning($"StageNum {num}ì— í•´ë‹¹í•˜ëŠ” ë°ì´í„°ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         return null;
     }
     #endregion

@@ -9,7 +9,7 @@ public partial class PlayerMoveController
             currentInput = Vector2.zero;
             currentCommand = stopCommand;
             currentCommand?.Execute(this, deltaTime);
-            if (allowRotationWhenLocked)
+            if (allowRotationWhenLocked && !useFixedUpdate && !IsRotationLocked)
             {
                 var input = GetRealtimeInput();
                 if (input != Vector2.zero)
@@ -26,8 +26,7 @@ public partial class PlayerMoveController
             return;
         }
 
-        var keyboardInput = GetMoveInput();
-        currentInput = keyboardInput.sqrMagnitude > 0f ? keyboardInput : joystickInput;
+        currentInput = GetRealtimeInput();
         currentCommand = currentInput == Vector2.zero ? stopCommand : moveCommand;
         currentCommand?.Execute(this, deltaTime);
         UpdateMoveAnimation(currentInput);

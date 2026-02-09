@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: RuleSO
+  m_EditorClassIdentifier: 
+  m_GroupName: RuleSO
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 853f3c2eb33a52045ad4cf80ac10bc8d
+  m_SerializeEntries:
+  - m_GUID: 14a3973d77ec90341a38ed7b70032f15
+    m_Address: GameRule/Rule_StageRule
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - RuleSO
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5d8df5eb5178c6a4ba86d3118d8ec312
+    m_Address: GameRule/Rule_ChellengeRule
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - RuleSO
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 74cf1781b23d7aa4fbbb4acd74b1c284
+    m_Address: GameRule/Rule_BossRule
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - RuleSO
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: e0b7358ee87b24748b7545f07d4b3daf, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 0c7bd2fc50172ac4798c04c6b64a3267, type: 2}
+    - {fileID: 11400000, guid: 5cb9ffa4f35269e48839ea3f2dc2021c, type: 2}

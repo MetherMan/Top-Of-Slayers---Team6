@@ -1,9 +1,9 @@
-/*
-    !ÇØ´ç ½ºÅ×ÀÌÁö¿¡ ÇØ´çÇÏ´Â µ¥ÀÌÅÍ ¿¬°á
+ï»¿/*
+    !í•´ë‹¹ ìŠ¤í…Œì´ì§€ì— í•´ë‹¹í•˜ëŠ” ë°ì´í„° ì—°ê²°
 
-    *½Ì±ÛÅæ
-    StageFlowManager ¿¬µ¿
-    StageDatabase ¸Ş¼­µå ½ÇÇà
+    *ì‹±ê¸€í†¤
+    StageFlowManager ì—°ë™
+    StageDatabase ë©”ì„œë“œ ì‹¤í–‰
 */
 public class StageManager : Singleton<StageManager>
 {
@@ -16,6 +16,8 @@ public class StageManager : Singleton<StageManager>
     protected override void Awake()
     {
         base.Awake();
+        stageDB = StageDatabase.Instance;
+        StageData(21);
     }
 
     void Update()
@@ -24,13 +26,23 @@ public class StageManager : Singleton<StageManager>
     }
 
     #region method
-    //½ºÅ×ÀÌÁö ¿ÀºêÁ§Æ® Å¬¸¯ ½Ã ½ÇÇàµÉ ¸Å¼­µå
+    //ìŠ¤í…Œì´ì§€ ì˜¤ë¸Œì íŠ¸ í´ë¦­ ì‹œ ì‹¤í–‰ë  ë§¤ì„œë“œ
+    //public void StageData(int id)
+    //{
+    //    StageConfigSO data = stageDB.GetStageData(id);
+    //    if (data != null)
+    //    {
+    //        //í•´ë‹¹ ìŠ¤í…Œì´ì§€ ë°ì´í„°ë¥¼ ë¶ˆëŸ¬ì˜¤ê¸°
+    //        selectDB = data;
+    //    }
+    //}
+
     public void StageData(int id)
     {
         StageConfigSO data = stageDB.GetStageData(id);
         if (data != null)
         {
-            //ÇØ´ç ½ºÅ×ÀÌÁö µ¥ÀÌÅÍ¸¦ ºÒ·¯¿À±â
+            //í•´ë‹¹ ìŠ¤í…Œì´ì§€ ë°ì´í„°ë¥¼ ë¶ˆëŸ¬ì˜¤ê¸°
             selectDB = data;
         }
     }

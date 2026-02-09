@@ -24,6 +24,13 @@ public class PlayerAttackAnimator : MonoBehaviour
     private int attackReadyFullPathHash;
     private int attackHitFullPathHash;
 
+    private bool isAutoSlashSubscribed;
+    private bool isImpactSubscribed;
+    private int pendingReadyRetry;
+    private int pendingSlashRetry;
+    private int attackReadyHash;
+    private int attackHitHash;
+
     private void Awake()
     {
         attackReadyHash = Animator.StringToHash(readyStateName);
@@ -123,6 +130,7 @@ public class PlayerAttackAnimator : MonoBehaviour
 
     private void FireReadyTrigger()
     {
+        if (animator == null) ResolveReferences();
         if (animator == null) return;
         if (string.IsNullOrEmpty(readyTrigger)) return;
         if (!string.IsNullOrEmpty(slashTrigger)) animator.ResetTrigger(slashTrigger);

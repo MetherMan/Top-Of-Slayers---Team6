@@ -10,13 +10,36 @@ public class DamageSystem : MonoBehaviour
         if (target == null) return;
         if (amount <= 0) return;
 
-        var damageable = target.GetComponent<IDamageable>();
+        var damageable = ResolveDamageable(target);
         if (damageable == null) return;
 
         damageable.ApplyDamage(amount);
 
         var result = new DamageResult(target, amount, damageable.IsDead);
         OnDamageApplied?.Invoke(result);
+    }
+
+    private IDamageable ResolveDamageable(Transform target)
+    {
+        var direct = target.GetComponent<IDamageable>();
+        if (direct != null) return direct;
+
+        var parent = target.GetComponentInParent<IDamageable>();
+        if (parent != null) return parent;
+
+        var root = target.root;
+        if (root == null) return null;
+
+        var components = root.GetComponentsInChildren<MonoBehaviour>(true);
+        for (int i = 0; i < components.Length; i++)
+        {
+            if (components[i] is IDamageable damageable)
+            {
+                return damageable;
+            }
+        }
+
+        return null;
     }
 
     public struct DamageResult

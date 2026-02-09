@@ -24,14 +24,14 @@ public partial class PlayerMoveController
         var direction = GetMoveDirection(moveInput);
         if (direction == Vector3.zero) return;
 
-        ApplyRotation(direction);
+        ApplyRotation(direction, true);
     }
 
     public void ForceLookDirection(Vector3 direction)
     {
         direction.y = 0f;
         if (direction.sqrMagnitude <= 0f) return;
-        ApplyRotation(direction);
+        ApplyRotation(direction, true);
     }
 
     public Vector3 GetAimDirection()
@@ -52,8 +52,9 @@ public partial class PlayerMoveController
         return direction.normalized;
     }
 
-    private void ApplyRotation(Vector3 moveDirection)
+    private void ApplyRotation(Vector3 moveDirection, bool ignoreLock = false)
     {
+        if (!ignoreLock && IsRotationLocked) return;
         if (moveDirection.sqrMagnitude <= 0f) return;
 
         var targetDirection = moveDirection.normalized;
@@ -85,12 +86,20 @@ public partial class PlayerMoveController
         var magnitude = moveInput.magnitude;
         if (magnitude <= 0f) return Vector3.zero;
 
-        var forward = cam.forward;
-        forward.y = 0f;
+        // 카메라가 수직에 가깝게 내려다보면 forward의 수평 성분이 0에 가까워진다.
+        // 이 경우 cam.up을 대체 축으로 써서 상하 이동 축이 사라지지 않게 보정한다.
+        var forward = Vector3.ProjectOnPlane(cam.forward, Vector3.up);
+        if (forward.sqrMagnitude <= 0.0001f)
+        {
+            forward = Vector3.ProjectOnPlane(cam.up, Vector3.up);
+        }
+        if (forward.sqrMagnitude <= 0.0001f)
+        {
+            forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+        }
         if (forward.sqrMagnitude > 0f) forward.Normalize();
 
-        var right = cam.right;
-        right.y = 0f;
+        var right = Vector3.Cross(Vector3.up, forward);
         if (right.sqrMagnitude > 0f) right.Normalize();
 
         var direction = right * moveInput.x + forward * moveInput.z;
@@ -110,6 +119,13 @@ public partial class PlayerMoveController
         {
             return cameraTransform;
         }
+
+        if (Time.unscaledTime < nextCameraResolveTime)
+        {
+            return cameraTransform;
+        }
+
+        nextCameraResolveTime = Time.unscaledTime + cameraResolveInterval;
 
         if (Camera.main != null)
         {

@@ -2,6 +2,16 @@
 
 public partial class PlayerMoveController
 {
+    private void ResolveJoystick()
+    {
+        if (joystick != null) return;
+
+        joystick = GetComponentInChildren<VirtualJoystickController>(true);
+        if (joystick != null) return;
+
+        joystick = FindObjectOfType<VirtualJoystickController>();
+    }
+
     private void HandleInputChanged(Vector2 input)
     {
         joystickInput = input;

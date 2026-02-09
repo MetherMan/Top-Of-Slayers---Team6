@@ -1,44 +1,65 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /*
-    ½ºÅ×ÀÌÁö ¾À¿¡ »ı¼º
-    ¿şÀÌºê ½ÃÀÛ, Á¾·á Á¶°Ç º¯¼ö °ªÀ» °ü¸®
+    ìŠ¤í…Œì´ì§€ ì”¬ì— ìƒì„±
+    ì›¨ì´ë¸Œ ì‹œì‘, ì¢…ë£Œ ì¡°ê±´ ë³€ìˆ˜ ê°’ì„ ê´€ë¦¬
     DontDestroyOnLoad : false
 
-    *º¯¼ö µ¥ÀÌÅÍ -> WaveDirectorySystem.cs º¸³»°í -> GameFlowManager¿¡¼­ °á°ú¿¡ µû¶ó ¸Ş¼­µå ½ÇÇà
-    *»óÅÂÀüÈ¯ <- GameStateMachine(»óÅÂ¸Ó½Å)
+    *ë³€ìˆ˜ ë°ì´í„° -> WaveDirectorySystem.cs ë³´ë‚´ê³  -> GameFlowManagerì—ì„œ ê²°ê³¼ì— ë”°ë¼ ë©”ì„œë“œ ì‹¤í–‰
+    *ìƒíƒœì „í™˜ <- GameStateMachine(ìƒíƒœë¨¸ì‹ ) <- GameFlowManager ë©”ì„œë“œ ì‹¤í–‰
 */
 
 public class StageFlowManager : Singleton<StageFlowManager>
 {
     #region field
-    //ÇÃ·¹ÀÌ ½Ã°£
+    //í”Œë ˆì´ ì‹œê°„
     public int remainingTime;
     public int playTime;
 
-    //¿şÀÌºê
-    public int loundLength;
+    //ì›¨ì´ë¸Œ
+    public int waveLength;
     public int monsterCount;
+    public int waveIndex; //EnemySpawnManagerì—ì„œ ê°’ ë³€ê²½
     #endregion
 
     protected override void Awake()
     {
         base.Awake();
-        //¼±ÅÃµÈ ½ºÅ×ÀÌÁöÀÇ StageConfigSO¿¡¼­ stageTime º¯¼ö °ªÀ» °¡Á®¿Í¼­ ÇÒ´ç
-        remainingTime = StageManager.Instance.selectDB.stageTime;
+    }
 
-        //¿şÀÌºê
-        loundLength = StageManager.Instance.stageDB.roundDatas.Count;
+    void Start()
+    {
+        if (StageManager.Instance.selectDB != null)
+        {
+            remainingTime = StageManager.Instance.selectDB.stageTime;
+            waveLength = StageManager.Instance.stageDB.roundDatas.Count;
+        }
     }
 
     void Update()
     {
-        //ÇÃ·¹ÀÌ ½Ã°£
-        if (remainingTime == 0) remainingTime = StageManager.Instance.selectDB.stageTime;
+        //í”Œë ˆì´ ì‹œê°„
+        if (StageManager.Instance.selectDB != null)
+        {
+            if (remainingTime == 0) remainingTime = StageManager.Instance.selectDB.stageTime;
+        }
         playTime += (int)Time.deltaTime;
     }
 
     #region method
+    public void MonsterCleared(int monsterIndex)
+    {
+        
+    }
 
+    public void WaveClear()
+    {
+        //ìƒíƒœì „í™˜ : UI ë“±ë“±
+    }
+
+    public void RoundClear()
+    {
+        //ìƒíƒœì „í™˜ : ì”¬ ì´ë™
+    }
     #endregion
 }
