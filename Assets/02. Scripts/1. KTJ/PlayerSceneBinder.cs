@@ -76,10 +76,12 @@ public class PlayerSceneBinder : MonoBehaviour
         if (moveController == null) moveController = GetComponent<PlayerMoveController>();
         if (moveController == null) moveController = GetComponentInParent<PlayerMoveController>();
         if (moveController == null) moveController = GetComponentInChildren<PlayerMoveController>(true);
+        if (moveController == null) moveController = FindObjectOfType<PlayerMoveController>();
 
         if (chainCombat == null) chainCombat = GetComponent<ChainCombatController>();
         if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
         if (chainCombat == null) chainCombat = GetComponentInChildren<ChainCombatController>(true);
+        if (chainCombat == null) chainCombat = FindObjectOfType<ChainCombatController>();
 
         if (chainVisual == null) chainVisual = GetComponent<ChainVisualController>();
         if (chainVisual == null) chainVisual = GetComponentInParent<ChainVisualController>();
@@ -93,6 +95,7 @@ public class PlayerSceneBinder : MonoBehaviour
         if (damageSystem == null) damageSystem = GetComponent<DamageSystem>();
         if (damageSystem == null) damageSystem = GetComponentInParent<DamageSystem>();
         if (damageSystem == null) damageSystem = GetComponentInChildren<DamageSystem>(true);
+        if (damageSystem == null) damageSystem = FindObjectOfType<DamageSystem>();
     }
 
     private void ResolveSceneRefs()
@@ -162,7 +165,8 @@ public class PlayerSceneBinder : MonoBehaviour
             {
                 var candidate = sprites[i];
                 if (candidate == null) continue;
-                if (!candidate.name.ToLower().Contains("chainblack")) continue;
+                var lowerName = candidate.name.ToLower();
+                if (!lowerName.Contains("chainblack") && !lowerName.Contains("chaindark")) continue;
                 darkenSprite = candidate;
                 darkenRoot = candidate.transform;
                 break;
@@ -181,6 +185,11 @@ public class PlayerSceneBinder : MonoBehaviour
             moveController.BindSceneRefs(joystick, cameraTransform, chainCombat);
         }
 
+        if (chainCombat != null)
+        {
+            chainCombat.BindSceneRefs(damageSystem, moveController);
+        }
+
         if (chainVisual != null)
         {
             chainVisual.BindSceneRefs(chainUI, chainPanel, chainText, darkenRoot, darkenSprite, chainCombat, damageSystem);
@@ -190,6 +199,8 @@ public class PlayerSceneBinder : MonoBehaviour
     private bool IsBindReady()
     {
         if (moveController == null) return false;
+        if (chainCombat == null) return false;
+        if (damageSystem == null) return false;
         if (joystick == null) return false;
         if (cameraTransform == null) return false;
         if (chainVisual == null) return false;

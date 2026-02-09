@@ -6,6 +6,26 @@ public partial class ChainVisualController
 {
     private void PlayDarken(bool isActive)
     {
+        var useEnvironment = ShouldUseEnvironmentDarken(isActive);
+        if (useEnvironment)
+        {
+            PlayEnvironmentDarken(isActive);
+            if (!useSpriteDarkenWithEnvironment)
+            {
+                PlaySpriteDarken(false);
+                return;
+            }
+        }
+        else
+        {
+            PlayEnvironmentDarken(false);
+        }
+
+        PlaySpriteDarken(isActive);
+    }
+
+    private void PlaySpriteDarken(bool isActive)
+    {
         if (darkenGroup == null && darkenGraphic == null && darkenSprite == null) return;
         var darkenHost = ResolveDarkenHost();
         if (isActive && darkenHost != null && !darkenHost.activeSelf)
@@ -96,6 +116,7 @@ public partial class ChainVisualController
     {
         if (darkenTween != null) darkenTween.Kill();
         darkenTween = null;
+        KillEnvironmentTween();
         if (darkenRoot != null) darkenRoot.DOKill();
         if (darkenGroup != null) darkenGroup.DOKill();
         if (darkenGraphic != null) darkenGraphic.DOKill();
@@ -106,6 +127,7 @@ public partial class ChainVisualController
 
     private void ResetDarkenImmediate()
     {
+        ResetEnvironmentDarkenImmediate();
         if (darkenRoot != null)
         {
             darkenRoot.localScale = darkenBaseScale;

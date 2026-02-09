@@ -36,13 +36,14 @@ public class ChainCombatController : MonoBehaviour
 
     private void Awake()
     {
-        if (damageSystem == null) damageSystem = GetComponent<DamageSystem>();
+        EnsureDamageSystem();
         EnsureMoveController();
         EnsureTargetingSystem();
     }
 
     private void OnEnable()
     {
+        EnsureDamageSystem();
         if (damageSystem != null)
         {
             damageSystem.OnDamageApplied += HandleDamageApplied;
@@ -196,12 +197,50 @@ public class ChainCombatController : MonoBehaviour
         if (moveController == null) moveController = FindObjectOfType<PlayerMoveController>();
     }
 
+    private void EnsureDamageSystem()
+    {
+        if (damageSystem != null) return;
+        damageSystem = GetComponent<DamageSystem>();
+        if (damageSystem == null) damageSystem = GetComponentInParent<DamageSystem>();
+        if (damageSystem == null) damageSystem = FindObjectOfType<DamageSystem>();
+    }
+
     private void EnsureTargetingSystem()
     {
         if (targetingSystem != null) return;
         targetingSystem = GetComponent<TargetingSystem>();
         if (targetingSystem == null) targetingSystem = GetComponentInParent<TargetingSystem>();
         if (targetingSystem == null) targetingSystem = FindObjectOfType<TargetingSystem>();
+    }
+
+    public void BindSceneRefs(
+        DamageSystem externalDamageSystem,
+        PlayerMoveController externalMoveController,
+        TargetingSystem externalTargetingSystem = null)
+    {
+        if (externalDamageSystem != null && damageSystem != externalDamageSystem)
+        {
+            if (isActiveAndEnabled && damageSystem != null)
+            {
+                damageSystem.OnDamageApplied -= HandleDamageApplied;
+            }
+
+            damageSystem = externalDamageSystem;
+            if (isActiveAndEnabled)
+            {
+                damageSystem.OnDamageApplied += HandleDamageApplied;
+            }
+        }
+
+        if (externalMoveController != null)
+        {
+            moveController = externalMoveController;
+        }
+
+        if (externalTargetingSystem != null)
+        {
+            targetingSystem = externalTargetingSystem;
+        }
     }
 
     private void SetTimeScale(float value)
