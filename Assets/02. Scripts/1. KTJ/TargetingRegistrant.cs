@@ -1,3 +1,4 @@
+﻿using System.Collections;
 using UnityEngine;
 
 public class TargetingRegistrant : MonoBehaviour
@@ -8,6 +9,7 @@ public class TargetingRegistrant : MonoBehaviour
     [SerializeField] private bool autoFindTargetingSystem = true;
 
     private bool isRegistered;
+    private Coroutine retryRegisterRoutine;
 
     private void Awake()
     {
@@ -20,10 +22,16 @@ public class TargetingRegistrant : MonoBehaviour
         ResolveTargetTransform();
         ResolveTargetingSystem();
         Register();
+
+        if (!isRegistered)
+        {
+            StartRetryRegister();
+        }
     }
 
     private void OnDisable()
     {
+        StopRetryRegister();
         Unregister();
     }
 
@@ -47,6 +55,34 @@ public class TargetingRegistrant : MonoBehaviour
         isRegistered = false;
     }
 
+    private void StartRetryRegister()
+    {
+        if (retryRegisterRoutine != null) return;
+        retryRegisterRoutine = StartCoroutine(RetryRegisterRoutine());
+    }
+
+    private void StopRetryRegister()
+    {
+        if (retryRegisterRoutine == null) return;
+        StopCoroutine(retryRegisterRoutine);
+        retryRegisterRoutine = null;
+    }
+
+    private IEnumerator RetryRegisterRoutine()
+    {
+        while (!isRegistered)
+        {
+            ResolveTargetTransform();
+            ResolveTargetingSystem();
+            Register();
+
+            if (isRegistered) break;
+            yield return null;
+        }
+
+        retryRegisterRoutine = null;
+    }
+
     private void ResolveTargetingSystem()
     {
         if (!autoFindTargetingSystem) return;
@@ -61,7 +97,7 @@ public class TargetingRegistrant : MonoBehaviour
     {
         if (targetTransform != null) return;
 
-        // 타겟 등록 지점과 피격(IDamageable) 지점을 일치시켜 체인/데미지 누락을 방지한다.
+        // 타겟 등록 지점과 피격(IDamageable) 지점을 맞춰서 체인/피해 누락을 줄인다.
         var components = GetComponentsInParent<MonoBehaviour>(true);
         for (int i = 0; i < components.Length; i++)
         {
@@ -84,6 +120,9 @@ public class TargetingRegistrant : MonoBehaviour
                     return;
                 }
             }
+            // 리깅 본/메시 자식 기준점은 실제 위치와 어긋날 수 있어 루트를 기준점으로 고정한다.
+            targetTransform = root;
+            return;
         }
 
         targetTransform = transform;
