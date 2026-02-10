@@ -6264,6 +6264,19 @@ MonoBehaviour:
   useDashEase: 1
   dashEaseOnlyDuringChain: 1
   dashEase: 7
+  useDashTrailVfx: 0
+  autoCreateDashTrail: 0
+  dashTrail: {fileID: 0}
+  dashTrailTime: 0.2
+  dashTrailWidth: 0.25
+  dashTrailStartColor: {r: 0.4, g: 1, b: 0.85, a: 0.8}
+  dashTrailEndColor: {r: 0.4, g: 1, b: 0.85, a: 0}
+  dashTrailMaterial: {fileID: 0}
+  dashTrailOnlyDuringDash: 1
+  dashPathVfxPrefab: {fileID: 2613462060424995206, guid: d102f3500c2d405494d41037a837a872, type: 3}
+  dashPathVfxAnchor: {fileID: 0}
+  keepDashPathVfxAfterDash: 1
+  dashPathVfxDestroyDelay: 1
 --- !u!114 &59366865248515028
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6484,6 +6497,22 @@ MonoBehaviour:
   useDashRange: 1
   useAutoSlashAimPreview: 1
   useAutoSlashAimOrigin: 1
+  useDottedLine: 1
+  dotRepeatPerMeter: 1
+  dotFillRatio: 0.4
+  dotMinWorldSize: 0.01
+  dotTileSizeMultiplier: 1
+  dottedMinWorldWidth: 0.08
+  idleLineColor: {r: 1, g: 1, b: 1, a: 0.7}
+  detectedLineColor: {r: 0.55, g: 1, b: 0.75, a: 0.95}
+  lineWidthMultiplier: 0.18
+  minLineWidth: 0.04
+  useTargetRing: 1
+  targetRing: {fileID: 0}
+  targetRingRadius: 0.75
+  targetRingSegments: 24
+  targetRingHeight: 0.03
+  targetRingWidthMultiplier: 1
 --- !u!114 &1175399574350167929
 MonoBehaviour:
   m_ObjectHideFlags: 0

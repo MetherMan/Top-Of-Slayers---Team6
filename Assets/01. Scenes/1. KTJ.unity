@@ -356,6 +356,37 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2004051583540269703, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+        type: 3}
+      propertyPath: dashPathVfxPrefab
+      value: 
+      objectReference: {fileID: 2613462060424995206, guid: d102f3500c2d405494d41037a837a872,
+        type: 3}
+    - target: {fileID: 2621966313014461852, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+        type: 3}
+      propertyPath: dotFillRatio
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2621966313014461852, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+        type: 3}
+      propertyPath: dottedMinWorldWidth
+      value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 2621966313014461852, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+        type: 3}
+      propertyPath: targetRingRadius
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 2621966313014461852, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+        type: 3}
+      propertyPath: dotRepeatPerMeter
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2621966313014461852, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+        type: 3}
+      propertyPath: dotTileSizeMultiplier
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6134572937968207212, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -432,6 +463,7 @@ GameObject:
   - component: {fileID: 409137369}
   - component: {fileID: 409137368}
   - component: {fileID: 409137367}
+  - component: {fileID: 409137371}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -557,6 +589,29 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 90, z: 0}
+--- !u!114 &409137371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 409137366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a670260eccff4ee09755e4575fa00db4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  followTarget: {fileID: 190155708}
+  dashController: {fileID: 0}
+  followLerpSpeed: 8
+  keepInitialOffset: 1
+  followOffset: {x: 0, y: 20, z: -9}
+  useAttackPull: 1
+  attackLookAhead: 1.4
+  attackPullLerpSpeed: 3
+  useBoundsClamp: 0
+  maxXDistance: 0
+  maxZDistance: 0
 --- !u!1 &590392482
 GameObject:
   m_ObjectHideFlags: 0

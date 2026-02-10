@@ -1,9 +1,11 @@
-ï»¿/*
-    !í•´ë‹¹ ìŠ¤í…Œì´ì§€ì— í•´ë‹¹í•˜ëŠ” ë°ì´í„° ì—°ê²°
+using UnityEngine;
 
-    *ì‹±ê¸€í†¤
-    StageFlowManager ì—°ë™
-    StageDatabase ë©”ì„œë“œ ì‹¤í–‰
+/*
+    !ÇØ´ç ½ºÅ×ÀÌÁö¿¡ ÇØ´çÇÏ´Â µ¥ÀÌÅÍ ¿¬°á
+
+    *½Ì±ÛÅæ
+    StageFlowManager ¿¬µ¿
+    StageDatabase ¸Ş¼­µå ½ÇÇà
 */
 public class StageManager : Singleton<StageManager>
 {
@@ -18,33 +20,58 @@ public class StageManager : Singleton<StageManager>
         base.Awake();
         stageDB = StageDatabase.Instance;
         StageData(21);
+        if (selectDB != null) return;
+
+        // ±âº» µ¥ÀÌÅÍ°¡ ¾øÀ» ¶§´Â Ã¹ À¯È¿ ½ºÅ×ÀÌÁö¸¦ ´ëÃ¼ ·ÎµåÇÑ´Ù.
+        if (stageDB == null || stageDB.stageData == null) return;
+        for (int i = 0; i < stageDB.stageData.Count; i++)
+        {
+            var fallback = stageDB.stageData[i];
+            if (fallback == null) continue;
+            selectDB = fallback;
+            Debug.LogWarning($"StageData(21) ·Îµå ½ÇÆĞ. ´ëÃ¼ ½ºÅ×ÀÌÁö({fallback.stageNum})¸¦ »ç¿ëÇÕ´Ï´Ù.");
+            return;
+        }
     }
 
     void Update()
     {
-        
+
     }
 
     #region method
-    //ìŠ¤í…Œì´ì§€ ì˜¤ë¸Œì íŠ¸ í´ë¦­ ì‹œ ì‹¤í–‰ë  ë§¤ì„œë“œ
+    //½ºÅ×ÀÌÁö ¿ÀºêÁ§Æ® Å¬¸¯ ½Ã ½ÇÇàµÉ ¸Å¼­µå
     //public void StageData(int id)
     //{
     //    StageConfigSO data = stageDB.GetStageData(id);
     //    if (data != null)
     //    {
-    //        //í•´ë‹¹ ìŠ¤í…Œì´ì§€ ë°ì´í„°ë¥¼ ë¶ˆëŸ¬ì˜¤ê¸°
+    //        //ÇØ´ç ½ºÅ×ÀÌÁö µ¥ÀÌÅÍ¸¦ ºÒ·¯¿À±â
     //        selectDB = data;
     //    }
     //}
 
     public void StageData(int id)
     {
+        if (stageDB == null)
+        {
+            stageDB = StageDatabase.Instance;
+        }
+        if (stageDB == null)
+        {
+            Debug.LogWarning("StageDatabase¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            return;
+        }
+
         StageConfigSO data = stageDB.GetStageData(id);
         if (data != null)
         {
-            //í•´ë‹¹ ìŠ¤í…Œì´ì§€ ë°ì´í„°ë¥¼ ë¶ˆëŸ¬ì˜¤ê¸°
+            //ÇØ´ç ½ºÅ×ÀÌÁö µ¥ÀÌÅÍ¸¦ ºÒ·¯¿À±â
             selectDB = data;
+            return;
         }
+
+        Debug.LogWarning($"StageData({id}) ·Îµå¿¡ ½ÇÆĞÇß½À´Ï´Ù.");
     }
     #endregion
 }
