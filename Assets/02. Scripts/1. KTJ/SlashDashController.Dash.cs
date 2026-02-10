@@ -56,6 +56,8 @@ public partial class SlashDashController
         dashTotalDistance = dashRemainingDistance;
 
         state = DashState.Dashing;
+        SetDashTrailState(true);
+        SpawnDashPathVfx();
         PreparePhysics();
         SetMovementLock(true);
         OnDashStarted?.Invoke();
@@ -73,6 +75,9 @@ public partial class SlashDashController
         pendingDamage = 0;
         contactStopTriggered = false;
         impactTriggered = false;
+        pendingPierceTargets.Clear();
+        SetDashTrailState(false);
+        StopDashPathVfx(false);
         RestorePhysics();
         SetMovementLock(false);
         SyncMoveRotation();

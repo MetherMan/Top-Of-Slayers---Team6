@@ -38,6 +38,8 @@ public partial class SlashDashController
         {
             TriggerImpactOnce();
             state = DashState.Idle;
+            SetDashTrailState(false);
+            StopDashPathVfx(keepDashPathVfxAfterDash);
             ApplyPendingDamage();
             RestorePhysics();
             SetMovementLock(false);
