@@ -1,16 +1,17 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+     이벤트 발행 및 구독
+*/
 public class GameEventSystem : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         
     }
 
-    // Update is called once per frame
     void Update()
     {
         
