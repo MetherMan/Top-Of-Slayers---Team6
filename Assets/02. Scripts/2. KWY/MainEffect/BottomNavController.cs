@@ -1,5 +1,6 @@
 ﻿using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BottomNavController : MonoBehaviour
 {
@@ -10,6 +11,9 @@ public class BottomNavController : MonoBehaviour
 
     public float normalHeight = 300f;
     public float selectedHeight = 400f;
+
+    public Sprite normalSprite;
+    public Sprite selectedSprite;
 
     public float pozX = -1000f;
     public float pozY = -300f;
@@ -45,6 +49,9 @@ public class BottomNavController : MonoBehaviour
             Vector2 targetPos = new Vector2(startX + w * 0.5f, pozY);
 
             buttons[i].DOKill();
+
+            Image img = buttons[i].GetComponentInChildren<Image>();
+            img.sprite = selected ? selectedSprite : normalSprite;
 
             if (instant)
             {
