@@ -3,7 +3,7 @@
 public class GameFlowManager : Singleton<GameFlowManager>
 {
     /*
-        상태전환
+        게임 총 관리
     */
 
     #region field
