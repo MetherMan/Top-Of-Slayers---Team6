@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class InventoryItemSlot : MonoBehaviour
 {
-    [SerializeField] Image backGroud;
+    [SerializeField] Image backGround;
     [SerializeField] Image itemSprite;
     [SerializeField] TextMeshProUGUI itemName;
     [SerializeField] TextMeshProUGUI itemCount;
@@ -30,13 +30,13 @@ public class InventoryItemSlot : MonoBehaviour
         switch (grade)
         {
             case Grade.Legend:
-                backGroud.sprite = legendColor;
+                backGround.sprite = legendColor;
                 break;
             case Grade.Epic:
-                backGroud.sprite = epicColor;
+                backGround.sprite = epicColor;
                 break;
             case Grade.Normal:
-                backGroud.sprite = normalColor;
+                backGround.sprite = normalColor;
                 break;
         }
     }
@@ -45,6 +45,6 @@ public class InventoryItemSlot : MonoBehaviour
         itemSprite.enabled = false;
         itemName.text = "";
         itemCount.text = "";
-        backGroud.sprite = normalColor;
+        backGround.sprite = normalColor;
     }
 }
