@@ -16,6 +16,8 @@ public class StageFlowManager : Singleton<StageFlowManager>
     public int remainingTime;
     public int playTime;
 
+    private float timer;
+
     //웨이브
     public int waveLength;
     public int monsterCount;
@@ -41,6 +43,13 @@ public class StageFlowManager : Singleton<StageFlowManager>
         //플레이 시간
         if (StageManager.Instance.selectDB != null)
         {
+            timer += Time.deltaTime;
+
+            if(timer >= 1f)
+            {
+                timer = 0f;
+                if(remainingTime > 0) remainingTime--;
+            }
             if (remainingTime == 0) remainingTime = StageManager.Instance.selectDB.stageTime;
         }
         playTime += (int)Time.deltaTime;

@@ -1,82 +1,56 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class InventoryManager : Singleton<InventoryManager>
 {
-    [SerializeField] ItemDataSO itemDatabase;
-    [SerializeField] Transform slotRoot;
+    public List<InventoryItem> inventory = new List<InventoryItem>();
+    public event Action OnInventoryChanged;
 
-    InventorySlotUI[] slotsUI;
-    List<InventorySlot> inventory = new List<InventorySlot>();
 
-    //테스트용 아이템
-    [SerializeField] ItemSO testItem1;
-    [SerializeField] ItemSO testItem2;
-    [SerializeField] ItemSO testItem3;
-    [SerializeField] ItemSO testItem4;
-
-    private void Start()
+    protected override void Awake()
     {
-        slotsUI = slotRoot.GetComponentsInChildren<InventorySlotUI>();
-
-        //테스트용 아이템
-        AddItem(testItem1, 1000);
-        AddItem(testItem2, 1);
-        AddItem(testItem3, 1);
-        AddItem(testItem4 , 1);
-
+        base.Awake();
     }
 
     public void AddItem(ItemSO item, int amount)
     {
+
         if (item == null) return;
 
-
+        bool found = false;
         foreach (var slot in inventory)
         {
             if (slot.item == item)
             {
                 slot.count += amount;
-                RefreshUI();
-                return;
+                found = true;
+                break;
             }
         }
-        inventory.Add(new InventorySlot { item = item, count = amount });
+        if (!found)
+        {
+            inventory.Add(new InventoryItem { item = item, count = amount });
 
-        RefreshUI();
+        }
+        OnInventoryChanged?.Invoke();
     }
     public bool UseItem(ItemSO item, int amount = 1)
     {
-         foreach(var slot in inventory)
+        for(int i = 0; i < inventory.Count; i++)
         {
-            if (slot.item == item)
+            if(inventory[i].item == item)
             {
-                slot.count -= amount;
-                if( slot.count <= 0)
+                inventory[i].count -= amount;
+                if(inventory[i].count <= 0)
                 {
-                    inventory.Remove(slot);
+                    inventory.RemoveAt(i);
                 }
-                RefreshUI();
+                OnInventoryChanged?.Invoke();
                 return true;
             }
-            
         }
-         return false;
-    }
-
-    public void RefreshUI()
-    {
-        for (int i = 0; i < slotsUI.Length; i++)
-        {
-            if (i < inventory.Count)
-            {
-                slotsUI[i].SetItem(inventory[i].item, inventory[i].count);
-            }
-            else
-            {
-                slotsUI[i].ClearItem();
-            }
-        }
+        return false;
     }
     
 }
