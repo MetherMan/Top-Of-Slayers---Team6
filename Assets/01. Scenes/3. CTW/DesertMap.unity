@@ -877,6 +877,9 @@ MonoBehaviour:
   followSpeed: 5
   maxXDistance: 0
   maxZDistance: 10
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!1 &1261920128
 GameObject:
   m_ObjectHideFlags: 0
@@ -991,7 +994,7 @@ PrefabInstance:
     - target: {fileID: 6134572937968207212, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 6.28
+      value: 4.65
       objectReference: {fileID: 0}
     - target: {fileID: 6134572937968207212, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
         type: 3}
