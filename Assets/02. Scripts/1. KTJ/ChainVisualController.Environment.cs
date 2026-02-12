@@ -142,6 +142,7 @@ public partial class ChainVisualController
         if (renderer.GetComponentInParent<ChainCombatController>(true) != null) return false;
         if (renderer.GetComponentInParent<DamageSystem>(true) != null) return false;
         if (renderer.GetComponentInParent<TargetingRegistrant>(true) != null) return false;
+        if (renderer.GetComponentInParent<MonsterTargetRingMarker>(true) != null) return false;
         return true;
     }
 

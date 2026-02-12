@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public partial class AutoSlashController
@@ -9,6 +9,49 @@ public partial class AutoSlashController
     private Vector3 lastInitialAimDirection = Vector3.forward;
     private bool hasInitialAimDirection;
     private float initialAimStableTimer;
+
+    public float GetCurrentTargetConfirmProgress(Transform target)
+    {
+        if (target == null) return 0f;
+
+        var isChainActive = chainCombat != null && chainCombat.IsSlowActive;
+        var confirmProgress = isChainActive ? GetChainConfirmProgress(target) : GetInitialConfirmProgress(target);
+        if (!isReadyWaiting) return confirmProgress;
+
+        return Mathf.Max(confirmProgress, GetReadyDelayProgress());
+    }
+
+    private float GetReadyDelayProgress()
+    {
+        if (!isReadyWaiting) return 0f;
+        if (readyDelay <= 0f) return 1f;
+
+        var normalized = 1f - (readyTimer / readyDelay);
+        return Mathf.Clamp01(normalized);
+    }
+
+    private float GetInitialConfirmProgress(Transform target)
+    {
+        if (!useInitialTargetConfirm || initialTargetConfirmTime <= 0f) return 1f;
+        if (!IsInitialAimStable()) return 0f;
+        if (pendingInitialTarget != target) return 0f;
+        if (pendingInitialTimer <= 0f) return 0f;
+        return Mathf.Clamp01(pendingInitialTimer / initialTargetConfirmTime);
+    }
+
+    private float GetChainConfirmProgress(Transform target)
+    {
+        var confirmTime = chainTargetConfirmTime;
+        if (chainCombat != null && target == chainCombat.LastTarget && chainSameTargetConfirmTime > 0f)
+        {
+            confirmTime = chainSameTargetConfirmTime;
+        }
+
+        if (!useChainTargetConfirm || confirmTime <= 0f) return 1f;
+        if (pendingChainTarget != target) return 0f;
+        if (pendingChainTimer <= 0f) return 0f;
+        return Mathf.Clamp01(pendingChainTimer / confirmTime);
+    }
 
     private List<Transform> GetPierceTargets(bool isChainActive, Vector3 origin, Vector3 aimDirection, float searchRange, Transform ignoreTarget, Transform selectedTarget)
     {

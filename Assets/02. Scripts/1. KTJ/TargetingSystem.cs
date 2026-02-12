@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum TargetingStrategyType
@@ -51,6 +51,22 @@ public partial class TargetingSystem : MonoBehaviour
     {
         CleanupTargets();
         return targets.Count;
+    }
+
+    public void GetTargetsSnapshot(List<Transform> buffer)
+    {
+        if (buffer == null) return;
+
+        CleanupTargets();
+        buffer.Clear();
+
+        for (int i = 0; i < targets.Count; i++)
+        {
+            var target = targets[i];
+            if (target == null) continue;
+            if (!target.gameObject.activeInHierarchy) continue;
+            buffer.Add(target);
+        }
     }
 
     public void SetStrategy(TargetingStrategyType type)
