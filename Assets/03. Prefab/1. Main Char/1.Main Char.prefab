@@ -6513,6 +6513,47 @@ MonoBehaviour:
   targetRingSegments: 24
   targetRingHeight: 0.03
   targetRingWidthMultiplier: 1
+  useTargetConfirmFx: 1
+  targetReadyColor: {r: 0.3, g: 1, b: 0.45, a: 0.95}
+  targetCautionColor: {r: 1, g: 0.92, b: 0.25, a: 0.98}
+  targetWarningColor: {r: 1, g: 0.58, b: 0.18, a: 1}
+  targetConfirmColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  cautionThreshold: 0.35
+  warningThreshold: 0.7
+  dangerThreshold: 0.9
+  lineColorBlend: 0.6
+  stageFlashToWhite: 0.35
+  stagePulseAmount: 0.08
+  stagePulseSpeed: 7
+  stagePulseSpeedByStage: 2.2
+  stageTransitionKickAmount: 0.3
+  stageTransitionKickDuration: 0.15
+  confirmSmoothSpeed: 14
+  confirmPulseAmount: 0.18
+  confirmPulseSpeed: 10
+  confirmLineWidthBoost: 1.15
+  targetRingGradientStrength: 0.85
+  targetRingPulseAmount: 0.12
+  targetRingPulseSpeed: 12
+  targetRingConfirmRadiusMultiplier: 1.1
+  targetRingConfirmWidthMultiplier: 1.35
+  targetRingSpinSpeed: 140
+  useGroundTargetMarker: 1
+  groundTargetMarkerPrefab: {fileID: 9057764777064642318, guid: a1bbcb01e9d7c4941a2a690f05e694be, type: 3}
+  groundMarkerBaseScale: {x: 1, y: 1, z: 1}
+  groundMarkerScaleByRadius: 1.4
+  groundMarkerConfirmScaleMultiplier: 1.2
+  groundMarkerRotationOffset: {x: 0, y: 0, z: 0}
+  groundMarkerSpinSpeed: 80
+  groundMarkerHeightOffset: 0.02
+  groundMarkerUseGroundRaycast: 1
+  groundMarkerRaycastHeight: 2
+  groundMarkerRaycastDistance: 6
+  groundMarkerRaycastMask:
+    serializedVersion: 2
+    m_Bits: -1
+  groundMarkerColorBlend: 0.85
+  groundMarkerEmission: 0.6
 --- !u!114 &1175399574350167929
 MonoBehaviour:
   m_ObjectHideFlags: 0

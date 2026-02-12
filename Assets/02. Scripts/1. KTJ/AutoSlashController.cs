@@ -87,6 +87,7 @@ public partial class AutoSlashController : MonoBehaviour
     private float lastAttackRange;
 
     public event System.Action OnAttackReady;
+    public bool IsChainSlowActive => chainCombat != null && chainCombat.IsSlowActive;
 
     private void Awake()
     {
