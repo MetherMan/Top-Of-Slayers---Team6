@@ -1739,6 +1739,10 @@ GameObject:
   - component: {fileID: 2706625792924299369}
   - component: {fileID: 5002794710740178919}
   - component: {fileID: 5360745187511200389}
+  - component: {fileID: -6542433453688844999}
+  - component: {fileID: 5849304565199588653}
+  - component: {fileID: 5239530261251254003}
+  - component: {fileID: -2804639472422143719}
   m_Layer: 0
   m_Name: Orc_Warrior_Cleaver
   m_TagString: Untagged
@@ -1836,6 +1840,74 @@ MonoBehaviour:
   targetingSystem: {fileID: 0}
   targetTransform: {fileID: 0}
   autoFindTargetingSystem: 1
+--- !u!54 &-6542433453688844999
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7608898817039318386}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &5849304565199588653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7608898817039318386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3ecf76b23681e848b868d144f83fb13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  rb: {fileID: 0}
+  enemyAnim: {fileID: 0}
+  enemyStateMachine: {fileID: 0}
+  enemySO: {fileID: 11400000, guid: 218c18edadf7e9c4bbb3b55e30f39242, type: 2}
+--- !u!114 &5239530261251254003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7608898817039318386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1c5e72196ac2a748a6defb1b241a2b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-2804639472422143719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7608898817039318386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67a1416060e01d64593f77652ee392ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7642706536652119300
 GameObject:
   m_ObjectHideFlags: 0
