@@ -1,5 +1,6 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 public enum StageType
 {
@@ -20,31 +21,34 @@ public enum ClearResult
 [CreateAssetMenu(fileName = "Stage_", menuName = "Config/Stage")]
 public class StageConfigSO : ScriptableObject
 {
+    [Header("SceneInstance ì£¼ì†Œ")]
+    //public AssetReferenceT<UnityEngine.ResourceManagement.ResourceProviders.SceneInstance> sceneReference;
+    public AssetReference sceneReference;
     /*
-        1¹ø ½ºÅ×ÀÌÁö ³ë¸»¸Ê 10
-        1¹ø ½ºÅ×ÀÌÁö ÇÏµå¸Ê 11
-        10¹ø ½ºÅ×ÀÌÁö ³ë¸» º¸½º¸Ê 103
-        10¹ø ½ºÅ×ÀÌÁö ÇÏµå º¸½º¸Ê 104
-        Ã¿¸°Áö ½ºÅ×ÀÌÁö 05
-    */ //³Ñ¹ö¸µ ¼³Á¤ °ª
+        1ë²ˆ ìŠ¤í…Œì´ì§€ ë…¸ë§ë§µ 10
+        1ë²ˆ ìŠ¤í…Œì´ì§€ í•˜ë“œë§µ 11
+        10ë²ˆ ìŠ¤í…Œì´ì§€ ë…¸ë§ ë³´ìŠ¤ë§µ 103
+        10ë²ˆ ìŠ¤í…Œì´ì§€ í•˜ë“œ ë³´ìŠ¤ë§µ 104
+        ì²¼ë¦°ì§€ ìŠ¤í…Œì´ì§€ 05
+    */ //ë„˜ë²„ë§ ì„¤ì • ê°’
 
-    [Header("½ºÅ×ÀÌÁö ³Ñ¹ö¸µ")]
-    public int stageNum;
+    [Header("ìŠ¤í…Œì´ì§€ ë„˜ë²„ë§")]
+    public int stageKey;
 
-    [Header("½ºÅ×ÀÌÁö Å¸ÀÔ")]
+    [Header("ìŠ¤í…Œì´ì§€ íƒ€ì…")]
     public StageType stageType;
 
-    [Header("½ºÅ×ÀÌÁö ·ê")]
+    [Header("ìŠ¤í…Œì´ì§€ ë£°")]
     public WaveRule stageRule;
 
-    [Header("½ºÅ×ÀÌÁö ½Ã°£")]
+    [Header("ìŠ¤í…Œì´ì§€ ì‹œê°„")]
     public int stageTime;
 
-    //µ¥ÀÌÅÍ Áß½É ¼³°è : °¢ ½ºÅ×ÀÌÁö µ¥ÀÌÅÍ¿¡¼­ ¿şÀÌºê °ª ¼³Á¤
-    //¿şÀÌºê : °¢ ¿şÀÌºê º° ½ºÆùµÉ ¸ó½ºÅÍ ¼ö, Å¸ÀÔ
-    //¶ó¿îµå : »ç¿ëµÇ¾îÁú ¸ó½ºÅÍ Å¸ÀÔ, ¿¤¸®Æ®, º¸½º À¯¹«
-    //ÁßÃ¸Å¬·¡½º : https://artiper.tistory.com/125
-    [Header("½ºÅ×ÀÌÁö ¿şÀÌºê(¶ó¿îµå) ¼¼ÆÃ")]
+    //ë°ì´í„° ì¤‘ì‹¬ ì„¤ê³„ : ê° ìŠ¤í…Œì´ì§€ ë°ì´í„°ì—ì„œ ì›¨ì´ë¸Œ ê°’ ì„¤ì •
+    //ì›¨ì´ë¸Œ : ê° ì›¨ì´ë¸Œ ë³„ ìŠ¤í°ë  ëª¬ìŠ¤í„° ìˆ˜, íƒ€ì…
+    //ë¼ìš´ë“œ : ì‚¬ìš©ë˜ì–´ì§ˆ ëª¬ìŠ¤í„° íƒ€ì…, ì—˜ë¦¬íŠ¸, ë³´ìŠ¤ ìœ ë¬´
+    //ì¤‘ì²©í´ë˜ìŠ¤ : https://artiper.tistory.com/125
+    [Header("ìŠ¤í…Œì´ì§€ ì›¨ì´ë¸Œ(ë¼ìš´ë“œ) ì„¸íŒ…")]
     public List<RoundData> roundDatas = new List<RoundData>();
 
     [System.Serializable] public class RoundData
@@ -54,14 +58,14 @@ public class StageConfigSO : ScriptableObject
         public EnemyConfigSO boss;
     }
 
-    [Header("Å¬¸®¾î °á°ú")]
-    public ClearResult clearResult; //±âº» °ª none
+    [Header("í´ë¦¬ì–´ ê²°ê³¼")]
+    public ClearResult clearResult; //ê¸°ë³¸ ê°’ none
 
-    [Header("½ºÅ×ÀÌÁö Å¬¸®¾î º¸»ó")]
+    [Header("ìŠ¤í…Œì´ì§€ í´ë¦¬ì–´ ë³´ìƒ")]
     //public itemDataSO[] FirstClearReward;
     public int[] FirstClearCoin;
 
-    [Header("½ºÅ×ÀÌÁö ¹İº¹ Å¬¸®¾î º¸»ó")]
+    [Header("ìŠ¤í…Œì´ì§€ ë°˜ë³µ í´ë¦¬ì–´ ë³´ìƒ")]
     //public itemDataSO[] ClearReward;
     public int[] ClearCoin;
 }

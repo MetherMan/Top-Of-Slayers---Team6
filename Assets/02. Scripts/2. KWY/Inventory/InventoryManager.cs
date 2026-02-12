@@ -52,5 +52,40 @@ public class InventoryManager : Singleton<InventoryManager>
         }
         return false;
     }
-    
+    public int GetItemCount(ItemSO item)
+    {
+        foreach (var slot in inventory)
+        {
+            if(slot.item == item)
+            {
+                return slot.count;
+            }
+        }
+        return 0;
+    }
+
+    public bool HasEnoughItem(ItemSO item, int amount)
+    {
+        return GetItemCount(item) >= amount;
+    }
+
+    public void RemoveItem(ItemSO item, int amount)
+    {
+        for (int i = 0; i < inventory.Count; i++)
+        {
+            if (inventory[i].item == item)
+            {
+                inventory[i].count -= amount;
+
+                if (inventory[i].count <= 0)
+                {
+                    inventory.RemoveAt(i);
+                }
+
+                OnInventoryChanged?.Invoke();
+                return;
+            }
+        }
+    }
+
 }

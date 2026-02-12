@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public enum MonsterType
 {
@@ -14,24 +14,40 @@ public enum Level
     Hard
 }
 
+public enum AttackType
+{
+    Melee,  //ê·¼ê±°ë¦¬
+    Ranged  //ì›ê±°ë¦¬
+}
+
 [CreateAssetMenu(fileName = "Enemy_", menuName = "Config/Enemy")]
 public class EnemyConfigSO : ScriptableObject
 {
-    [Header("¸ó½ºÅÍ ±âº» ¼³Á¤")]
-    public Level level; //³­ÀÌµµ º° ±¸ºĞ : 20% ½ºÆå °ª Áõ°¨
+    [Header("ëª¬ìŠ¤í„° ê¸°ë³¸ ì„¤ì •")]
+    public Level level; //ë‚œì´ë„ ë³„ êµ¬ë¶„ : 20% ìŠ¤í™ ê°’ ì¦ê°
     public MonsterType monsterType;
     public GameObject monsterPrefab;
 
-    [Header("¸ó½ºÅÍ ½ºÆå")]
+    [Header("ëª¬ìŠ¤í„° ìŠ¤í™")]
     public int maxHp;
     public int hp;
 
-    public int strength; //Str µ¥¹ÌÁö
-    public int defence; //df ¹æ¾î·Â
+    public int strength; //Str ë°ë¯¸ì§€
+    public int defence; //df ë°©ì–´ë ¥
 
-    [Header("¸ó½ºÅÍ ·çÆÃ ¸ñ·Ï")]
+    public float moveSpeed;
+    public float attackRange;
+
+    [Header("ëª¬ìŠ¤í„° ë£¨íŒ… ëª©ë¡")]
     public int[] NormalDropCoin; //ex. 14~17 coin
-    //public itemSO[] NormalDropItemList; ^RandomRange·Î ·çÆÃ ¾ÆÀÌÅÆ È®·ü Á¶Á¤
+    //public itemSO[] NormalDropItemList; ^RandomRangeë¡œ ë£¨íŒ… ì•„ì´íƒ¬ í™•ë¥  ì¡°ì •
     public int[] HardDropCoin;
     //public itemSO[] HardDropItemList;
+
+    [Header("ê³µê²© íƒ€ì…")]
+    public AttackType attackType;
+
+    [Header("ì›ê±°ë¦¬ ì „ìš©")]
+    public GameObject bulletPrefab;
+    public float bulletSpeed;
 }
