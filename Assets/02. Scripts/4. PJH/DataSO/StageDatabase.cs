@@ -47,9 +47,9 @@ public class StageDatabase : ScriptableObject
         foreach (var data in stageData)
         {
             if (data == null) continue;
-            if (!stageDic.ContainsKey(data.stageNum))
+            if (!stageDic.ContainsKey(data.stageKey))
             {
-                stageDic.Add(data.stageNum, data);
+                stageDic.Add(data.stageKey, data);
             }
         }
     }

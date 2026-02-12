@@ -33,6 +33,10 @@ public class SceneSlot : MonoBehaviour, IPointerClickHandler
         {
             SceneLoad.Instance.LoadData(this);
         }
+        else
+        {
+            Debug.LogError("SceneLoad를 찾을 수 없습니다.");
+        }
     }
 
     #endregion

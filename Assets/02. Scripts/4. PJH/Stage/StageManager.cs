@@ -1,11 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /*
-    !ÇØ´ç ½ºÅ×ÀÌÁö¿¡ ÇØ´çÇÏ´Â µ¥ÀÌÅÍ ¿¬°á
+    !í•´ë‹¹ ìŠ¤í…Œì´ì§€ì— í•´ë‹¹í•˜ëŠ” ë°ì´í„° ì—°ê²°
 
-    *½Ì±ÛÅæ
-    StageFlowManager ¿¬µ¿
-    StageDatabase ¸Ş¼­µå ½ÇÇà
+    *ì‹±ê¸€í†¤
+    StageFlowManager ì—°ë™
+    StageDatabase ë©”ì„œë“œ ì‹¤í–‰
 */
 public class StageManager : Singleton<StageManager>
 {
@@ -22,14 +22,14 @@ public class StageManager : Singleton<StageManager>
         StageData(21);
         if (selectDB != null) return;
 
-        // ±âº» µ¥ÀÌÅÍ°¡ ¾øÀ» ¶§´Â Ã¹ À¯È¿ ½ºÅ×ÀÌÁö¸¦ ´ëÃ¼ ·ÎµåÇÑ´Ù.
+        // ê¸°ë³¸ ë°ì´í„°ê°€ ì—†ì„ ë•ŒëŠ” ì²« ìœ íš¨ ìŠ¤í…Œì´ì§€ë¥¼ ëŒ€ì²´ ë¡œë“œí•œë‹¤.
         if (stageDB == null || stageDB.stageData == null) return;
         for (int i = 0; i < stageDB.stageData.Count; i++)
         {
             var fallback = stageDB.stageData[i];
             if (fallback == null) continue;
             selectDB = fallback;
-            Debug.LogWarning($"StageData(21) ·Îµå ½ÇÆĞ. ´ëÃ¼ ½ºÅ×ÀÌÁö({fallback.stageNum})¸¦ »ç¿ëÇÕ´Ï´Ù.");
+            Debug.LogWarning($"StageData(21) ë¡œë“œ ì‹¤íŒ¨. ëŒ€ì²´ ìŠ¤í…Œì´ì§€({fallback.stageKey})ë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.");
             return;
         }
     }
@@ -40,13 +40,13 @@ public class StageManager : Singleton<StageManager>
     }
 
     #region method
-    //½ºÅ×ÀÌÁö ¿ÀºêÁ§Æ® Å¬¸¯ ½Ã ½ÇÇàµÉ ¸Å¼­µå
+    //ìŠ¤í…Œì´ì§€ ì˜¤ë¸Œì íŠ¸ í´ë¦­ ì‹œ ì‹¤í–‰ë  ë§¤ì„œë“œ
     //public void StageData(int id)
     //{
     //    StageConfigSO data = stageDB.GetStageData(id);
     //    if (data != null)
     //    {
-    //        //ÇØ´ç ½ºÅ×ÀÌÁö µ¥ÀÌÅÍ¸¦ ºÒ·¯¿À±â
+    //        //í•´ë‹¹ ìŠ¤í…Œì´ì§€ ë°ì´í„°ë¥¼ ë¶ˆëŸ¬ì˜¤ê¸°
     //        selectDB = data;
     //    }
     //}
@@ -59,19 +59,19 @@ public class StageManager : Singleton<StageManager>
         }
         if (stageDB == null)
         {
-            Debug.LogWarning("StageDatabase¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("StageDatabaseë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 
         StageConfigSO data = stageDB.GetStageData(id);
         if (data != null)
         {
-            //ÇØ´ç ½ºÅ×ÀÌÁö µ¥ÀÌÅÍ¸¦ ºÒ·¯¿À±â
+            //í•´ë‹¹ ìŠ¤í…Œì´ì§€ ë°ì´í„°ë¥¼ ë¶ˆëŸ¬ì˜¤ê¸°
             selectDB = data;
             return;
         }
 
-        Debug.LogWarning($"StageData({id}) ·Îµå¿¡ ½ÇÆĞÇß½À´Ï´Ù.");
+        Debug.LogWarning($"StageData({id}) ë¡œë“œì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.");
     }
     #endregion
 }
