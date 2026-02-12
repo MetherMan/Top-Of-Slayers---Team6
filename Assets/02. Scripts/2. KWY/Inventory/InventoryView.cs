@@ -34,7 +34,8 @@ public class InventoryView : MonoBehaviour
         {
             if (i < inventoryData.Count)
             {
-                slotsUI[i].SetItem(inventoryData[i].item, inventoryData[i].count);
+                slotsUI[i].SetItem(inventoryData[i].item,
+                    inventoryData[i].count);
             }
             else
             {

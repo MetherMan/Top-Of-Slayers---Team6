@@ -13,8 +13,12 @@ public class InventoryItemSlot : MonoBehaviour
     [SerializeField] Sprite epicColor;
     [SerializeField] Sprite normalColor;
 
+    ItemSO currentItem;
+
     public void SetItem(ItemSO item, int count)
     {
+        currentItem = item;
+
         itemSprite.sprite = item.sprite;
         itemSprite.enabled = true;
         itemName.text = item.itemName;
@@ -42,9 +46,18 @@ public class InventoryItemSlot : MonoBehaviour
     }
     public void ClearItem()
     {
+        currentItem = null;
+
         itemSprite.enabled = false;
         itemName.text = "";
         itemCount.text = "";
         backGround.sprite = normalColor;
+    }
+
+    public void OnClickSlot()
+    {
+        if (currentItem == null) return;
+
+        InventorySelection.Instance?.NotifyItemClicked(currentItem);
     }
 }
