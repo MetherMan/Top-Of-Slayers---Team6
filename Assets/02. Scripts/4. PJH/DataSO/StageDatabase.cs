@@ -34,7 +34,7 @@ public class StageDatabase : ScriptableObject
     //stageConfigSO의 창고로 사용할 예정
     public List<StageConfigSO> stageData = new List<StageConfigSO>();
 
-    private Dictionary<int, StageConfigSO> stageDic;
+    private Dictionary<string, StageConfigSO> stageDic;
     #endregion
 
     #region method
@@ -42,7 +42,7 @@ public class StageDatabase : ScriptableObject
     {
         if (stageDic != null) return; //중복실행 방지
 
-        stageDic = new Dictionary<int, StageConfigSO>();
+        stageDic = new Dictionary<string, StageConfigSO>();
 
         foreach (var data in stageData)
         {
@@ -54,7 +54,7 @@ public class StageDatabase : ScriptableObject
         }
     }
 
-    public StageConfigSO GetStageData(int num)
+    public StageConfigSO GetStageData(string num)
     {
         if (stageDic == null) Initialization();
         if (stageDic.TryGetValue(num, out StageConfigSO data))

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -8,13 +9,15 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 public class AddressableManager : Singleton<AddressableManager>
 {
     #region field
+    private List<AsyncOperationHandle> loadedAssets = new List<AsyncOperationHandle>();
     private Dictionary<string, StageConfigSO> _stageDB = new Dictionary<string, StageConfigSO>();
-    private Dictionary<string, SceneInstance> _scene = new Dictionary<string, SceneInstance>();
+    private Dictionary<string, SceneInstance> _stageScene = new Dictionary<string, SceneInstance>();
     #endregion
 
     protected override void Awake()
     {
         base.Awake();
+        LoadAllData();
     }
 
     #region method
@@ -43,27 +46,46 @@ public class AddressableManager : Singleton<AddressableManager>
         }
         return false;
     }
+
+    public async Task LoadAllData()
+    {
+        //호출 리스트
+        Task stageDBTask = LoadAllStageDB();
+        //RuleSO
+        //MonsterSO
+        //MonsterPrefab
+        //ItemSO
+        //ItemPrefab
+        //VFX
+        //SFX
+
+        await Task.WhenAll(stageDBTask);
+
+        Debug.Log("모든 데이터 로드 완료");
+    }
+
     #region Load
-    //StageConfigSO
+    //StageConfigSO : 게임을 종료할 때까지 가지고 있는다.
     public async Task LoadAllStageDB()
     {
-        AsyncOperationHandle<IList<StageConfigSO>> handle 
+        AsyncOperationHandle<IList<StageConfigSO>> stageDBhandle 
             = Addressables.LoadAssetsAsync<StageConfigSO>("StageSO", null);
+        loadedAssets.Add(stageDBhandle);
 
-        await handle.Task;
+        await stageDBhandle.Task;
 
-        if (IsSucceeded(handle))
+        if (IsSucceeded(stageDBhandle))
         {
-            foreach (StageConfigSO data in handle.Result)
+            foreach (StageConfigSO data in stageDBhandle.Result)
             {
                 //중복 키 방지
-                if (!_stageDB.ContainsKey(data.stageKey.ToString()))
+                if (!_stageDB.ContainsKey(data.stageKey))
                 {
-                    _stageDB.Add(data.stageKey.ToString(), data);
+                    _stageDB.Add(data.stageKey, data);
                 }
             }
         }
-        else if (IsFailed(handle))
+        else if (IsFailed(stageDBhandle))
         {
             Debug.LogError("LoadAllStageDB : Failed");
             return;
@@ -71,10 +93,46 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //SceneInstance
-    //LoadAssetsAsync<T> 사용할 경우 메모리 부담
-    public void test()
+    //LoadAssetsAsync<T> 사용할 경우 메모리 부담 / 데이터 파일로 취급
+    //스테이지 씬 이동 : SO의 키값을 입력하면 해당되는 씬을 불러와 실행한다.
+    public void RequestStageScene(string key)
     {
-        
+        StageConfigSO data = AddressableManager.Instance.GetData(key);
+        if (data == null) return;
+
+        //AsyncOperationHandle<T> 타입을 명시하지 않으면 handle.Result는 object 타입으로 반환한다.
+        AsyncOperationHandle<SceneInstance> loadOp = Addressables.LoadSceneAsync(data.sceneReference);
+
+        loadOp.Completed += (handle) =>
+        {
+            if (IsSucceeded(handle))
+            {
+                //RuntimeKey를 제외할 경우 엉뚱한 값이 나올 수 있다
+                string address = data.sceneReference.RuntimeKey.ToString();
+                AddSceneSafely(address, handle.Result);
+            }
+            else if (IsFailed(handle))
+            {
+                Debug.LogError("RequestScene : Failed");
+                return;
+            }
+        };
+    }
+
+    //중복방지 메서드
+    public void AddSceneSafely(string address, SceneInstance instance)
+    {
+        if (_stageScene.ContainsKey(address))
+        {
+            // '==' 기호를 사용하려면 오버로드를 해줘야 사용할 수 있다.
+            //.Equals는 object에 내장되어있는 비교함수이다.
+            if (_stageScene[address].Equals(instance))
+            {
+                Debug.Log("RequestScene 중복 데이터");
+                return;
+            }
+        }
+        _stageScene[address] = instance;
     }
 
     //RuleSO
@@ -97,5 +155,16 @@ public class AddressableManager : Singleton<AddressableManager>
         return null;
     }
     #endregion
+    private void OnDestroy()
+    {
+        foreach (AsyncOperationHandle handle in loadedAssets)
+        {
+            //핸들이 유효한지 확인 (실패한 핸들도 유효; 대신 handle.Status = faild로 구분됨
+            if (handle.IsValid())
+            {
+                Addressables.Release(handle);
+            }
+        }
+    }
     #endregion
 }
