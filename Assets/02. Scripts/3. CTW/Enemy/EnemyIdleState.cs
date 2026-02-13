@@ -1,36 +1,34 @@
 ﻿using UnityEngine;
 
-public class EnemyHitted : IEnemyState
+public class EnemyIdleState : IEnemyState
 {
     private EnemyBase enemy;
     private EnemyStateMachine enemyStateMachine;
 
-    private float hitTime = 0.5f;
+    private float idleTime = 1f;
     private float timer;
 
-    public EnemyHitted(EnemyBase enemy, EnemyStateMachine enemyStateMachine)
+    public EnemyIdleState(EnemyBase enemy, EnemyStateMachine enemyStateMachine)
     {
         this.enemy = enemy;
         this.enemyStateMachine = enemyStateMachine;
     }
-
     public void Enter()
     {
-        timer = hitTime;
-
-        enemy.enemyAnim.EnemyHitted();
+        timer = 0f;
 
         enemy.enemyAnim.EnemyRunning(false);
         enemy.enemyAnim.EnemyAttack(false);
     }
 
+    
     public void Update()
     {
-        timer -= Time.deltaTime;
+        timer += Time.deltaTime;
 
-        if(timer <= 0)
+        if(timer >= idleTime)
         {
-            enemy.enemyStateMachine.ChangeState(enemy.FollowState);
+            enemyStateMachine.ChangeState(enemy.FollowState);
         }
     }
 

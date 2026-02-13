@@ -4,6 +4,7 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
 {
     [Header("연동")]
     [SerializeField] private TargetingSystem targeting;
+    [SerializeField] private EnemyBase enemyBase;
 
     [Header("스탯")]
     [SerializeField] private int hp = 30;
@@ -36,9 +37,20 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
         hp -= amount;
         if (hp <= 0)
         {
-            gameObject.SetActive(false);
+            Die();
         }
     }
 
+    private void Die()
+    {
+        if(enemyBase != null)
+        {
+            enemyBase.Die();
+        }
+        else
+        {
+            gameObject.SetActive(false);
+        }
+    }
     public bool IsDead => hp <= 0;
 }
