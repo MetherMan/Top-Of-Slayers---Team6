@@ -962,6 +962,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targeting: {fileID: 0}
+  enemyBase: {fileID: -7446007442038305452}
   hp: 30
 --- !u!114 &1845985666723176145
 MonoBehaviour:
@@ -1002,6 +1003,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3ecf76b23681e848b868d144f83fb13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  killScore: 1
   player: {fileID: 0}
   rb: {fileID: 0}
   enemyAnim: {fileID: 0}
@@ -1058,6 +1060,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3ecf76b23681e848b868d144f83fb13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  killScore: 100
   player: {fileID: 0}
   rb: {fileID: 0}
   enemyAnim: {fileID: 0}

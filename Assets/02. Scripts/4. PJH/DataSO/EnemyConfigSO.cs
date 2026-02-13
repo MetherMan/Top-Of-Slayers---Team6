@@ -17,7 +17,8 @@ public enum Level
 public enum AttackType
 {
     Melee,  //근거리
-    Ranged  //원거리
+    Ranged, //원거리
+    Corn    //부채꼴
 }
 
 [CreateAssetMenu(fileName = "Enemy_", menuName = "Config/Enemy")]
@@ -50,4 +51,7 @@ public class EnemyConfigSO : ScriptableObject
     [Header("원거리 전용")]
     public GameObject bulletPrefab;
     public float bulletSpeed;
+
+    [Header("부채꼴 전용")]
+    public float attackAngle;
 }
