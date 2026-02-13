@@ -19,7 +19,7 @@ public class StageManager : Singleton<StageManager>
     {
         base.Awake();
         stageDB = StageDatabase.Instance;
-        StageData(21);
+        StageData("21");
         if (selectDB != null) return;
 
         // 기본 데이터가 없을 때는 첫 유효 스테이지를 대체 로드한다.
@@ -51,7 +51,7 @@ public class StageManager : Singleton<StageManager>
     //    }
     //}
 
-    public void StageData(int id)
+    public void StageData(string id)
     {
         if (stageDB == null)
         {
