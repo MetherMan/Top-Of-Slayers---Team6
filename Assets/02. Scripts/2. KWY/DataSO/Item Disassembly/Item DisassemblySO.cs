@@ -3,7 +3,7 @@
 [CreateAssetMenu(menuName = "Data/DisassemblyRecipe")]
 public class ItemDisassemblySO : ScriptableObject
 {
-    public ItemSO targetItem;
+    public EquipmentSO targetItem;
 
     public ItemSO[] resultItems;
     public int[] resultCounts;
