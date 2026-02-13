@@ -5,11 +5,11 @@ public class ShopView : MonoBehaviour
     [SerializeField] ShopManager shopManager;
     [SerializeField] Transform slotRoot;
 
-    ShopSlotUI[] slots;
+    ShopItemSlot[] slots;
 
     private void OnEnable()
     {
-        slots = slotRoot.GetComponentsInChildren<ShopSlotUI>();
+        slots = slotRoot.GetComponentsInChildren<ShopItemSlot>();
         RefreshUI();
     }
 

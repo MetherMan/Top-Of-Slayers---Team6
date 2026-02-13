@@ -6,13 +6,10 @@ public class InventoryManager : Singleton<InventoryManager>
 {
     public List<InventoryItem> inventory = new List<InventoryItem>();
     public event Action OnInventoryChanged;
-
-
     protected override void Awake()
     {
         base.Awake();
     }
-
     public void AddItem(ItemSO item, int amount)
     {
 
@@ -63,7 +60,6 @@ public class InventoryManager : Singleton<InventoryManager>
         }
         return 0;
     }
-
     public bool HasEnoughItem(ItemSO item, int amount)
     {
         return GetItemCount(item) >= amount;
