@@ -3,10 +3,10 @@
 [CreateAssetMenu(menuName = "Data/Equipment/Emblem")]
 public class EmblemSO : EquipmentSO
 {
-    public int attack;
+    public float attackHealRate;
 
     public override string GetStatText()
     {
-        return $"공격력 +{attack}";
+        return $"적중 시 피 회복율 +{attackHealRate}";
     }
 }
