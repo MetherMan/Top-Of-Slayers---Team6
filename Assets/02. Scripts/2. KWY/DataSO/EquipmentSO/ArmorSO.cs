@@ -3,10 +3,10 @@
 [CreateAssetMenu(menuName = "Data/Equipment/Armor")]
 public class ArmorSO : EquipmentSO
 {
-    public int defense;
+    public int hp;
 
     public override string GetStatText()
     {
-        return $"방어력 +{defense}";
+        return $"체력 +{hp}";
     }
 }
