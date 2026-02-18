@@ -13,6 +13,8 @@ public class InventoryItemSlot : MonoBehaviour
     [SerializeField] Sprite epicColor;
     [SerializeField] Sprite normalColor;
 
+    [SerializeField] InventorySelection inventorySelection;
+
     ItemSO currentItem;
 
     public void SetItem(ItemSO item, int count)
@@ -58,6 +60,11 @@ public class InventoryItemSlot : MonoBehaviour
     {
         if (currentItem == null) return;
 
-        InventorySelection.Instance?.NotifyItemClicked(currentItem);
+        inventorySelection.NotifyItemClicked(currentItem);
+    }
+
+    public void SetSelection(InventorySelection selection)
+    {
+        inventorySelection = selection;
     }
 }

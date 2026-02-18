@@ -10,6 +10,8 @@ public class InventoryManager : Singleton<InventoryManager>
     {
         base.Awake();
     }
+
+    //아이템 추가
     public void AddItem(ItemSO item, int amount)
     {
 
@@ -32,6 +34,7 @@ public class InventoryManager : Singleton<InventoryManager>
         }
         OnInventoryChanged?.Invoke();
     }
+    //소비아이템 사용(가챠권 사용때 사용 예정)
     public bool UseItem(ItemSO item, int amount = 1)
     {
         for(int i = 0; i < inventory.Count; i++)
@@ -49,6 +52,7 @@ public class InventoryManager : Singleton<InventoryManager>
         }
         return false;
     }
+    //특정 아이템 보유 수량 조회
     public int GetItemCount(ItemSO item)
     {
         foreach (var slot in inventory)
@@ -65,6 +69,7 @@ public class InventoryManager : Singleton<InventoryManager>
         return GetItemCount(item) >= amount;
     }
 
+    //제작/분해 아이템 제거
     public void RemoveItem(ItemSO item, int amount)
     {
         for (int i = 0; i < inventory.Count; i++)

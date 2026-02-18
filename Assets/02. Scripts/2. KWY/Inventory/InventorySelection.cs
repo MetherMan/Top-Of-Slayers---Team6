@@ -3,30 +3,34 @@ using UnityEngine;
 
 public class InventorySelection : MonoBehaviour
 {
-    public static InventorySelection Instance;
+    [SerializeField] ItemPopupUI itemPopup;
+    private Action<ItemSO> onItemSelected;
 
-    Action<ItemSO> onItemSelected;
-
-    private void Awake()
-    {
-        Instance = this;
-    }
-
+    //아이템 선택 대기 상태 ON
     public void EnableSelectMode(Action<ItemSO> callback)
     {
         onItemSelected = callback;
     }
-
+    //아이템 선택 대기 상태 off
     public void DisableSelectMode()
     {
         onItemSelected = null;
     }
-
+    //슬롯에서 클릭됐다고 알려주는 함수
     public void NotifyItemClicked(ItemSO item) 
     {
-        if (onItemSelected == null) return;
+        if (item == null) return;
 
-        onItemSelected.Invoke(item);
-        DisableSelectMode();
+        // 선택 모드라면 → 콜백
+        if (onItemSelected != null)
+        {
+            onItemSelected.Invoke(item);
+            DisableSelectMode();
+        }
+        else
+        {
+            if (itemPopup != null)
+                itemPopup.Show(item);
+        }
     }
 }

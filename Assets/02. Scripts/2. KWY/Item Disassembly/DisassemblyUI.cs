@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class DisassemblyUI : MonoBehaviour
@@ -6,28 +8,46 @@ public class DisassemblyUI : MonoBehaviour
     [SerializeField] Image selectedItemImage;
     [SerializeField] Image disassemblyItemImage;
 
-    [SerializeField] Sprite defaultselectedItemImage;
-    [SerializeField] Sprite defaultdisassemblyItemImage;
+    [SerializeField] Sprite defaultSelectedItemImage;
+    [SerializeField] Sprite defaultDisassemblyItemImage;
 
     [SerializeField] GameObject inventoryPanel;
-    [SerializeField] GameObject failPaenl;
+    [SerializeField] GameObject failPanel;
+    [SerializeField] TextMeshProUGUI failText;
 
     [SerializeField] ItemDisassemblySystem itemDisassemblySystem;
+    [SerializeField] InventorySelection inventorySelection;
 
     ItemSO selectedItem;
 
+    private void OnDisable()
+    {
+        ResetUI();
+    }
+
+    //인벤토리 패널 열기, 아이템 선택 모드 활성화
     public void OnClickSelectedItem()
     {
         inventoryPanel.SetActive(true);
 
-        InventorySelection.Instance.EnableSelectMode(OnItemSelected);
+        inventorySelection.EnableSelectMode(OnItemSelected);
     }
-
+    //선택된 아이템 ui에 반영
     public void OnItemSelected(ItemSO item)
     {
-        if (!(item is EquipmentSO))
+        if (!(item is EquipmentSO equip))
         {
-            failPaenl.SetActive(true);
+            failText.text = "재료아이템은\r\n 분해하지 못합니다.";
+            failPanel.SetActive(true);
+            inventorySelection.EnableSelectMode(OnItemSelected);
+            return;
+        }
+        //아이템 장착시 불가
+        if (EquipmentManager.Instance.IsEquipped(equip))
+        {
+            failText.text = "장착 중인 장비는\r\n 분해할 수 없습니다.";
+            failPanel.SetActive(true);   
+            inventorySelection.EnableSelectMode(OnItemSelected);
             return;
         }
 
@@ -36,14 +56,19 @@ public class DisassemblyUI : MonoBehaviour
 
         var recipe = itemDisassemblySystem.GetRecipe(item);
 
-        if (recipe != null) 
+        if (recipe != null && recipe.resultItems.Length > 0) 
         {
             disassemblyItemImage.sprite = recipe.resultItems[0].sprite;
+        }
+        else
+        {
+            disassemblyItemImage.sprite = defaultDisassemblyItemImage;
+
         }
 
         inventoryPanel.SetActive(false);
     }
-
+    //클릭시 분해
     public void OnClickDisassembly()
     {
 
@@ -52,7 +77,16 @@ public class DisassemblyUI : MonoBehaviour
         itemDisassemblySystem.Disassembly(selectedItem);
 
         selectedItem = null;
-        selectedItemImage.sprite = defaultselectedItemImage;
-        disassemblyItemImage.sprite = defaultdisassemblyItemImage;
+        selectedItemImage.sprite = defaultSelectedItemImage;
+        disassemblyItemImage.sprite = defaultDisassemblyItemImage;
+    }
+
+    private void ResetUI()
+    {
+        selectedItem = null;
+
+        selectedItemImage.sprite = defaultSelectedItemImage;
+        disassemblyItemImage.sprite = defaultDisassemblyItemImage;
+
     }
 }

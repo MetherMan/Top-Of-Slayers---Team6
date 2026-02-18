@@ -4,7 +4,16 @@ public class InventoryView : MonoBehaviour
 {
     [SerializeField] Transform slotRoot;
     private InventoryItemSlot[] slotsUI;
+    [SerializeField] InventorySelection inventorySelection;
+    private void Start()
+    {
+        var slots = GetComponentsInChildren<InventoryItemSlot>();
 
+        foreach (var slot in slots) 
+        {
+            slot.SetSelection(inventorySelection);
+        }
+    }
     private void OnEnable()
     {
         if(InventoryManager.Instance != null)

@@ -14,6 +14,8 @@ public class ItemDetailsView : MonoBehaviour
     [SerializeField] TextMeshProUGUI itemDesc;
     [SerializeField] TextMeshProUGUI itemPrice;
 
+    [SerializeField] ShopManager shopManager;
+
     ItemSO currentItem;
 
     public void Show(ItemSO item)
@@ -47,6 +49,6 @@ public class ItemDetailsView : MonoBehaviour
     {
         if (currentItem == null) return;
 
-        InventoryManager.Instance.AddItem(currentItem, 1);
+        shopManager.TryBuy(currentItem);
     }
 }
