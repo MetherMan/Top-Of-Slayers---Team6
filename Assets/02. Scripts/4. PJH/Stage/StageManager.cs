@@ -6,6 +6,8 @@
     *싱글톤
     StageFlowManager 연동
     StageDatabase 메서드 실행
+
+    스테이지 몬스터 관리
 */
 public class StageManager : Singleton<StageManager>
 {
