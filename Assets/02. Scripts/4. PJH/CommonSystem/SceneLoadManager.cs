@@ -51,6 +51,7 @@ public class SceneLoadManager : Singleton<SceneLoadManager>
         Addressables.LoadSceneAsync(sceneRef);
     }
 
+    //GameFlowManager에서 GameStateMachine 상태머신을 이용해 씬 전환
     public void ActiveScene(SceneSlot slot)
     {
         SceneType sceneType = slot.sceneType;

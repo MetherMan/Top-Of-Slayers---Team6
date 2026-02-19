@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "Rule_", menuName = "Rule/ChellengeStage")]
-public class ChellengeStage : WaveRule
+[CreateAssetMenu(fileName = "Rule_", menuName = "Rule/ChellengeRule")]
+public class ChellengeRule : WaveRule
 {
     public override void OnStart(RuleDataContainer data, WaveDirectorSystem context)
     {
