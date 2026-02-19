@@ -5,5 +5,21 @@ using UnityEngine;
 
 public class GachaDataSO : ScriptableObject
 {
-    public List<ItemSO> items = new List<ItemSO>();
+    [System.Serializable]
+    public class GachaEntry
+    {
+        public ItemSO item;
+        public float chance;
+    }
+    public List<GachaEntry> items = new List<GachaEntry>();
+
+    public float TotalChance()
+    {
+        float total = 0f;
+        foreach (var item in items)
+        {
+            total += item.chance;
+        }
+        return total;
+    }
 }
