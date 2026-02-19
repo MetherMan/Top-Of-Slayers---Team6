@@ -4,7 +4,7 @@ using UnityEngine;
 public class ItemDisassemblySystem : MonoBehaviour
 {
     [SerializeField] List<ItemDisassemblySO> recipes = new List<ItemDisassemblySO>();
-
+    //아이템의 분해 레시피 찾아서 반환
     public ItemDisassemblySO GetRecipe(ItemSO item)
     {
         for(int i = 0; i<recipes.Count; i++)
@@ -16,7 +16,7 @@ public class ItemDisassemblySystem : MonoBehaviour
         }
         return null;
     }
-
+    //분해 실행
     public void Disassembly(ItemSO item)
     {
         if (item == null) return;
