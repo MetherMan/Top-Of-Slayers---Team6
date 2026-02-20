@@ -27,7 +27,7 @@ public class InventoryView : MonoBehaviour
 
     private void OnDisable()
     {
-        if(InventoryManager.Instance != null)
+        if (InventoryManager.HasInstance)
         {
             InventoryManager.Instance.OnInventoryChanged -= RefreshUI;
         }

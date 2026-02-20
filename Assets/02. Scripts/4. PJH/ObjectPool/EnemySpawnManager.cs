@@ -1,16 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public enum SpawnPattern
-{
-    Diagonal,//대각선
-    Cross,   //상하좌우
-    Around,  //주변 8방향
-    Up,      //위에만
-    Down,    //아래에만
-    Left,
-    Right
-}
+using UnityEngine.Serialization;
 
 public class EnemySpawnManager : MonoBehaviour
 {
@@ -20,6 +11,7 @@ public class EnemySpawnManager : MonoBehaviour
     [SerializeField] private DamageSystem damageSystem;
 
     [Header("설정")]
+    [FormerlySerializedAs("player")]
     [SerializeField] private Transform mapCenter;
     [SerializeField] private float spawnDistance = 5f;
     [SerializeField] private LayerMask groundLayer;
@@ -81,7 +73,7 @@ public class EnemySpawnManager : MonoBehaviour
                     new Vector3(1, 0, 1),
                     new Vector3(-1, 0, 1),
                     Vector3.forward*2,
-                    new Vector3(1, 0 , 2),
+                    new Vector3(1, 0, 2),
                     new Vector3(-1, 0, 2)
                 };
 
@@ -102,7 +94,7 @@ public class EnemySpawnManager : MonoBehaviour
                     Vector3.left,
                     new Vector3(-1, 0, 1),
                     new Vector3(-1, 0, -1),
-                    Vector3 .left*2,
+                    Vector3.left*2,
                     new Vector3(-2, 0, 1),
                     new Vector3(-2, 0, -1)
                 };
@@ -118,11 +110,17 @@ public class EnemySpawnManager : MonoBehaviour
                     new Vector3(2, 0, -1)
                 };
         }
+
         return null;
     }
 
     private void Awake()
     {
+        if (mapCenter == null)
+        {
+            mapCenter = ResolveSpawnCenter();
+        }
+
         if (damageSystem == null)
         {
             damageSystem = FindObjectOfType<DamageSystem>();
@@ -158,24 +156,49 @@ public class EnemySpawnManager : MonoBehaviour
 
     private void WaveStart()
     {
+        if (stageSO == null || stageSO.roundDatas == null)
+        {
+            return;
+        }
+
         if (currentRound >= stageSO.roundDatas.Count) return;
         StartCoroutine(SpawnCoroutine());
     }
 
     private IEnumerator SpawnCoroutine()
     {
+        if (enemyFactory == null || stageSO == null || stageSO.roundDatas == null)
+        {
+            yield break;
+        }
+
+        if (mapCenter == null)
+        {
+            mapCenter = ResolveSpawnCenter();
+            if (mapCenter == null)
+            {
+                yield break;
+            }
+        }
+
         StageFlowManager.Instance.waveIndex = currentRound + 1;
         WaveDirectorSystem.Instance.WaveClear();
 
         var roundData = stageSO.roundDatas[currentRound]; // 현재라운드 SO
+        Vector3[] spawnDirections = SpawnDirections(roundData.spawnPattern);
+        if (spawnDirections == null || spawnDirections.Length == 0)
+        {
+            yield break;
+        }
 
-        Vector3[] spawnDirections = SpawnDirections(roundData.spawnPattern); // 라운드 데이터 스폰 패턴에 따른 방향 배열
-
+        int dirCount = spawnDirections.Length;
         int dirIndex = 0; // 방향 인덱스
 
         // 라운드데이터 리스트만큼 몬스터 생성
         foreach (var monster in roundData.monsterSpawnList)
         {
+            if (monster == null) continue;
+
             Vector3 dir = spawnDirections[dirIndex];
             Vector3 spawnPos = mapCenter.position + dir * spawnDistance;
             Vector3 finalSpawnPos = OnGround(spawnPos); // 최종 스폰위치는 땅에
@@ -190,13 +213,36 @@ public class EnemySpawnManager : MonoBehaviour
             dirIndex++; // 방향 인덱스 추가로 다음 스폰 방향 가져오기
 
             // 만약 8마리 이상일 때 처음부터 다시
-            if (dirIndex >= spawnDirections.Length)
+            if (dirIndex >= dirCount)
             {
                 dirIndex = 0;
             }
 
             yield return new WaitForSeconds(spawnInterval); // 스폰 간격
         }
+    }
+
+    private Transform ResolveSpawnCenter()
+    {
+        try
+        {
+            GameObject taggedPlayer = GameObject.FindGameObjectWithTag("Player");
+            if (taggedPlayer != null)
+            {
+                return taggedPlayer.transform;
+            }
+        }
+        catch (UnityException)
+        {
+        }
+
+        GameObject mainChar = GameObject.Find("1.Main Char");
+        if (mainChar != null)
+        {
+            return mainChar.transform;
+        }
+
+        return transform;
     }
 
     // 땅 위에 스폰 위치 반환
@@ -252,3 +298,4 @@ public class EnemySpawnManager : MonoBehaviour
         MonsterDead();
     }
 }
+

@@ -18,6 +18,17 @@ public enum ClearResult
     Faile
 }
 
+public enum SpawnPattern
+{
+    Diagonal,
+    Cross,
+    Around,
+    Up,
+    Down,
+    Left,
+    Right
+}
+
 [CreateAssetMenu(fileName = "Stage_", menuName = "Config/Stage")]
 public class StageConfigSO : ScriptableObject
 {

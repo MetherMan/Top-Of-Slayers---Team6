@@ -21,6 +21,37 @@ public class UIRootManager : MonoBehaviour
 
     [SerializeField] BottomNavController bottomNav;
 
+    private void Awake()
+    {
+        ApplyBuildScreenSetup();
+    }
+
+    private void Start()
+    {
+        ApplyBuildScreenSetup();
+    }
+
+    private void ApplyBuildScreenSetup()
+    {
+#if UNITY_EDITOR
+        return;
+#else
+#if UNITY_ANDROID || UNITY_IOS
+        Screen.autorotateToPortrait = true;
+        Screen.autorotateToPortraitUpsideDown = false;
+        Screen.autorotateToLandscapeLeft = false;
+        Screen.autorotateToLandscapeRight = false;
+        Screen.orientation = ScreenOrientation.Portrait;
+#endif
+#if UNITY_STANDALONE || UNITY_WEBGL
+        if (Screen.width > Screen.height)
+        {
+            Screen.SetResolution(Screen.height, Screen.width, false);
+        }
+#endif
+#endif
+    }
+
     public void OpenInventory()
     {
         inventoryPanel.SetActive(true);

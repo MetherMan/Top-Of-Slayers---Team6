@@ -13,7 +13,7 @@ public class GoldView : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (CurrencyManager.Instance != null)
+        if (CurrencyManager.HasInstance)
             CurrencyManager.Instance.OnGoldChanged -= Refresh;
     }
 
