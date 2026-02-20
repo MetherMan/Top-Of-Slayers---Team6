@@ -12,14 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea8bb6303b74a4b4e8fc6f63e5dc726b, type: 3}
   m_Name: DungeonStage
   m_EditorClassIdentifier: 
-  stageNum: 0
+  sceneReference:
+    m_AssetGUID: 
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  stageKey: 0
   stageType: 0
   stageRule: {fileID: 0}
   stageTime: 0
   roundDatas:
   - monsterSpawnList:
     - {fileID: 11400000, guid: 82de04cf1519a0541ac197375496c165, type: 2}
-    - {fileID: 11400000, guid: 82de04cf1519a0541ac197375496c165, type: 2}
+    - {fileID: 11400000, guid: 3da890310af10414fbe38d6db5535c3e, type: 2}
     - {fileID: 11400000, guid: 8122f62cf0a59314984def3f12735650, type: 2}
     elite: {fileID: 0}
     boss: {fileID: 0}

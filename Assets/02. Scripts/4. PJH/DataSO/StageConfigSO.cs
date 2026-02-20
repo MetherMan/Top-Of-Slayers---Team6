@@ -33,7 +33,7 @@ public class StageConfigSO : ScriptableObject
     */ //넘버링 설정 값
 
     [Header("스테이지 넘버링")]
-    public int stageKey;
+    public string stageKey;
 
     [Header("스테이지 타입")]
     public StageType stageType;
@@ -53,6 +53,7 @@ public class StageConfigSO : ScriptableObject
 
     [System.Serializable] public class RoundData
     {
+        public SpawnPattern spawnPattern;
         public EnemyConfigSO[] monsterSpawnList;
         public EnemyConfigSO elite;
         public EnemyConfigSO boss;

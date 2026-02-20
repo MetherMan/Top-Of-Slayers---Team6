@@ -3,10 +3,14 @@
 [CreateAssetMenu(menuName = "Data/Equipment/Gloves")]
 public class GlovesSO : EquipmentSO
 {
-    public float attackSpeed;
+    public float criticalRate;
 
-    public override string GetStatText()
+    public override float GetCritical(int level)
     {
-        return $"공격속도 +{attackSpeed}";
+        return criticalRate * (level * 5);
+    }
+    public override string GetStatText(int level)
+    {
+        return $"치명타 확률 +{GetCritical(level)}";
     }
 }

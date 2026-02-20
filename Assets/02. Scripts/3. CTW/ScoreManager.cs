@@ -1,22 +1,34 @@
-using System;
+癤퓎sing System;
 using UnityEngine;
 
-public class ScoreManager : ChainComboDecorator
+public class ScoreManager : Singleton<ScoreManager>
 {
-    private int killScore;
-    private Action<int> onScore;
+    private int totalScore;
+    public event Action<int> onScoreChanged;
 
-    public ScoreManager(IChainCombo inner, int killScore, Action<int> onScore) : base(inner)
+    protected override void Awake()
     {
-        this.killScore = killScore;
-        this.onScore = onScore;
+        base.Awake();
+    }
+    private void OnEnable()
+    {
+        EnemyBase.OnEnemyKilled += AddScore;
     }
 
-    public override void ChainUp()
+    private void OnDisable()
     {
-        base.ChainUp();
+        EnemyBase.OnEnemyKilled -= AddScore;
+    }
 
-        //스코어 변동되면 작동
-        onScore?.Invoke(killScore);
+    public void AddScore(int score)
+    {
+        totalScore += score;
+        onScoreChanged?.Invoke(totalScore);
+    }
+
+    public void RestScore()
+    {
+        totalScore = 0;
+        onScoreChanged?.Invoke(totalScore);
     }
 }

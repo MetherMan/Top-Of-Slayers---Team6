@@ -18,6 +18,7 @@ public class CraftingUI : MonoBehaviour
 
     CraftingSO currentRecipe;
 
+    //제작 아이템 표시
     public void ShowRecipe(CraftingSO recipe)
     {
         currentRecipe = recipe;
@@ -27,7 +28,7 @@ public class CraftingUI : MonoBehaviour
 
         if (recipe.ResultItem is EquipmentSO equip)
         {
-            itemDitails.text = equip.GetStatText();
+            itemDitails.text = equip.GetStatText(0);
 
         }
         int have1 = InventoryManager.Instance.GetItemCount(recipe.materials[0]);
@@ -42,6 +43,7 @@ public class CraftingUI : MonoBehaviour
         mat2Image.sprite = recipe.materials[1].sprite;
         mat2Count.text = $"{have2}/{need2}";
     }
+    //클릭시 제작
     public void Craft()
     {
         if (currentRecipe == null) return;

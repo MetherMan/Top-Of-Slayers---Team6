@@ -8,24 +8,28 @@ public class InventoryItemSlot : MonoBehaviour
     [SerializeField] Image itemSprite;
     [SerializeField] TextMeshProUGUI itemName;
     [SerializeField] TextMeshProUGUI itemCount;
+    //[SerializeField] TextMeshProUGUI itemLevel;
 
     [SerializeField] Sprite legendColor;
     [SerializeField] Sprite epicColor;
     [SerializeField] Sprite normalColor;
 
-    ItemSO currentItem;
+    [SerializeField] InventorySelection inventorySelection;
 
-    public void SetItem(ItemSO item, int count)
+    InventoryItem currentItem;
+
+    public void SetItem(InventoryItem data)
     {
-        currentItem = item;
+        currentItem = data;
 
-        itemSprite.sprite = item.sprite;
+        itemSprite.sprite = data.item.sprite;
         itemSprite.enabled = true;
-        itemName.text = item.itemName;
+        itemName.text = data.item.itemName;
 
-        itemCount.text = count.ToString();
+        //itemLevel.text = $"+{data.enhancementLevel}";
+        itemCount.text = data.count.ToString();
 
-        ApplyGradeColor(item.grade);
+        ApplyGradeColor(data.item.grade);
     }
 
 
@@ -51,6 +55,7 @@ public class InventoryItemSlot : MonoBehaviour
         itemSprite.enabled = false;
         itemName.text = "";
         itemCount.text = "";
+        //itemLevel.text = "";
         backGround.sprite = normalColor;
     }
 
@@ -58,6 +63,11 @@ public class InventoryItemSlot : MonoBehaviour
     {
         if (currentItem == null) return;
 
-        InventorySelection.Instance?.NotifyItemClicked(currentItem);
+        inventorySelection.NotifyItemClicked(currentItem);
+    }
+
+    public void SetSelection(InventorySelection selection)
+    {
+        inventorySelection = selection;
     }
 }

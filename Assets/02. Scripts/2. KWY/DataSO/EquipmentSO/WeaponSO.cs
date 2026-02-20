@@ -5,8 +5,13 @@ public class WeaponSO : EquipmentSO
 {
     public int attack;
 
-    public override string GetStatText()
+    public override int GetAttack(int level)
     {
-        return $"공격력 +{attack}";
+        return attack + level * 5;
+    }
+
+    public override string GetStatText(int level)
+    {
+        return $"공격력 +{GetAttack(level)}";
     }
 }

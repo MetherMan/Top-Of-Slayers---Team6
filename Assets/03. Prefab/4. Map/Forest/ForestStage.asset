@@ -12,9 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea8bb6303b74a4b4e8fc6f63e5dc726b, type: 3}
   m_Name: ForestStage
   m_EditorClassIdentifier: 
-  stageNum: 0
+  sceneReference:
+    m_AssetGUID: 15c26d06d429e924c9833ea5a27e3159
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  stageKey: 
   stageType: 0
-  stageRule: {fileID: 0}
+  stageRule: {fileID: 11400000, guid: 14a3973d77ec90341a38ed7b70032f15, type: 2}
   stageTime: 0
   roundDatas: []
   clearResult: 0

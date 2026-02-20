@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class ShopSlotUI : MonoBehaviour
+public class ShopItemSlot : MonoBehaviour
 {
     [SerializeField] Image backGroud;
     [SerializeField] Image itemSprite;
@@ -15,6 +15,8 @@ public class ShopSlotUI : MonoBehaviour
     [SerializeField] Sprite epicColor;
     [SerializeField] Sprite normalColor;
 
+    [SerializeField] ItemDetailsView detailsView;
+    
     private ItemSO currentItem;
 
     public void SetItem(ItemSO item)
@@ -29,12 +31,6 @@ public class ShopSlotUI : MonoBehaviour
         ApplyGradeColor(item.grade);
     }
 
-    public void Buy()
-    {
-        if (currentItem == null) return;
-
-        InventoryManager.Instance.AddItem(currentItem, 1);
-    }
     public void ApplyGradeColor(Grade grade)
     {
         switch (grade)
@@ -56,5 +52,11 @@ public class ShopSlotUI : MonoBehaviour
         itemName.text = "";
         itemPrice.text = "";
         backGroud.sprite = normalColor;
+    }
+
+    public void OnClickSlot()
+    {
+        if(currentItem == null) return;
+        detailsView.Show(currentItem);
     }
 }

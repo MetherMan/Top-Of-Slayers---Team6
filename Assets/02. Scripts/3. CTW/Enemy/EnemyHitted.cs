@@ -7,6 +7,7 @@ public class EnemyHitted : IEnemyState
 
     private float hitTime = 0.5f;
     private float timer;
+
     public EnemyHitted(EnemyBase enemy, EnemyStateMachine enemyStateMachine)
     {
         this.enemy = enemy;

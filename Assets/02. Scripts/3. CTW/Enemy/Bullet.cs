@@ -5,14 +5,16 @@ public class Bullet : MonoBehaviour
     private GameObject bulletPrefab;
     private float bulletSpeed;
     private Vector3 bulletDir;
+    private int attackDamage;
     private float lifeTime = 3f;
     private float timer;
 
-    public void Init(GameObject bulletPrefab, float bulletSpeed, Vector3 bulletDir)
+    public void Init(GameObject bulletPrefab, float bulletSpeed, Vector3 bulletDir, int attackDamage)
     {
         this.bulletPrefab = bulletPrefab;
         this.bulletSpeed = bulletSpeed;
         this.bulletDir = bulletDir;
+        this.attackDamage = attackDamage;
         timer = 0f;
     }
     void Update()
@@ -30,6 +32,11 @@ public class Bullet : MonoBehaviour
     {
         if(other.CompareTag("Player"))
         {
+            PlayerHP playerHP = other.GetComponent<PlayerHP>();
+            if (playerHP != null)
+            {
+                playerHP.TakeDamage(attackDamage);
+            }
             ReturnPool();
         }
     }

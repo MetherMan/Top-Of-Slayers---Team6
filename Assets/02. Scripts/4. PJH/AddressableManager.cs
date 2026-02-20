@@ -8,13 +8,20 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 public class AddressableManager : Singleton<AddressableManager>
 {
     #region field
-    private Dictionary<string, StageConfigSO> _stageDB = new Dictionary<string, StageConfigSO>();
-    private Dictionary<string, SceneInstance> _scene = new Dictionary<string, SceneInstance>();
+    private List<AsyncOperationHandle> loadedAssets = new List<AsyncOperationHandle>();
+    public Dictionary<string, StageConfigSO> _stageSO = new Dictionary<string, StageConfigSO>();
+    public Dictionary<string, SceneInstance> _stageScene = new Dictionary<string, SceneInstance>();
+    public Dictionary<string, WaveRule> _ruleSO = new Dictionary<string, WaveRule>();
+    public Dictionary<string, GameObject> _uI = new Dictionary<string, GameObject>();
     #endregion
 
-    protected override void Awake()
+    //비동기 매서드 실행하기 위해서 async 필요
+    //로드 매서드를 실행하지만 Unity 생명주기대로 기다리지 않고 실행된다.
+    //로그인 씬에 로딩을 만들어야 한다.
+    protected override async void Awake()
     {
         base.Awake();
+        await LoadAllData();
     }
 
     #region method
@@ -43,27 +50,54 @@ public class AddressableManager : Singleton<AddressableManager>
         }
         return false;
     }
-    #region Load
-    //StageConfigSO
-    public async Task LoadAllStageDB()
+
+    public async Task LoadAllData()
     {
-        AsyncOperationHandle<IList<StageConfigSO>> handle 
+        //호출 리스트
+        Task stageSOTask = LoadAllStageSO();
+        Task ruleSOTask = LoadAllRule();
+        Task uITask = LoadAllUI();
+        //MonsterSO
+        //MonsterPrefab
+        //ItemSO
+        //ItemPrefab
+        //VFX
+        //SFX
+
+        await Task.WhenAll(stageSOTask, ruleSOTask, uITask);
+        //Task -> 코루틴 예외처리 구현
+        //로딩씬 : 코루틴으로 작업 [유니티 로딩씬 구현]
+
+        Debug.Log("모든 데이터 로드 완료");
+    }
+
+    #region Load
+    //StageConfigSO : 게임을 종료할 때까지 가지고 있는다.
+    public async Task LoadAllStageSO()
+    {
+        AsyncOperationHandle<IList<StageConfigSO>> stageSOHandle 
             = Addressables.LoadAssetsAsync<StageConfigSO>("StageSO", null);
+        loadedAssets.Add(stageSOHandle);
 
-        await handle.Task;
+        await stageSOHandle.Task;
 
-        if (IsSucceeded(handle))
+        if (IsSucceeded(stageSOHandle))
         {
-            foreach (StageConfigSO data in handle.Result)
+            foreach (StageConfigSO data in stageSOHandle.Result)
             {
                 //중복 키 방지
-                if (!_stageDB.ContainsKey(data.stageKey.ToString()))
+                if (!_stageSO.ContainsKey(data.stageKey))
                 {
-                    _stageDB.Add(data.stageKey.ToString(), data);
+                    _stageSO.Add(data.stageKey, data);
+                    Debug.Log($"stageConfigSO 등록완료 : {data.stageKey}");
+                }
+                else
+                {
+                    Debug.LogWarning($"동일한 이름의 stageSO가 존재합니다. : {data.stageKey}");
                 }
             }
         }
-        else if (IsFailed(handle))
+        else if (IsFailed(stageSOHandle))
         {
             Debug.LogError("LoadAllStageDB : Failed");
             return;
@@ -71,31 +105,195 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //SceneInstance
-    //LoadAssetsAsync<T> 사용할 경우 메모리 부담
-    public void test()
+    //LoadAssetsAsync<T> 사용할 경우 메모리 부담 / 데이터 파일로 취급
+    //스테이지 씬 이동 : SO의 키값을 입력하면 해당되는 씬을 불러와 실행한다.
+    public void RequestStageScene(string key)
     {
-        
+        StageConfigSO data = AddressableManager.Instance.GetStageData(key);
+        if (data == null) return;
+
+        //AsyncOperationHandle<T> 타입을 명시하지 않으면 handle.Result는 object 타입으로 반환한다.
+        AsyncOperationHandle<SceneInstance> sceneLoadHandle = Addressables.LoadSceneAsync(data.sceneReference);
+
+        /*
+            씬인스턴스 핸들은 별도로 관리하지 않는다.
+            - single로만 전환하기 때문에 자동으로 sceneLoadHandle(핸들)을 Relases 해준다.
+            - InValid()로 검사를 해서 오류가 발생하지 않지만 불필요한 행동이다.
+            - 클라이언트가 정리될 경우 시스템에서 메모리를 전부 해제하므로 로딩중 클라이언트가
+                + 강제 종료되는 상황은 상정하지 않아도 된다.
+        */ //리스트에 따로 .Add 하지 않는 이유
+        sceneLoadHandle.Completed += (handle) =>
+        {
+            if (IsSucceeded(handle))
+            {
+                //RuntimeKey를 제외할 경우 엉뚱한 값이 나올 수 있다
+                string address = data.sceneReference.RuntimeKey.ToString();
+                AddSceneSafely(address, handle.Result);
+            }
+            else if (IsFailed(handle))
+            {
+                Debug.LogError("RequestScene : Failed");
+                return;
+            }
+        };
+    }
+
+    //중복방지 메서드
+    public void AddSceneSafely(string address, SceneInstance instance)
+    {
+        if (_stageScene.ContainsKey(address))
+        {
+            // '==' 기호를 사용하려면 오버로드를 해줘야 사용할 수 있다.
+            //.Equals는 object에 내장되어있는 비교함수이다.
+            if (_stageScene[address].Equals(instance))
+            {
+                Debug.Log("RequestScene 중복 데이터");
+                return;
+            }
+        }
+        _stageScene[address] = instance;
     }
 
     //RuleSO
+    public async Task LoadAllRule()
+    {
+        AsyncOperationHandle<IList<WaveRule>> ruleDbHandle
+            = Addressables.LoadAssetsAsync<WaveRule>("RuleSO", null);
+        loadedAssets.Add(ruleDbHandle);
+
+        await ruleDbHandle.Task;
+
+        if (IsSucceeded(ruleDbHandle))
+        {
+            foreach (WaveRule rule in ruleDbHandle.Result)
+            {
+                if (!_ruleSO.ContainsKey(rule.RuleType))
+                {
+                    _ruleSO.Add(rule.RuleType, rule);
+                    Debug.Log($"rule 등록 완료 : {rule.RuleType}");
+                }
+                else
+                {
+                    Debug.LogWarning($"동일한 이름의 rule이 존재합니다. : {rule.RuleType}");
+                }
+            }
+        }
+        else if (IsFailed(ruleDbHandle))
+        {
+            Debug.LogError("LoadAllRule : Failed");
+            return;
+        }
+    }
+
+    //UI
+    public async Task LoadAllUI()
+    {
+        AsyncOperationHandle<IList<GameObject>> uIHandle
+            = Addressables.LoadAssetsAsync<GameObject>("UI", null);
+        loadedAssets.Add(uIHandle);
+
+        await uIHandle.Task;
+
+        if (IsSucceeded(uIHandle))
+        {
+            foreach(GameObject uI in uIHandle.Result)
+            {
+                string key = uI.name;
+
+                if (!_uI.ContainsKey(key))
+                {
+                    _uI.Add(key, uI);
+                    Debug.Log($"UI 등록 완료 : {key}");
+                }
+                else
+                {
+                    Debug.LogWarning($"동일한 이름의 UI가 존재합니다. : {key}");
+                }
+            }
+        }
+        else if (IsFailed(uIHandle))
+        {
+            Debug.LogError("LoadAllUI : Failed");
+        }
+    }
+
     //MonsterSO
+    public async Task LoadAllMonsterSO()
+    {
+
+    }
+
     //MonsterPrefab
+    public async Task LoadAllMonsterPf()
+    {
+
+    }
+
     //ItemSO
+    public async Task LoadAllItemSO()
+    {
+
+    }
+
     //ItemPrefab
+    public async Task LoadAllItemPf()
+    {
+
+    }
+
     //VFX
+    public async Task LoadAllVFX()
+    {
+
+    }
+
     //SFX
+    public async Task LoadAllSFX()
+    {
+
+    }
     #endregion
 
     #region Get
-    //stageNum T int -> string으로 형변환
-    public StageConfigSO GetData(string stageNum)
+    public StageConfigSO GetStageData(string stageNum)
     {
-        if (_stageDB.TryGetValue(stageNum, out StageConfigSO data))
+        if (_stageSO.TryGetValue(stageNum, out StageConfigSO data))
         {
             return data;
         }
         return null;
     }
+
+    public WaveRule GetRuleData(string ruleType)
+    {
+        if (_ruleSO.TryGetValue(ruleType, out WaveRule rule))
+        {
+            return rule;
+        }
+        return null;
+    }
+
+    public GameObject GetUI(string uIname)
+    {
+        if (_uI.TryGetValue(uIname, out GameObject ui))
+        {
+            return ui;
+        }
+        return null;
+    }
     #endregion
+
+    //메모리 할당 해제
+    private void OnDestroy()
+    {
+        foreach (AsyncOperationHandle handle in loadedAssets)
+        {
+            //핸들이 유효한지 확인 (실패한 핸들도 유효; 대신 handle.Status = faild로 구분됨
+            if (handle.IsValid())
+            {
+                Addressables.Release(handle);
+            }
+        }
+    }
     #endregion
 }

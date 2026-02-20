@@ -5,14 +5,14 @@ public class ShopView : MonoBehaviour
     [SerializeField] ShopManager shopManager;
     [SerializeField] Transform slotRoot;
 
-    ShopSlotUI[] slots;
-
+    ShopItemSlot[] slots;
+    //슬롯 찾고 UI갱신
     private void OnEnable()
     {
-        slots = slotRoot.GetComponentsInChildren<ShopSlotUI>();
+        slots = slotRoot.GetComponentsInChildren<ShopItemSlot>();
         RefreshUI();
     }
-
+    //shopManager 데이터 기반 슬롯 채우기
     void RefreshUI()
     {
         var shopItems = shopManager.GetShopItems();
