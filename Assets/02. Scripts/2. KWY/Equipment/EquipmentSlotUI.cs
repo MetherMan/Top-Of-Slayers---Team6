@@ -23,7 +23,7 @@ public class EquipmentSlotUI : MonoBehaviour
 
     public void Refresh()
     {
-        EquipmentSO equip = null;
+        InventoryItem equip = null;
 
         switch (slotType)
         {
@@ -48,9 +48,9 @@ public class EquipmentSlotUI : MonoBehaviour
                 break;
         }
 
-        if (equip != null)
+        if (equip != null && equip.item != null)
         {
-            icon.sprite = equip.sprite;
+            icon.sprite = equip.item.sprite;
         }
         else
         {

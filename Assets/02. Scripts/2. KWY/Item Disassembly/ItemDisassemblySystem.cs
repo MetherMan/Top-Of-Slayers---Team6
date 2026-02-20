@@ -17,15 +17,15 @@ public class ItemDisassemblySystem : MonoBehaviour
         return null;
     }
     //분해 실행
-    public void Disassembly(ItemSO item)
+    public void Disassembly(InventoryItem data)
     {
-        if (item == null) return;
+        if (data == null) return;
 
-        var recipe = GetRecipe(item);
+        var recipe = GetRecipe(data.item);
 
         if (recipe == null) return;
 
-        InventoryManager.Instance.RemoveItem(item, 1);
+        InventoryManager.Instance.RemoveItem(data);
 
         for (int i = 0; i < recipe.resultItems.Length; i++)
         {

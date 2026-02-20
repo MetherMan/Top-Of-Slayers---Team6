@@ -3,32 +3,34 @@ using UnityEngine;
 
 public class EquipmentManager : Singleton<EquipmentManager>
 {
-    public EquipmentSO weapon;
-    public EquipmentSO shoes;
-    public EquipmentSO gloves;
-    public EquipmentSO armor;
-    public EquipmentSO emblem;
+    public InventoryItem weapon;
+    public InventoryItem shoes;
+    public InventoryItem gloves;
+    public InventoryItem armor;
+    public InventoryItem emblem;
 
     public event Action OnEquipmentChanged;
 
-    public void Equip(EquipmentSO equipment)
+    public void Equip(InventoryItem data)
     {
-        switch (equipment.equipSlot)
+        if (!(data.item is EquipmentSO equip)) return;
+
+        switch (equip.equipSlot)
         {
             case EquipSlot.Weapon:
-                weapon = equipment;
+                weapon = data;
                 break;
             case EquipSlot.Shoes:
-                shoes = equipment;
+                shoes = data;
                 break;
             case EquipSlot.Gloves:
-                gloves = equipment;
+                gloves = data;
                 break;
             case EquipSlot.Armor:
-                armor = equipment;
+                armor = data;
                 break;
             case EquipSlot.Emblem:
-                emblem = equipment;
+                emblem = data;
                 break;
         }
 
@@ -63,13 +65,13 @@ public class EquipmentManager : Singleton<EquipmentManager>
         OnEquipmentChanged?.Invoke();
     }
 
-    public bool IsEquipped(EquipmentSO equipment)
+    public bool IsEquipped(InventoryItem data)
     {
-        return weapon == equipment ||
-            armor == equipment ||
-            shoes == equipment ||
-            gloves == equipment ||
-            emblem == equipment;
+        return weapon == data ||
+            armor == data ||
+            shoes == data ||
+            gloves == data ||
+            emblem == data;
     }
 
 }

@@ -28,7 +28,7 @@ public class CraftingUI : MonoBehaviour
 
         if (recipe.ResultItem is EquipmentSO equip)
         {
-            itemDitails.text = equip.GetStatText();
+            itemDitails.text = equip.GetStatText(0);
 
         }
         int have1 = InventoryManager.Instance.GetItemCount(recipe.materials[0]);
