@@ -2,11 +2,11 @@
 
 public class ResultState : IGameState
 {
-    private GameStateMachine _machine;
+    private GameFlowMachine _machine;
     private bool _isClear;
     private bool _eventClear;
 
-    public ResultState(GameStateMachine machine, bool isClear, bool eventClear)
+    public ResultState(GameFlowMachine machine, bool isClear, bool eventClear)
     {
         _machine = machine;
         _isClear = isClear;
