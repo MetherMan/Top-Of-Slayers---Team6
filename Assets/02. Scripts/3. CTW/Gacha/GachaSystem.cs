@@ -8,10 +8,13 @@ public class GachaSystem : MonoBehaviour
 {
     [SerializeField] private GachaDataSO gachaData;
 
-    [SerializeField] private GameObject resultPanel;
+    [Header("1개 뽑기")]
+    [SerializeField] private GameObject oneResultPanel;
     [SerializeField] private TextMeshProUGUI resultText;
-    [SerializeField] private Image resultImage;
+    [SerializeField] private Image oneResultImage;
 
+    [Header("10개 뽑기")]
+    [SerializeField] private GameObject tenResultPanel;
     [SerializeField] private Transform iconParent;
     [SerializeField] private GameObject iconPrefab;
 
@@ -20,11 +23,13 @@ public class GachaSystem : MonoBehaviour
         ItemSO result = Gacha();
         ClearPanel();
 
-        string message = "뽑기 결과\n";
-        message += $"{result.itemName}\n";
+        string message = $"{result.itemName}";
 
-        resultImage.gameObject.SetActive(true);
-        resultImage.sprite = result.sprite;
+        oneResultPanel.SetActive(true);
+        tenResultPanel.SetActive(false);
+
+        oneResultImage.gameObject.SetActive(true);
+        oneResultImage.sprite = result.sprite;
 
         ResultUI(message);
     }
@@ -73,6 +78,10 @@ public class GachaSystem : MonoBehaviour
 
         ClearPanel();
 
+        tenResultPanel.SetActive(true);
+        oneResultPanel.SetActive(false);
+        oneResultImage.gameObject.SetActive(false);
+
         string message = "10연 뽑기 결과\n";
         foreach(var item in results)
         {
@@ -80,13 +89,10 @@ public class GachaSystem : MonoBehaviour
             iconObj.GetComponent<Image>().sprite = item.sprite;
         }
         ResultUI(message);
-
-        resultImage.gameObject.SetActive(false);
     }
 
     private void ResultUI(string message)
     {
-        resultPanel.SetActive(true);
         resultText.text = message;
     }
 

@@ -53,6 +53,7 @@ public class StageConfigSO : ScriptableObject
 
     [System.Serializable] public class RoundData
     {
+        public SpawnPattern spawnPattern;
         public EnemyConfigSO[] monsterSpawnList;
         public EnemyConfigSO elite;
         public EnemyConfigSO boss;
