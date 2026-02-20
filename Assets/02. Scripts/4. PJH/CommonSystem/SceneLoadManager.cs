@@ -27,11 +27,19 @@ public class SceneLoadManager : Singleton<SceneLoadManager>
     [Header("고정 씬 설정")]
     public AssetReference loginScene;
     public AssetReference lobbyScene;
+
+    private State _state;
+    
     #endregion
 
     protected override void Awake()
     {
         base.Awake();
+    }
+
+    private void Start()
+    {
+        GameFlowMachine.currentState += (tag) => _state = tag;
     }
 
     #region method

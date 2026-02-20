@@ -19,7 +19,7 @@ public class LobbyState : IGameState
         //상태 전환 조건
         if (true)
         {
-            _machine.ChangeState(new PlayState(_machine, false));
+            _machine.ChangeState(new PlayState(_machine, false), State.Play);
         }
     }
 

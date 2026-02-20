@@ -3,7 +3,6 @@
 public class EventState : IGameState
 {
     private GameFlowMachine _machine;
-    public bool isSuccess;
 
     public EventState(GameFlowMachine machine)
     {
@@ -17,13 +16,10 @@ public class EventState : IGameState
 
     public void Execute()
     {
-        if (isSuccess)
+        //이벤트 웨이브가 종료되었는지 확인하고 넘긴다
+        if (true)
         {
-            _machine.ChangeState(new PlayState(_machine, true));
-        }
-        else if (!isSuccess)
-        {
-            _machine.ChangeState(new PlayState(_machine, false));
+            _machine.ChangeState(new ResultState(_machine), State.Result);
         }
     }
 

@@ -121,7 +121,14 @@ public class AddressableManager : Singleton<AddressableManager>
             - InValid()로 검사를 해서 오류가 발생하지 않지만 불필요한 행동이다.
             - 클라이언트가 정리될 경우 시스템에서 메모리를 전부 해제하므로 로딩중 클라이언트가
                 + 강제 종료되는 상황은 상정하지 않아도 된다.
+
+            람다식으로 이벤트를 구독하기에 매개변수명으로 사용한 handle은 추가하는 순간 메모리에서 삭제된다.
+            즉 -= 구독해제 구문을 작성할 필요가 없다 할 수도 없고
         */ //리스트에 따로 .Add 하지 않는 이유
+        /*
+            Completed 이벤트는 매개변수 1개만 사용한다.
+            작업이 끝나면 해당 작업의 결과정보(handle)를 통째로 넘겨주자 라고 정의되어 있기 때문이다.
+        */ //.Completed
         sceneLoadHandle.Completed += (handle) =>
         {
             if (IsSucceeded(handle))
