@@ -12,7 +12,10 @@ public class ScoreUI : MonoBehaviour
 
     private void OnDisable()
     {
-        ScoreManager.Instance.onScoreChanged -= UpdateScoreUI;
+        if (ScoreManager.HasInstance)
+        {
+            ScoreManager.Instance.onScoreChanged -= UpdateScoreUI;
+        }
     }
 
     private void UpdateScoreUI(int score)
