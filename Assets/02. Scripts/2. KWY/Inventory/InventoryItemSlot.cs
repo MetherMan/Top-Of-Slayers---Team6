@@ -8,6 +8,7 @@ public class InventoryItemSlot : MonoBehaviour
     [SerializeField] Image itemSprite;
     [SerializeField] TextMeshProUGUI itemName;
     [SerializeField] TextMeshProUGUI itemCount;
+    //[SerializeField] TextMeshProUGUI itemLevel;
 
     [SerializeField] Sprite legendColor;
     [SerializeField] Sprite epicColor;
@@ -15,19 +16,20 @@ public class InventoryItemSlot : MonoBehaviour
 
     [SerializeField] InventorySelection inventorySelection;
 
-    ItemSO currentItem;
+    InventoryItem currentItem;
 
-    public void SetItem(ItemSO item, int count)
+    public void SetItem(InventoryItem data)
     {
-        currentItem = item;
+        currentItem = data;
 
-        itemSprite.sprite = item.sprite;
+        itemSprite.sprite = data.item.sprite;
         itemSprite.enabled = true;
-        itemName.text = item.itemName;
+        itemName.text = data.item.itemName;
 
-        itemCount.text = count.ToString();
+        //itemLevel.text = $"+{data.enhancementLevel}";
+        itemCount.text = data.count.ToString();
 
-        ApplyGradeColor(item.grade);
+        ApplyGradeColor(data.item.grade);
     }
 
 
@@ -53,6 +55,7 @@ public class InventoryItemSlot : MonoBehaviour
         itemSprite.enabled = false;
         itemName.text = "";
         itemCount.text = "";
+        //itemLevel.text = "";
         backGround.sprite = normalColor;
     }
 

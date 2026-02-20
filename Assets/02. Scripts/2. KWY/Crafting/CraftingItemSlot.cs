@@ -24,7 +24,7 @@ public class CraftingItemSlot : MonoBehaviour
         if(item is EquipmentSO equip)
         {
             itemType.text = equip.equipSlot.ToString();
-            itemDetails.text = equip.GetStatText();
+            itemDetails.text = equip.GetStatText(0);
         }
     }
 

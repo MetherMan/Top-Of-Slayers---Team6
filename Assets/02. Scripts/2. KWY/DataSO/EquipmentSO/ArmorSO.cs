@@ -5,8 +5,13 @@ public class ArmorSO : EquipmentSO
 {
     public int hp;
 
-    public override string GetStatText()
+    public override int GetHP(int level)
     {
-        return $"체력 +{hp}";
+        return hp + level * 5;
+    }
+
+    public override string GetStatText(int level)
+    {
+        return $"체력 +{GetHP(level)}";
     }
 }

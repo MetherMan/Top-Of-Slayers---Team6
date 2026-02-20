@@ -18,7 +18,7 @@ public class DisassemblyUI : MonoBehaviour
     [SerializeField] ItemDisassemblySystem itemDisassemblySystem;
     [SerializeField] InventorySelection inventorySelection;
 
-    ItemSO selectedItem;
+    InventoryItem selectedItem;
 
     private void OnDisable()
     {
@@ -33,9 +33,9 @@ public class DisassemblyUI : MonoBehaviour
         inventorySelection.EnableSelectMode(OnItemSelected);
     }
     //선택된 아이템 ui에 반영
-    public void OnItemSelected(ItemSO item)
+    public void OnItemSelected(InventoryItem data)
     {
-        if (!(item is EquipmentSO equip))
+        if (!(data.item is EquipmentSO equip))
         {
             failText.text = "재료아이템은\r\n 분해하지 못합니다.";
             failPanel.SetActive(true);
@@ -43,7 +43,7 @@ public class DisassemblyUI : MonoBehaviour
             return;
         }
         //아이템 장착시 불가
-        if (EquipmentManager.Instance.IsEquipped(equip))
+        if (EquipmentManager.Instance.IsEquipped(data))
         {
             failText.text = "장착 중인 장비는\r\n 분해할 수 없습니다.";
             failPanel.SetActive(true);   
@@ -51,10 +51,10 @@ public class DisassemblyUI : MonoBehaviour
             return;
         }
 
-        selectedItem = item;
-        selectedItemImage.sprite = item.sprite;
+        selectedItem = data;
+        selectedItemImage.sprite = data.item.sprite;
 
-        var recipe = itemDisassemblySystem.GetRecipe(item);
+        var recipe = itemDisassemblySystem.GetRecipe(data.item);
 
         if (recipe != null && recipe.resultItems.Length > 0) 
         {
@@ -76,9 +76,8 @@ public class DisassemblyUI : MonoBehaviour
 
         itemDisassemblySystem.Disassembly(selectedItem);
 
-        selectedItem = null;
-        selectedItemImage.sprite = defaultSelectedItemImage;
-        disassemblyItemImage.sprite = defaultDisassemblyItemImage;
+        ResetUI();
+
     }
 
     private void ResetUI()

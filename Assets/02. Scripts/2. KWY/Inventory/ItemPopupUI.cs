@@ -10,18 +10,18 @@ public class ItemPopupUI : MonoBehaviour
     [SerializeField] GameObject equipButton;
     [SerializeField] GameObject okButton;
 
-    ItemSO currentItem;
+    InventoryItem currentItem;
 
-    public void Show(ItemSO item)
+    public void Show(InventoryItem data)
     {
-        currentItem = item;
+        currentItem = data;
 
         gameObject.SetActive(true);
 
-        itemImage.sprite = item.sprite;
-        itemName.text = item.itemName;
+        itemImage.sprite = data.item.sprite;
+        itemName.text = data.item.itemName;
 
-        if(item is EquipmentSO)
+        if(data.item is EquipmentSO)
         {
             equipButton.SetActive(true);
             okButton.SetActive(true);
@@ -35,9 +35,9 @@ public class ItemPopupUI : MonoBehaviour
 
     public void OnClickEquip()
     {
-        if (currentItem is EquipmentSO equip)
+        if (currentItem.item is EquipmentSO)
         {
-            EquipmentManager.Instance.Equip(equip);
+            EquipmentManager.Instance.Equip(currentItem);
         }
 
         gameObject.SetActive(false);

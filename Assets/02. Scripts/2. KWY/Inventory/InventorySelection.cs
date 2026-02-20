@@ -4,10 +4,10 @@ using UnityEngine;
 public class InventorySelection : MonoBehaviour
 {
     [SerializeField] ItemPopupUI itemPopup;
-    private Action<ItemSO> onItemSelected;
+    private Action<InventoryItem> onItemSelected;
 
     //아이템 선택 대기 상태 ON
-    public void EnableSelectMode(Action<ItemSO> callback)
+    public void EnableSelectMode(Action<InventoryItem> callback)
     {
         onItemSelected = callback;
     }
@@ -17,7 +17,7 @@ public class InventorySelection : MonoBehaviour
         onItemSelected = null;
     }
     //슬롯에서 클릭됐다고 알려주는 함수
-    public void NotifyItemClicked(ItemSO item) 
+    public void NotifyItemClicked(InventoryItem item) 
     {
         if (item == null) return;
 
