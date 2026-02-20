@@ -11,8 +11,8 @@ public class EnemySpawnManager : MonoBehaviour
     [SerializeField] private DamageSystem damageSystem;
 
     [Header("설정")]
-    [FormerlySerializedAs("mapCenter")]
-    [SerializeField] private Transform player;
+    [FormerlySerializedAs("player")]
+    [SerializeField] private Transform mapCenter;
     [SerializeField] private float spawnDistance = 5f;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float spawnInterval = 0.1f;
@@ -23,18 +23,102 @@ public class EnemySpawnManager : MonoBehaviour
     private readonly HashSet<int> aliveEnemyIds = new HashSet<int>();
 
     // 스폰 방향
-    private Vector3[] spawnDirections =
+    private Vector3[] SpawnDirections(SpawnPattern spawnPattern)
     {
-        Vector3.forward, Vector3.back, Vector3.left, Vector3.right, //상하좌우
-        Vector3.forward + Vector3.left, Vector3.forward + Vector3.right, //좌상, 우상
-        Vector3.back + Vector3.left, Vector3.back + Vector3.right //좌하, 우하
-    };
+        switch (spawnPattern)
+        {
+            case SpawnPattern.Diagonal:
+                return new Vector3[]
+                {
+                    new Vector3(1, 0, 1),
+                    new Vector3(-1, 0, 1),
+                    new Vector3(1, 0, -1),
+                    new Vector3(-1, 0, -1),
+                    new Vector3(2, 0, 2),
+                    new Vector3(-2, 0, 2),
+                    new Vector3(2, 0, -2),
+                    new Vector3(-2, 0, -2)
+                };
+
+            case SpawnPattern.Cross:
+                return new Vector3[]
+                {
+                    Vector3.forward,
+                    Vector3.back,
+                    Vector3.left,
+                    Vector3.right,
+                    Vector3.forward*2,
+                    Vector3.back*2,
+                    Vector3.left*2,
+                    Vector3.right*2
+                };
+
+            case SpawnPattern.Around:
+                return new Vector3[]
+                {
+                    Vector3.forward,
+                    Vector3.back,
+                    Vector3.left,
+                    Vector3.right,
+                    new Vector3(1, 0, 1),
+                    new Vector3(-1, 0, 1),
+                    new Vector3(1, 0, -1),
+                    new Vector3(-1, 0, -1)
+                };
+
+            case SpawnPattern.Up:
+                return new Vector3[]
+                {
+                    Vector3.forward,
+                    new Vector3(1, 0, 1),
+                    new Vector3(-1, 0, 1),
+                    Vector3.forward*2,
+                    new Vector3(1, 0, 2),
+                    new Vector3(-1, 0, 2)
+                };
+
+            case SpawnPattern.Down:
+                return new Vector3[]
+                {
+                    Vector3.back,
+                    new Vector3(1, 0, -1),
+                    new Vector3(-1, 0, -1),
+                    Vector3.back*2,
+                    new Vector3(1, 0, -2),
+                    new Vector3(-1, 0, -2)
+                };
+
+            case SpawnPattern.Left:
+                return new Vector3[]
+                {
+                    Vector3.left,
+                    new Vector3(-1, 0, 1),
+                    new Vector3(-1, 0, -1),
+                    Vector3.left*2,
+                    new Vector3(-2, 0, 1),
+                    new Vector3(-2, 0, -1)
+                };
+
+            case SpawnPattern.Right:
+                return new Vector3[]
+                {
+                    Vector3.right,
+                    new Vector3(1, 0, 1),
+                    new Vector3(1, 0, -1),
+                    Vector3.right*2,
+                    new Vector3(2, 0, 1),
+                    new Vector3(2, 0, -1)
+                };
+        }
+
+        return null;
+    }
 
     private void Awake()
     {
-        if (player == null)
+        if (mapCenter == null)
         {
-            player = ResolveSpawnCenter();
+            mapCenter = ResolveSpawnCenter();
         }
 
         if (damageSystem == null)
@@ -88,10 +172,10 @@ public class EnemySpawnManager : MonoBehaviour
             yield break;
         }
 
-        if (player == null)
+        if (mapCenter == null)
         {
-            player = ResolveSpawnCenter();
-            if (player == null)
+            mapCenter = ResolveSpawnCenter();
+            if (mapCenter == null)
             {
                 yield break;
             }
@@ -101,7 +185,13 @@ public class EnemySpawnManager : MonoBehaviour
         WaveDirectorSystem.Instance.WaveClear();
 
         var roundData = stageSO.roundDatas[currentRound]; // 현재라운드 SO
-        int dirCount = spawnDirections.Length; // 방향갯수
+        Vector3[] spawnDirections = SpawnDirections(roundData.spawnPattern);
+        if (spawnDirections == null || spawnDirections.Length == 0)
+        {
+            yield break;
+        }
+
+        int dirCount = spawnDirections.Length;
         int dirIndex = 0; // 방향 인덱스
 
         // 라운드데이터 리스트만큼 몬스터 생성
@@ -110,7 +200,7 @@ public class EnemySpawnManager : MonoBehaviour
             if (monster == null) continue;
 
             Vector3 dir = spawnDirections[dirIndex];
-            Vector3 spawnPos = player.position + dir * spawnDistance;
+            Vector3 spawnPos = mapCenter.position + dir * spawnDistance;
             Vector3 finalSpawnPos = OnGround(spawnPos); // 최종 스폰위치는 땅에
             var enemy = enemyFactory.Create(monster, finalSpawnPos, Quaternion.identity);
             if (enemy != null)
@@ -132,7 +222,6 @@ public class EnemySpawnManager : MonoBehaviour
         }
     }
 
-    // 씬 참조가 비어도 플레이어 기준 스폰이 가능하도록 보정한다.
     private Transform ResolveSpawnCenter()
     {
         try
@@ -145,7 +234,6 @@ public class EnemySpawnManager : MonoBehaviour
         }
         catch (UnityException)
         {
-            // Player 태그 미등록 프로젝트도 대응한다.
         }
 
         GameObject mainChar = GameObject.Find("1.Main Char");

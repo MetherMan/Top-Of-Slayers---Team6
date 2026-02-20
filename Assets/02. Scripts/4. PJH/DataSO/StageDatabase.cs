@@ -85,7 +85,6 @@ public class StageDatabase : ScriptableObject
         return GetStageData(num.ToString());
     }
 
-    // stageKey가 비어있는 구버전 에셋(stageNum 직렬화)까지 대응한다.
     private bool TryResolveStageKey(StageConfigSO data, out string stageKey)
     {
         stageKey = null;

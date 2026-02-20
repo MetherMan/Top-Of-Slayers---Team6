@@ -23,8 +23,8 @@ public class CirculDrag : MonoBehaviour
 
     private void SetOnClickButton()
     {
-        nextButton.onClick.AddListener(() => ShowPanel(currentIndex - 1));
-        prevButton.onClick.AddListener(() => ShowPanel(currentIndex + 1));
+        nextButton.onClick.AddListener(() => ShowPanel(currentIndex + 1));
+        prevButton.onClick.AddListener(() => ShowPanel(currentIndex - 1));
     }
 
     public void ShowPanel(int index)

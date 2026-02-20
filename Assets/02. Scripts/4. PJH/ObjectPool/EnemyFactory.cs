@@ -27,6 +27,12 @@ public class EnemyFactory : MonoBehaviour
             enemy = Instantiate(enemySO.monsterPrefab, position, rotation);
         }
 
+        EnemyBase enemyBase = enemy.GetComponent<EnemyBase>();
+        if (enemyBase != null)
+        {
+            enemyBase.Init(enemySO.monsterPrefab);
+        }
+
         return enemy;
     }
 }
