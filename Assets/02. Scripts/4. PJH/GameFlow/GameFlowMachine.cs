@@ -8,7 +8,7 @@ public interface IGameState
     void Exit();
 }
 
-public class GameStateMachine : Singleton<GameStateMachine>
+public class GameFlowMachine : Singleton<GameFlowMachine>
 {
     /*
         지금 현재 상태를 EVENT로 전달한다. ?.Invoke();

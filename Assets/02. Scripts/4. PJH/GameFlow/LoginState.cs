@@ -2,9 +2,9 @@
 
 public class LoginState : IGameState
 {
-    private GameStateMachine _machine;
+    private GameFlowMachine _machine;
 
-    public LoginState(GameStateMachine machine)
+    public LoginState(GameFlowMachine machine)
     {
         _machine = machine;
     }

@@ -2,9 +2,9 @@
 
 public class LobbyState : IGameState
 {
-    private GameStateMachine _machine;
+    private GameFlowMachine _machine;
 
-    public LobbyState(GameStateMachine machine)
+    public LobbyState(GameFlowMachine machine)
     {
         _machine = machine;
     }

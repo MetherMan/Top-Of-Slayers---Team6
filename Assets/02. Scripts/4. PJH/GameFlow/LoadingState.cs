@@ -2,7 +2,7 @@
 
 public class LoadingState : IGameState
 {
-    private GameStateMachine _machine;
+    private GameFlowMachine _machine;
     private float _loadingTimer = 0f;
 
     /*
@@ -10,7 +10,7 @@ public class LoadingState : IGameState
         -만약 모든 상태를 컴포넌트로 만들면, 오브젝트에 수십 개의 스크립트가 붙어 관리가 어렵다.
         -new 키워드로 필요한 순간에만 메모리에 잠깐 올렸다 버리는 방식을 사용
     */
-    public LoadingState(GameStateMachine machine)
+    public LoadingState(GameFlowMachine machine)
     {
         _machine = machine;
     }

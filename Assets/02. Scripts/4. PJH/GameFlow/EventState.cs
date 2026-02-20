@@ -2,10 +2,10 @@
 
 public class EventState : IGameState
 {
-    private GameStateMachine _machine;
+    private GameFlowMachine _machine;
     public bool isSuccess;
 
-    public EventState(GameStateMachine machine)
+    public EventState(GameFlowMachine machine)
     {
         _machine = machine;
     }

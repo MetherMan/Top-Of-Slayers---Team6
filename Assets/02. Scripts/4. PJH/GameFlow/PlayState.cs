@@ -2,14 +2,14 @@
 
 public class PlayState : IGameState
 {
-    private GameStateMachine _machine;
+    private GameFlowMachine _machine;
     private bool _eventCleared; //이벤트 진행 종료 후 값 변경
     //GameStateMachine에서 값을 확인하고 받아오는 방식으로 수정 ↓
     public bool cleared; //스테이지 룰에서 판정하고 GameFlowManager에서 값 변경
     public bool isEventActive; //스테이지 룰에서 판정하고 GameFlowManager에서 값 변경
 
     //이벤트 진행 여부 확인하기 위해 매개변수 추가
-    public PlayState(GameStateMachine machine, bool eventCleared)
+    public PlayState(GameFlowMachine machine, bool eventCleared)
     {
         _machine = machine;
         _eventCleared = eventCleared;

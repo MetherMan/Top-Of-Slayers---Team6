@@ -65,6 +65,8 @@ public class AddressableManager : Singleton<AddressableManager>
         //SFX
 
         await Task.WhenAll(stageSOTask, ruleSOTask, uITask);
+        //Task -> 코루틴 예외처리 구현
+        //로딩씬 : 코루틴으로 작업 [유니티 로딩씬 구현]
 
         Debug.Log("모든 데이터 로드 완료");
     }
