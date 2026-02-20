@@ -19,4 +19,7 @@ public class AttackSpecSO : ScriptableObject
 
     [Header("쿨타임")]
     [Min(0f)] public float cooldown = 0.5f;
+
+    [Header("코스트")]
+    [Min(0)] public int attackCost = 1;
 }
