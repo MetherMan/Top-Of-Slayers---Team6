@@ -167,8 +167,10 @@ public partial class AutoSlashController
                 return;
             }
 
+            if (!CanStartAttackByCost()) return;
             if (dashController.TryStartAutoSlashPierce(target, aimDirection, aimDistance, autoGrade, damageMultiplier, pierceTargets))
             {
+                ConsumeAttackCost();
                 RegisterAttackTarget(target, rawAimDirection);
                 cooldownTimer = GetCooldown();
             }
@@ -181,8 +183,10 @@ public partial class AutoSlashController
             return;
         }
 
+        if (!CanStartAttackByCost()) return;
         if (dashController.TryStartAutoSlash(target, aimDirection, aimDistance, autoGrade, damageMultiplier))
         {
+            ConsumeAttackCost();
             RegisterAttackTarget(target, rawAimDirection);
             cooldownTimer = GetCooldown();
         }

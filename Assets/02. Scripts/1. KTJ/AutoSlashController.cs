@@ -8,6 +8,7 @@ public partial class AutoSlashController : MonoBehaviour
     [SerializeField] private AttackSpecSO spec;
     [SerializeField] private PlayerMoveController moveController;
     [SerializeField] private ChainCombatController chainCombat;
+    [SerializeField] private PlayerCombatResource combatResource;
 
     [Header("감지")]
     [SerializeField] private float detectInterval = 0f;
@@ -82,6 +83,10 @@ public partial class AutoSlashController : MonoBehaviour
     [SerializeField] private bool useTargetingRange = true;
     [SerializeField, Min(0f)] private float manualRange = 0f;
 
+    [Header("공격 코스트")]
+    [SerializeField] private bool useSpecAttackCost = true;
+    [SerializeField, Min(0)] private int manualAttackCost = 1;
+
     private float detectTimer;
     private float cooldownTimer;
     private float lastAttackRange;
@@ -100,6 +105,9 @@ public partial class AutoSlashController : MonoBehaviour
         if (chainCombat == null) chainCombat = GetComponent<ChainCombatController>();
         if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
         if (chainCombat == null) chainCombat = FindObjectOfType<ChainCombatController>();
+        if (combatResource == null) combatResource = GetComponent<PlayerCombatResource>();
+        if (combatResource == null) combatResource = GetComponentInParent<PlayerCombatResource>();
+        if (combatResource == null) combatResource = FindObjectOfType<PlayerCombatResource>();
         if (spec == null && dashController != null) spec = dashController.Spec;
     }
 }
