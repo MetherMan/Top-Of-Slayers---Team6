@@ -25,7 +25,7 @@ public class GachaTableUI : MonoBehaviour
         {
             float percent = (entry.chance / totalChance) * 100f;
             //테이블에 아이템 이름과 확률
-            tableText.text += $"{entry.item.name}({percent})%\n";
+            tableText.text += $"{entry.item.name}({percent}%)\n";
         }
     }
 }

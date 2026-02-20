@@ -122,6 +122,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &75017690
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 75017691}
+  m_Layer: 0
+  m_Name: MapCenter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &75017691
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 75017690}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 4.86, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &108293164
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -143,7 +174,7 @@ PrefabInstance:
     - target: {fileID: 6134572937968207212, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -9
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6134572937968207212, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
         type: 3}
@@ -195,12 +226,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ece8dc05b11cc84d82f5c5b019d54d1, type: 3}
---- !u!4 &108293165 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6134572937968207212, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
-    type: 3}
-  m_PrefabInstance: {fileID: 108293164}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &326770384 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 718388664240730375, guid: 19964a28dd0c8704eb7439fc1cd29fb1,
@@ -317,7 +342,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.5, y: 0.5, z: -0.5, w: 0.5}
-  m_LocalPosition: {x: 3.5199997, y: 28.84, z: -9.086203}
+  m_LocalPosition: {x: 3.5199997, y: 28.84, z: 0.54}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1006,7 +1031,7 @@ MonoBehaviour:
   enemyFactory: {fileID: 748532136}
   stageSO: {fileID: 11400000, guid: 282617c619d29934b83a7acbd3a6f52a, type: 2}
   damageSystem: {fileID: 0}
-  player: {fileID: 108293165}
+  mapCenter: {fileID: 75017691}
   spawnDistance: 5
   groundLayer:
     serializedVersion: 2
@@ -1094,7 +1119,7 @@ PrefabInstance:
     - target: {fileID: 324904852764899724, guid: 19964a28dd0c8704eb7439fc1cd29fb1,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -8.138542
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 324904852764899724, guid: 19964a28dd0c8704eb7439fc1cd29fb1,
         type: 3}
@@ -1449,3 +1474,4 @@ SceneRoots:
   - {fileID: 788084418}
   - {fileID: 108293164}
   - {fileID: 1570402386}
+  - {fileID: 75017691}
