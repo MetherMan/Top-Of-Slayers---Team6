@@ -82,12 +82,14 @@ public partial class AutoSlashController
     {
         if (dashController == null) return;
         if (attack.Target == null) return;
+        if (!CanStartAttackByCost()) return;
 
         var usePierce = attack.UsePierce && attack.PierceTargets != null && attack.PierceTargets.Count > 1;
         if (usePierce)
         {
             if (dashController.TryStartAutoSlashPierce(attack.Target, attack.AimDirection, attack.AimDistance, attack.Grade, attack.DamageMultiplier, attack.PierceTargets))
             {
+                ConsumeAttackCost();
                 RegisterAttackTarget(attack.Target, attack.RawAimDirection);
                 cooldownTimer = GetCooldown();
             }
@@ -96,6 +98,7 @@ public partial class AutoSlashController
 
         if (dashController.TryStartAutoSlash(attack.Target, attack.AimDirection, attack.AimDistance, attack.Grade, attack.DamageMultiplier))
         {
+            ConsumeAttackCost();
             RegisterAttackTarget(attack.Target, attack.RawAimDirection);
             cooldownTimer = GetCooldown();
         }
