@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement;
 
 [CreateAssetMenu (fileName = "Database_", menuName = "Config/StageDatabase")]
 public class StageDatabase : ScriptableObject
@@ -43,13 +41,21 @@ public class StageDatabase : ScriptableObject
         if (stageDic != null) return; //중복실행 방지
 
         stageDic = new Dictionary<int, StageConfigSO>();
+        if (stageData == null) return;
 
         foreach (var data in stageData)
         {
             if (data == null) continue;
-            if (!stageDic.ContainsKey(data.stageKey))
+
+            if (!TryResolveStageKey(data, out int stageKey))
             {
-                stageDic.Add(data.stageKey, data);
+                Debug.LogWarning($"StageDatabase 초기화 중 stageKey를 확인할 수 없습니다: {data.name}");
+                continue;
+            }
+
+            if (!stageDic.ContainsKey(stageKey))
+            {
+                stageDic.Add(stageKey, data);
             }
         }
     }
@@ -65,6 +71,44 @@ public class StageDatabase : ScriptableObject
 
         Debug.LogWarning($"StageNum {num}에 해당하는 데이터를 찾을 수 없습니다.");
         return null;
+    }
+
+    // stageKey가 비어있는 구버전 에셋(stageNum 직렬화)까지 대응한다.
+    private bool TryResolveStageKey(StageConfigSO data, out int stageKey)
+    {
+        stageKey = data.stageKey;
+        if (stageKey > 0)
+        {
+            return true;
+        }
+
+        string name = data.name;
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return false;
+        }
+
+        int start = -1;
+        int end = -1;
+        for (int i = 0; i < name.Length; i++)
+        {
+            if (char.IsDigit(name[i]))
+            {
+                if (start < 0) start = i;
+                end = i;
+                continue;
+            }
+
+            if (start >= 0) break;
+        }
+
+        if (start < 0 || end < start)
+        {
+            return false;
+        }
+
+        string numberText = name.Substring(start, end - start + 1);
+        return int.TryParse(numberText, out stageKey);
     }
     #endregion
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class EnemySpawnManager : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class EnemySpawnManager : MonoBehaviour
     [SerializeField] private DamageSystem damageSystem;
 
     [Header("설정")]
+    [FormerlySerializedAs("mapCenter")]
     [SerializeField] private Transform player;
     [SerializeField] private float spawnDistance = 5f;
     [SerializeField] private LayerMask groundLayer;
@@ -32,7 +34,7 @@ public class EnemySpawnManager : MonoBehaviour
     {
         if (player == null)
         {
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+            player = ResolveSpawnCenter();
         }
 
         if (damageSystem == null)
@@ -70,12 +72,31 @@ public class EnemySpawnManager : MonoBehaviour
 
     private void WaveStart()
     {
+        if (stageSO == null || stageSO.roundDatas == null)
+        {
+            return;
+        }
+
         if (currentRound >= stageSO.roundDatas.Count) return;
         StartCoroutine(SpawnCoroutine());
     }
 
     private IEnumerator SpawnCoroutine()
     {
+        if (enemyFactory == null || stageSO == null || stageSO.roundDatas == null)
+        {
+            yield break;
+        }
+
+        if (player == null)
+        {
+            player = ResolveSpawnCenter();
+            if (player == null)
+            {
+                yield break;
+            }
+        }
+
         StageFlowManager.Instance.waveIndex = currentRound + 1;
         WaveDirectorSystem.Instance.WaveClear();
 
@@ -86,6 +107,8 @@ public class EnemySpawnManager : MonoBehaviour
         // 라운드데이터 리스트만큼 몬스터 생성
         foreach (var monster in roundData.monsterSpawnList)
         {
+            if (monster == null) continue;
+
             Vector3 dir = spawnDirections[dirIndex];
             Vector3 spawnPos = player.position + dir * spawnDistance;
             Vector3 finalSpawnPos = OnGround(spawnPos); // 최종 스폰위치는 땅에
@@ -107,6 +130,31 @@ public class EnemySpawnManager : MonoBehaviour
 
             yield return new WaitForSeconds(spawnInterval); // 스폰 간격
         }
+    }
+
+    // 씬 참조가 비어도 플레이어 기준 스폰이 가능하도록 보정한다.
+    private Transform ResolveSpawnCenter()
+    {
+        try
+        {
+            GameObject taggedPlayer = GameObject.FindGameObjectWithTag("Player");
+            if (taggedPlayer != null)
+            {
+                return taggedPlayer.transform;
+            }
+        }
+        catch (UnityException)
+        {
+            // Player 태그 미등록 프로젝트도 대응한다.
+        }
+
+        GameObject mainChar = GameObject.Find("1.Main Char");
+        if (mainChar != null)
+        {
+            return mainChar.transform;
+        }
+
+        return transform;
     }
 
     // 땅 위에 스폰 위치 반환
@@ -162,3 +210,4 @@ public class EnemySpawnManager : MonoBehaviour
         MonsterDead();
     }
 }
+
