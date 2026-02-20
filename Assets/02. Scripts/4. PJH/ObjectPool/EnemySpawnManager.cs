@@ -1,16 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public enum SpawnPattern
-{
-    Diagonal,//대각선
-    Cross,   //상하좌우
-    Around,  //주변 8방향
-    Up,      //위에만
-    Down,    //아래에만
-    Left,
-    Right
-}
 
 public class EnemySpawnManager : MonoBehaviour
 {
@@ -20,7 +10,7 @@ public class EnemySpawnManager : MonoBehaviour
     [SerializeField] private DamageSystem damageSystem;
 
     [Header("설정")]
-    [SerializeField] private Transform mapCenter;
+    [SerializeField] private Transform player;
     [SerializeField] private float spawnDistance = 5f;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float spawnInterval = 0.1f;
@@ -31,106 +21,23 @@ public class EnemySpawnManager : MonoBehaviour
     private readonly HashSet<int> aliveEnemyIds = new HashSet<int>();
 
     // 스폰 방향
-    private Vector3[] SpawnDirections(SpawnPattern spawnPattern)
+    private Vector3[] spawnDirections =
     {
-        switch (spawnPattern)
-        {
-            case SpawnPattern.Diagonal:
-                return new Vector3[]
-                {
-                    new Vector3(1, 0, 1),
-                    new Vector3(-1, 0, 1),
-                    new Vector3(1, 0, -1),
-                    new Vector3(-1, 0, -1),
-                    new Vector3(2, 0, 2),
-                    new Vector3(-2, 0, 2),
-                    new Vector3(2, 0, -2),
-                    new Vector3(-2, 0, -2)
-                };
-
-            case SpawnPattern.Cross:
-                return new Vector3[]
-                {
-                    Vector3.forward,
-                    Vector3.back,
-                    Vector3.left,
-                    Vector3.right,
-                    Vector3.forward*2,
-                    Vector3.back*2,
-                    Vector3.left*2,
-                    Vector3.right*2
-                };
-
-            case SpawnPattern.Around:
-                return new Vector3[]
-                {
-                    Vector3.forward,
-                    Vector3.back,
-                    Vector3.left,
-                    Vector3.right,
-                    new Vector3(1, 0, 1),
-                    new Vector3(-1, 0, 1),
-                    new Vector3(1, 0, -1),
-                    new Vector3(-1, 0, -1)
-                };
-
-            case SpawnPattern.Up:
-                return new Vector3[]
-                {
-                    Vector3.forward,
-                    new Vector3(1, 0, 1),
-                    new Vector3(-1, 0, 1),
-                    Vector3.forward*2,
-                    new Vector3(1, 0 , 2),
-                    new Vector3(-1, 0, 2)
-                };
-
-            case SpawnPattern.Down:
-                return new Vector3[]
-                {
-                    Vector3.back,
-                    new Vector3(1, 0, -1),
-                    new Vector3(-1, 0, -1),
-                    Vector3.back*2,
-                    new Vector3(1, 0, -2),
-                    new Vector3(-1, 0, -2)
-                };
-
-            case SpawnPattern.Left:
-                return new Vector3[]
-                {
-                    Vector3.left,
-                    new Vector3(-1, 0, 1),
-                    new Vector3(-1, 0, -1),
-                    Vector3 .left*2,
-                    new Vector3(-2, 0, 1),
-                    new Vector3(-2, 0, -1)
-                };
-
-            case SpawnPattern.Right:
-                return new Vector3[]
-                {
-                    Vector3.right,
-                    new Vector3(1, 0, 1),
-                    new Vector3(1, 0, -1),
-                    Vector3.right*2,
-                    new Vector3(2, 0, 1),
-                    new Vector3(2, 0, -1)
-                };
-        }
-        return null;
-    }
+        Vector3.forward, Vector3.back, Vector3.left, Vector3.right, //상하좌우
+        Vector3.forward + Vector3.left, Vector3.forward + Vector3.right, //좌상, 우상
+        Vector3.back + Vector3.left, Vector3.back + Vector3.right //좌하, 우하
+    };
 
     private void Awake()
     {
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player").transform;
+        }
+
         if (damageSystem == null)
         {
             damageSystem = FindObjectOfType<DamageSystem>();
-        }
-
-        if (mapCenter == null)
-        {
-            mapCenter = ResolveMapCenter();
         }
     }
 
@@ -169,25 +76,18 @@ public class EnemySpawnManager : MonoBehaviour
 
     private IEnumerator SpawnCoroutine()
     {
-        if (mapCenter == null)
-        {
-            mapCenter = ResolveMapCenter();
-        }
-
         StageFlowManager.Instance.waveIndex = currentRound + 1;
         WaveDirectorSystem.Instance.WaveClear();
 
         var roundData = stageSO.roundDatas[currentRound]; // 현재라운드 SO
-
-        Vector3[] spawnDirections = SpawnDirections(roundData.spawnPattern); // 라운드 데이터 스폰 패턴에 따른 방향 배열
-
+        int dirCount = spawnDirections.Length; // 방향갯수
         int dirIndex = 0; // 방향 인덱스
 
         // 라운드데이터 리스트만큼 몬스터 생성
         foreach (var monster in roundData.monsterSpawnList)
         {
             Vector3 dir = spawnDirections[dirIndex];
-            Vector3 spawnPos = mapCenter.position + dir * spawnDistance;
+            Vector3 spawnPos = player.position + dir * spawnDistance;
             Vector3 finalSpawnPos = OnGround(spawnPos); // 최종 스폰위치는 땅에
             var enemy = enemyFactory.Create(monster, finalSpawnPos, Quaternion.identity);
             if (enemy != null)
@@ -200,34 +100,13 @@ public class EnemySpawnManager : MonoBehaviour
             dirIndex++; // 방향 인덱스 추가로 다음 스폰 방향 가져오기
 
             // 만약 8마리 이상일 때 처음부터 다시
-            if (dirIndex >= spawnDirections.Length)
+            if (dirIndex >= dirCount)
             {
                 dirIndex = 0;
             }
 
             yield return new WaitForSeconds(spawnInterval); // 스폰 간격
         }
-    }
-
-    // 씬 참조가 비었을 때 스폰 중심을 런타임에서 보정한다.
-    private Transform ResolveMapCenter()
-    {
-        Transform[] allTransforms = FindObjectsOfType<Transform>();
-        foreach (Transform target in allTransforms)
-        {
-            if (target != null && target.tag == "Player")
-            {
-                return target;
-            }
-        }
-
-        GameObject mainChar = GameObject.Find("1.Main Char");
-        if (mainChar != null)
-        {
-            return mainChar.transform;
-        }
-
-        return transform;
     }
 
     // 땅 위에 스폰 위치 반환

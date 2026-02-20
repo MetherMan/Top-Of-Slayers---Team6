@@ -45,23 +45,19 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
     public GameObject SpawnPool(GameObject prefab, Vector3 position, Quaternion rotation)
     {
-        if (prefab == null)
+        //딕셔너리 프리팹 키 나열(디버그용)
+        string keys = string.Join(", ", poolDictionary.Keys);
+        if (!poolDictionary.ContainsKey(prefab))
         {
             return null;
         }
 
-        if (!poolDictionary.TryGetValue(prefab, out Queue<GameObject> objectQueue))
-        {
-            objectQueue = new Queue<GameObject>();
-            poolDictionary[prefab] = objectQueue;
-        }
+        GameObject obj;
 
-        GameObject obj = null;
-
-        if (objectQueue.Count > 0)
+        if (poolDictionary[prefab].Count > 0)
         {
             //큐에서 오브젝트 꺼내기
-            obj = objectQueue.Dequeue();
+            obj = poolDictionary[prefab].Dequeue();
         }
         else
         {
@@ -77,15 +73,10 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
     public void ReturnPool(GameObject prefab, GameObject obj)
     {
-        if (prefab == null || obj == null) return;
-
-        if (!poolDictionary.TryGetValue(prefab, out Queue<GameObject> objectQueue))
-        {
-            objectQueue = new Queue<GameObject>();
-            poolDictionary[prefab] = objectQueue;
-        }
+        //프리팹이 딕셔너리에 없으면 반환하지 않음
+        if (!poolDictionary.ContainsKey(prefab)) return;
 
         obj.SetActive(false);
-        objectQueue.Enqueue(obj);
+        poolDictionary[prefab].Enqueue(obj);
     }
 }
