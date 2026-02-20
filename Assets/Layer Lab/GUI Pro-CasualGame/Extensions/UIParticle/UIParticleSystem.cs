@@ -142,6 +142,11 @@ namespace UnityEngine.UI.Extensions.CasualGame
                 }
             }
 #endif
+            if (!Initialize())
+            {
+                return;
+            }
+
             // prepare vertices
             vh.Clear();
 
@@ -150,10 +155,29 @@ namespace UnityEngine.UI.Extensions.CasualGame
                 return;
             }
 
+            if (pSystem == null)
+            {
+                return;
+            }
+
             if (!isInitialised && !pSystem.main.playOnAwake)
             {
                 pSystem.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
                 isInitialised = true;
+            }
+
+#if UNITY_5_5_OR_NEWER
+            int maxParticles = pSystem.main.maxParticles;
+#else
+            int maxParticles = pSystem.maxParticles;
+#endif
+            if (maxParticles <= 0)
+            {
+                return;
+            }
+            if (particles == null || particles.Length < maxParticles)
+            {
+                particles = new ParticleSystem.Particle[maxParticles];
             }
 
             Vector2 temp = Vector2.zero;
