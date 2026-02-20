@@ -32,7 +32,7 @@ public class StageDatabase : ScriptableObject
     //stageConfigSO의 창고로 사용할 예정
     public List<StageConfigSO> stageData = new List<StageConfigSO>();
 
-    private Dictionary<int, StageConfigSO> stageDic;
+    private Dictionary<string, StageConfigSO> stageDic;
     #endregion
 
     #region method
@@ -40,14 +40,14 @@ public class StageDatabase : ScriptableObject
     {
         if (stageDic != null) return; //중복실행 방지
 
-        stageDic = new Dictionary<int, StageConfigSO>();
+        stageDic = new Dictionary<string, StageConfigSO>();
         if (stageData == null) return;
 
         foreach (var data in stageData)
         {
             if (data == null) continue;
 
-            if (!TryResolveStageKey(data, out int stageKey))
+            if (!TryResolveStageKey(data, out string stageKey))
             {
                 Debug.LogWarning($"StageDatabase 초기화 중 stageKey를 확인할 수 없습니다: {data.name}");
                 continue;
@@ -60,10 +60,17 @@ public class StageDatabase : ScriptableObject
         }
     }
 
-    public StageConfigSO GetStageData(int num)
+    public StageConfigSO GetStageData(string num)
     {
+        if (string.IsNullOrWhiteSpace(num))
+        {
+            Debug.LogWarning("StageNum이 비어 있어 데이터를 조회할 수 없습니다.");
+            return null;
+        }
+
         if (stageDic == null) Initialization();
-        if (stageDic.TryGetValue(num, out StageConfigSO data))
+        string stageKey = num.Trim();
+        if (stageDic.TryGetValue(stageKey, out StageConfigSO data))
         {
             roundDatas = data.roundDatas;
             return data;
@@ -73,12 +80,18 @@ public class StageDatabase : ScriptableObject
         return null;
     }
 
-    // stageKey가 비어있는 구버전 에셋(stageNum 직렬화)까지 대응한다.
-    private bool TryResolveStageKey(StageConfigSO data, out int stageKey)
+    public StageConfigSO GetStageData(int num)
     {
-        stageKey = data.stageKey;
-        if (stageKey > 0)
+        return GetStageData(num.ToString());
+    }
+
+    // stageKey가 비어있는 구버전 에셋(stageNum 직렬화)까지 대응한다.
+    private bool TryResolveStageKey(StageConfigSO data, out string stageKey)
+    {
+        stageKey = null;
+        if (!string.IsNullOrWhiteSpace(data.stageKey))
         {
+            stageKey = data.stageKey.Trim();
             return true;
         }
 
@@ -107,8 +120,8 @@ public class StageDatabase : ScriptableObject
             return false;
         }
 
-        string numberText = name.Substring(start, end - start + 1);
-        return int.TryParse(numberText, out stageKey);
+        stageKey = name.Substring(start, end - start + 1);
+        return !string.IsNullOrWhiteSpace(stageKey);
     }
     #endregion
 }

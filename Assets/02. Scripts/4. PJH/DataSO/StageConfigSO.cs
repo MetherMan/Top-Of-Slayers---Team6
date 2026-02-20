@@ -18,6 +18,17 @@ public enum ClearResult
     Faile
 }
 
+public enum SpawnPattern
+{
+    Diagonal, //대각선
+    Cross,    //상하좌우
+    Around,   //주변 8방향
+    Up,       //위에만
+    Down,     //아래에만
+    Left,
+    Right
+}
+
 [CreateAssetMenu(fileName = "Stage_", menuName = "Config/Stage")]
 public class StageConfigSO : ScriptableObject
 {

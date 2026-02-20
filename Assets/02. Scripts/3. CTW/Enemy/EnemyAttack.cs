@@ -88,7 +88,7 @@ public class EnemyAttack : IEnemyState
                 Vector3 target = enemy.player.position + Vector3.up * 1.5f;
                 Vector3 shootDir = (target - spawnPos).normalized;
 
-                bullet.Init(enemy.bulletPrefab, enemy.bulletSpeed, shootDir);
+                bullet.Init(enemy.bulletPrefab, enemy.bulletSpeed, shootDir, enemy.attackDamage);
             }
         }
     }
