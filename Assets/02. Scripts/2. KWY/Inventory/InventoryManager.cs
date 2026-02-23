@@ -12,6 +12,7 @@ public class InventoryManager : Singleton<InventoryManager>
     }
     public void NotifyInventoryChanged()
     {
+
         OnInventoryChanged?.Invoke();
     }
 
