@@ -11,6 +11,7 @@ public class EquipmentEnhancementSystem : MonoBehaviour
 
         if (targetItem.enhancementLevel >= maxLevel)
         {
+
             Debug.Log("최대 강화 도달");
             return false;
         }
@@ -25,7 +26,10 @@ public class EquipmentEnhancementSystem : MonoBehaviour
 
         CurrencyManager.Instance.Spend(cost);
 
+
         targetItem.enhancementLevel++;
+
+
 
         Debug.Log($"강화 성공! 현재 레벨: {targetItem.enhancementLevel}");
 

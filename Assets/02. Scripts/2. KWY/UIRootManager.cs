@@ -14,6 +14,9 @@ public class UIRootManager : MonoBehaviour
     [SerializeField] GameObject craftingUIPanel;
     [SerializeField] GameObject itemDisassemblyScrollPanel;
     [SerializeField] GameObject EquipmentEnhancementPanel;
+    [SerializeField] GameObject gachaResultOne;
+    [SerializeField] GameObject gachaResultTen;
+
 
     [Header("Crafting Panels")]
     [SerializeField] GameObject succesPanel;
@@ -64,6 +67,8 @@ public class UIRootManager : MonoBehaviour
         craftingUIPanel.SetActive(false);
         itemDisassemblyScrollPanel.SetActive(false);
         EquipmentEnhancementPanel.SetActive(false);
+        gachaResultOne.SetActive(false);
+        gachaResultTen.SetActive(false);
 
         bottomNav.Select(0);
 
@@ -75,6 +80,9 @@ public class UIRootManager : MonoBehaviour
         shopPanel.SetActive(true);
         gachaPanel.SetActive(false);
         dailyRewardPanel.SetActive(false);
+
+        gachaResultOne.SetActive(false);
+        gachaResultTen.SetActive(false);
     }
     public void OpenGacha()
     {
@@ -82,6 +90,11 @@ public class UIRootManager : MonoBehaviour
         shopPanel.SetActive(false);
         gachaPanel.SetActive(true);
         dailyRewardPanel.SetActive(false);
+
+        gachaResultOne.SetActive(false);
+        gachaResultTen.SetActive(false);
+
+
     }
 
     public void OpenDailyReward()
@@ -90,6 +103,9 @@ public class UIRootManager : MonoBehaviour
         shopPanel.SetActive(false);
         gachaPanel.SetActive(false);
         dailyRewardPanel.SetActive(true);
+
+        gachaResultOne.SetActive(false);
+        gachaResultTen.SetActive(false);
     }
     public void OpenInventoryScroll()
     {
@@ -98,6 +114,8 @@ public class UIRootManager : MonoBehaviour
         craftingUIPanel.SetActive(false);
         itemDisassemblyScrollPanel.SetActive(false);
         EquipmentEnhancementPanel.SetActive(false);
+
+
     }
 
     public void OpenCraftList()

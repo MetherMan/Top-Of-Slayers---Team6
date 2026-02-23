@@ -16,20 +16,22 @@ public class InventoryView : MonoBehaviour
     }
     private void OnEnable()
     {
-        if(InventoryManager.Instance != null)
-        {
-            slotsUI = slotRoot.GetComponentsInChildren<InventoryItemSlot>();
+        var manager = InventoryManager.Instance;
 
-            InventoryManager.Instance.OnInventoryChanged += RefreshUI;
+        if (manager != null)
+        {
+            manager.OnInventoryChanged += RefreshUI;
             RefreshUI();
         }
     }
 
     private void OnDisable()
     {
-        if (InventoryManager.HasInstance)
+        var manager = InventoryManager.Instance;
+
+        if (manager != null)
         {
-            InventoryManager.Instance.OnInventoryChanged -= RefreshUI;
+            manager.OnInventoryChanged -= RefreshUI;
         }
     }
 
