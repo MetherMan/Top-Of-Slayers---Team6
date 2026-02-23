@@ -24,6 +24,9 @@ public enum AttackType
 [CreateAssetMenu(fileName = "Enemy_", menuName = "Config/Enemy")]
 public class EnemyConfigSO : ScriptableObject
 {
+    [Header("몬스터 이름 / 키 값")]
+    public string MonsterName;
+
     [Header("몬스터 기본 설정")]
     public Level level; //난이도 별 구분 : 20% 스펙 값 증감
     public MonsterType monsterType;

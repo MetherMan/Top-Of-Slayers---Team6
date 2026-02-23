@@ -14,17 +14,19 @@ public class StageDatabase : ScriptableObject
             {
                 instance = Resources.Load<StageDatabase>("StageInfo/Database_Main");
 
-                //StageDatabase handle = Addressables.LoadAssetAsync<StageDatabase>("");
-                //instance = handle.WaitForCompletion();
+                //Get : AddressableManager.Instance.GetStageData("main");
 
                 if (instance == null)
                 {
-
+                    Debug.LogWarning("데이터베이스 파일을 찾을 수 없음");
                 }
             }
             return instance;
         }
     }
+    //데이터 베이스 key값 고정
+    public string stageKey = "main";
+
     //스테이지 라운드(웨이브) 데이터
     public List<StageConfigSO.RoundData> roundDatas;
     public StageConfigSO.RoundData roundData;
