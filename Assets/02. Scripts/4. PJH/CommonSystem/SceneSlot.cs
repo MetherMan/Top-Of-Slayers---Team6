@@ -2,24 +2,15 @@
 using UnityEngine.UI;
 
 /*
-    IPointerClickHandler 사용
-    :여러번 터치 등 중복 방지
+    Button으로 중복터치 방지
 */
-public enum SceneType
-{
-    Login,
-    Lobby,
-    Stage
-}
-
 [RequireComponent(typeof(Button))]
 public class SceneSlot : MonoBehaviour
 {
     #region field
-    public Button button;
+    Button button;
 
     [Header("스테이지 정보")]
-    [SerializeField] public SceneType sceneType;
     [SerializeField] public string stageKey;
 
     #endregion

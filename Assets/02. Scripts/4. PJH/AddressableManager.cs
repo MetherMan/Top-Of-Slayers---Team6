@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 
 public class AddressableManager : Singleton<AddressableManager>
@@ -13,6 +15,8 @@ public class AddressableManager : Singleton<AddressableManager>
     public Dictionary<string, SceneInstance> _stageScene = new Dictionary<string, SceneInstance>();
     public Dictionary<string, WaveRule> _ruleSO = new Dictionary<string, WaveRule>();
     public Dictionary<string, GameObject> _uI = new Dictionary<string, GameObject>();
+    public Dictionary<string, EnemyConfigSO> _enemySO = new Dictionary<string, EnemyConfigSO>();
+    public Dictionary<string, GameObject> _monsterPf = new Dictionary<string, GameObject>();
     #endregion
 
     //비동기 매서드 실행하기 위해서 async 필요
@@ -37,17 +41,12 @@ public class AddressableManager : Singleton<AddressableManager>
 
     private bool IsFailed(AsyncOperationHandle handle)
     {
-        if (!handle.IsValid())
+        if (!handle.IsValid() || handle.Status == AsyncOperationStatus.Failed)
         {
-            Debug.LogError("유효성 검사 실패");
+            Debug.LogError($"[Addressable Error] 유효성 {handle.IsValid()}, 상태 {handle.Status}");
             return true;
         }
 
-        if (handle.Status == AsyncOperationStatus.Failed)
-        {
-            Debug.LogError("Status.Failed");
-            return true;
-        }
         return false;
     }
 
@@ -57,14 +56,14 @@ public class AddressableManager : Singleton<AddressableManager>
         Task stageSOTask = LoadAllStageSO();
         Task ruleSOTask = LoadAllRule();
         Task uITask = LoadAllUI();
-        //MonsterSO
-        //MonsterPrefab
+        Task monsterSOTask = LoadAllMonsterSO();
+        Task mosnterPfTask = LoadAllMonsterPf() as Task;
         //ItemSO
         //ItemPrefab
         //VFX
         //SFX
 
-        await Task.WhenAll(stageSOTask, ruleSOTask, uITask);
+        await Task.WhenAll(stageSOTask, ruleSOTask, uITask, monsterSOTask, mosnterPfTask);
         //Task -> 코루틴 예외처리 구현
         //로딩씬 : 코루틴으로 작업 [유니티 로딩씬 구현]
 
@@ -227,13 +226,87 @@ public class AddressableManager : Singleton<AddressableManager>
     //MonsterSO
     public async Task LoadAllMonsterSO()
     {
+        AsyncOperationHandle<IList<EnemyConfigSO>> MonsterSOHandle
+            = Addressables.LoadAssetsAsync<EnemyConfigSO>("MonsterSO", null);
+        loadedAssets.Add(MonsterSOHandle);
 
+        await MonsterSOHandle.Task;
+
+        if (IsSucceeded(MonsterSOHandle))
+        {
+            foreach (EnemyConfigSO monsterSO in MonsterSOHandle.Result)
+            {
+                if (!_enemySO.ContainsKey(monsterSO.MonsterName))
+                {
+                    _enemySO.Add(monsterSO.MonsterName, monsterSO);
+                    Debug.Log($"monsterConfigSO 등록완료 : {monsterSO.MonsterName}");
+                }
+                else
+                {
+                    Debug.LogWarning($"동일한 이름의 monsterSO가 존재합니다. : {monsterSO.MonsterName}");
+                }
+            }
+        }
+        else if (IsFailed(MonsterSOHandle))
+        {
+            Debug.LogError("LoadAllMonsterSO : Failed");
+            return;
+        }
     }
 
     //MonsterPrefab
-    public async Task LoadAllMonsterPf()
+    public IEnumerator LoadAllMonsterPf()
     {
+        var loadResourceLocationHandle
+            = Addressables.LoadResourceLocationsAsync("MonsterPrefab", typeof(GameObject));
 
+        if (!IsSucceeded(loadResourceLocationHandle))
+        {
+            yield return loadResourceLocationHandle;
+        }
+        else if (IsFailed(loadResourceLocationHandle))
+        {
+            Debug.LogWarning("LoadAllMonsterPf : Failed");
+        }
+
+        List<AsyncOperationHandle> opList = new List<AsyncOperationHandle>();
+
+        foreach (IResourceLocation location in loadResourceLocationHandle.Result)
+        {
+            AsyncOperationHandle<GameObject> loadAssetHandle
+                = Addressables.LoadAssetAsync<GameObject>(location);
+            loadedAssets.Add(loadAssetHandle);
+
+            if (IsSucceeded(loadAssetHandle))
+            {
+                if (!_monsterPf.ContainsKey(location.PrimaryKey))
+                {
+                    _monsterPf.Add(location.PrimaryKey, loadAssetHandle.Result);
+                    opList.Add(loadAssetHandle);
+                }
+                else
+                {
+                    Debug.Log($"몬스터프리팹 중복 : {location.PrimaryKey}");
+                }
+            }
+            else if (IsFailed(loadAssetHandle))
+            {
+                Debug.LogWarning("LoadAllmonsterPf_loadAssetHandle : Failed");
+            }
+        }
+
+        //create a GroupOperation to wait on all the above loads at once.
+        var groupOp = Addressables.ResourceManager.CreateGenericGroupOperation(opList);
+
+        if (!groupOp.IsDone) yield return groupOp;
+
+        //ResourceLocation 위치 정보이기에 메모리를 지워도 데이터가 사라지지 않는다.
+        Addressables.Release(loadResourceLocationHandle);
+
+        foreach (var item in _monsterPf)
+        {
+            Debug.Log(item.Key + " - " + item.Value.name);
+        }
     }
 
     //ItemSO
@@ -262,9 +335,9 @@ public class AddressableManager : Singleton<AddressableManager>
     #endregion
 
     #region Get
-    public StageConfigSO GetStageData(string stageNum)
+    public StageConfigSO GetStageData(string stageKey)
     {
-        if (_stageSO.TryGetValue(stageNum, out StageConfigSO data))
+        if (_stageSO.TryGetValue(stageKey, out StageConfigSO data))
         {
             return data;
         }
@@ -285,6 +358,24 @@ public class AddressableManager : Singleton<AddressableManager>
         if (_uI.TryGetValue(uIname, out GameObject ui))
         {
             return ui;
+        }
+        return null;
+    }
+
+    public EnemyConfigSO GetEnemyData(string monsterName)
+    {
+        if (_enemySO.TryGetValue(monsterName, out EnemyConfigSO data))
+        {
+            return data;
+        }
+        return null;
+    }
+
+    public GameObject GetEnemyPf(string monsterName)
+    {
+        if (_monsterPf.TryGetValue(monsterName, out GameObject data))
+        {
+            return data;
         }
         return null;
     }

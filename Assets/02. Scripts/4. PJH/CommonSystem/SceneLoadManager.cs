@@ -27,6 +27,7 @@ public class SceneLoadManager : Singleton<SceneLoadManager>
     [Header("고정 씬 설정")]
     public AssetReference loginScene;
     public AssetReference lobbyScene;
+    public AssetReference lodingScene;
 
     private State _state;
     
@@ -62,21 +63,19 @@ public class SceneLoadManager : Singleton<SceneLoadManager>
     //GameFlowManager에서 GameStateMachine 상태머신을 이용해 씬 전환
     public void ActiveScene(SceneSlot slot)
     {
-        SceneType sceneType = slot.sceneType;
-
-        switch (sceneType)
+        switch (_state)
         {
-            case SceneType.Login:
+            case State.Login:
                 {
                     LoadLoginScene();
                 }
                 break;
-            case SceneType.Lobby:
+            case State.Lobby:
                 {
                     LoadLobbyScene();
                 }
                 break;
-            case SceneType.Stage:
+            case State.Play:
                 {
                     AddressableManager.Instance.RequestStageScene(slot.stageKey);
                 }

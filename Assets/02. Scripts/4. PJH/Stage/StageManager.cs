@@ -42,30 +42,10 @@ public class StageManager : Singleton<StageManager>
     }
 
     #region method
-    //스테이지 오브젝트 클릭 시 실행될 매서드
-    //public void StageData(int id)
-    //{
-    //    StageConfigSO data = stageDB.GetStageData(id);
-    //    if (data != null)
-    //    {
-    //        //해당 스테이지 데이터를 불러오기
-    //        selectDB = data;
-    //    }
-    //}
-
-    public void StageData(string id)
+    //스테이지 UI 클릭 시 실행될 매서드
+    public void StageData(string key)
     {
-        if (stageDB == null)
-        {
-            stageDB = StageDatabase.Instance;
-        }
-        if (stageDB == null)
-        {
-            Debug.LogWarning("StageDatabase를 찾을 수 없습니다.");
-            return;
-        }
-
-        StageConfigSO data = stageDB.GetStageData(id);
+        StageConfigSO data = AddressableManager.Instance.GetStageData(key);
         if (data != null)
         {
             //해당 스테이지 데이터를 불러오기
@@ -73,7 +53,30 @@ public class StageManager : Singleton<StageManager>
             return;
         }
 
-        Debug.LogWarning($"StageData({id}) 로드에 실패했습니다.");
+        Debug.LogWarning($"StageData({key}) 로드에 실패했습니다.");
     }
+
+    //public void StageData(string id)
+    //{
+    //    if (stageDB == null)
+    //    {
+    //        stageDB = StageDatabase.Instance;
+    //    }
+    //    if (stageDB == null)
+    //    {
+    //        Debug.LogWarning("StageDatabase를 찾을 수 없습니다.");
+    //        return;
+    //    }
+
+    //    StageConfigSO data = stageDB.GetStageData(id);
+    //    if (data != null)
+    //    {
+    //        //해당 스테이지 데이터를 불러오기
+    //        selectDB = data;
+    //        return;
+    //    }
+
+    //    Debug.LogWarning($"StageData({id}) 로드에 실패했습니다.");
+    //}
     #endregion
 }
