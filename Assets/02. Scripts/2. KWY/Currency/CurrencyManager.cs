@@ -9,6 +9,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
     protected override void Awake()
     {
         base.Awake();
+
     }
     //현재 보유 골드 반환
     public int GetGold()

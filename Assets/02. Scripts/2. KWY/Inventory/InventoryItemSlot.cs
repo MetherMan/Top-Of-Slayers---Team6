@@ -8,7 +8,7 @@ public class InventoryItemSlot : MonoBehaviour
     [SerializeField] Image itemSprite;
     [SerializeField] TextMeshProUGUI itemName;
     [SerializeField] TextMeshProUGUI itemCount;
-    //[SerializeField] TextMeshProUGUI itemLevel;
+    [SerializeField] TextMeshProUGUI itemLevel;
 
     [SerializeField] Sprite legendColor;
     [SerializeField] Sprite epicColor;
@@ -24,10 +24,18 @@ public class InventoryItemSlot : MonoBehaviour
 
         itemSprite.sprite = data.item.sprite;
         itemSprite.enabled = true;
-        itemName.text = data.item.itemName;
 
-        //itemLevel.text = $"+{data.enhancementLevel}";
+        itemName.text = data.item.itemName;
         itemCount.text = data.count.ToString();
+
+        if(data.item is EquipmentSO && data.enhancementLevel > 0)
+        {
+            itemLevel.text = $"+{data.enhancementLevel}";
+        }
+        else
+        {
+            itemLevel.text = "";
+        }
 
         ApplyGradeColor(data.item.grade);
     }
@@ -55,7 +63,7 @@ public class InventoryItemSlot : MonoBehaviour
         itemSprite.enabled = false;
         itemName.text = "";
         itemCount.text = "";
-        //itemLevel.text = "";
+        itemLevel.text = "";
         backGround.sprite = normalColor;
     }
 
