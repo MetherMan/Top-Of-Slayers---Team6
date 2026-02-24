@@ -328,6 +328,9 @@ MonoBehaviour:
   followSpeed: 5
   maxXDistance: 10
   maxZDistance: 0
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &580262032
 GameObject:
   m_ObjectHideFlags: 0
@@ -1031,9 +1034,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyFactory: {fileID: 1957043948}
-  stageSO: {fileID: 11400000, guid: 282617c619d29934b83a7acbd3a6f52a, type: 2}
+  stageSO: {fileID: 11400000, guid: be796b4c20ad046429fd9911017484a7, type: 2}
   damageSystem: {fileID: 0}
-  player: {fileID: 0}
+  mapCenter: {fileID: 2049071901}
   spawnDistance: 5
   groundLayer:
     serializedVersion: 2
@@ -1101,6 +1104,12 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &2049071901 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6134572937968207212, guid: 7ece8dc05b11cc84d82f5c5b019d54d1,
+    type: 3}
+  m_PrefabInstance: {fileID: 716234581}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &997544084809380979
 PrefabInstance:
   m_ObjectHideFlags: 0

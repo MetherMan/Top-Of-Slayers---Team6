@@ -30,4 +30,9 @@ public class EnemyDie : IEnemyState
     {
 
     }
+
+    public void FixedUpdate()
+    {
+
+    }
 }

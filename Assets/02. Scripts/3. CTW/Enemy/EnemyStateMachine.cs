@@ -15,4 +15,9 @@ public class EnemyStateMachine : MonoBehaviour
     {
         EnemyState?.Update();
     }
+
+    public void FixedUpdate()
+    {
+        EnemyState?.FixedUpdate();
+    }
 }

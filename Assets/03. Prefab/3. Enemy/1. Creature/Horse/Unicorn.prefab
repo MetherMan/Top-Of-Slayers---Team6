@@ -2518,6 +2518,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targeting: {fileID: 0}
+  enemyBase: {fileID: 0}
   hp: 30
 --- !u!54 &8823925521748096412
 Rigidbody:
@@ -2542,9 +2543,9 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!114 &4252827424434959022
 MonoBehaviour:
@@ -2558,6 +2559,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3ecf76b23681e848b868d144f83fb13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  killScore: 100
   player: {fileID: 0}
   rb: {fileID: 0}
   enemyAnim: {fileID: 0}

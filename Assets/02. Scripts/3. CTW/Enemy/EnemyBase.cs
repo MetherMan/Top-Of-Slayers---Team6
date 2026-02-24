@@ -51,6 +51,11 @@ public class EnemyBase : MonoBehaviour
         this.enemyPrefab = enemyPrefab;
     }
 
+    private void FixedUpdate()
+    {
+        enemyStateMachine.FixedUpdate();
+    }
+
     public void Die()
     {
         OnEnemyKilled?.Invoke(killScore);
