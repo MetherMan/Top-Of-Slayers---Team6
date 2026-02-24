@@ -6,6 +6,9 @@ public class GachaManager : MonoBehaviour
     [SerializeField] GachaDataSO gachaData;
     [SerializeField] ItemSO ticketItem;
 
+
+    public ItemSO TicketItem => ticketItem;
+
     public ItemSO RollOne()
     {
         if (!InventoryManager.Instance.HasEnoughItem(ticketItem, 1))

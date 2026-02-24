@@ -34,28 +34,28 @@ public class GachaSystem : MonoBehaviour
     }
     public ItemSO Gacha()
     {
-        if (gachaData == null || gachaData.items.Count == 0)
-        {
-            Debug.LogWarning("가차 테이블이 비어있음");
-            return null;
-        }
-    
-        float totalChance = gachaData.TotalChance();
-        float randomPoint = Random.Range(0, totalChance);
-        float current = 0f;
+        //if (gachaData == null || gachaData.items.Count == 0)
+        //{
+        //    Debug.LogWarning("가차 테이블이 비어있음");
+        //    return null;
+        //}
 
-        foreach (var item in gachaData.items)
-        {
-            current += item.chance;
-            if (randomPoint <= current)
-            {
-                float percent = (item.chance / totalChance) * 100f;
+        //float totalChance = gachaData.TotalChance();
+        float randomPoint = Random.Range(0, 100f);
+        //float current = 0f;
 
-                Debug.Log($"결과: {item.item.name}({percent}%)");
-                return item.item;
-            }
-        }
-    
+        //foreach (var item in gachaData.items)
+        //{
+        //    current += item.chance;
+        //    if (randomPoint <= current)
+        //    {
+        //        float percent = (item.chance / totalChance) * 100f;
+
+        //        Debug.Log($"결과: {item.item.name}({percent}%)");
+        //        return item.item;
+        //    }
+        //}
+
         return null;
     }
 
@@ -82,7 +82,7 @@ public class GachaSystem : MonoBehaviour
         oneResultImage.gameObject.SetActive(false);
 
         string message = "10연 뽑기 결과\n";
-        foreach(var item in results)
+        foreach (var item in results)
         {
             GameObject iconObj = Instantiate(iconPrefab, iconParent);
             iconObj.GetComponent<Image>().sprite = item.sprite;
@@ -97,7 +97,7 @@ public class GachaSystem : MonoBehaviour
 
     private void ClearPanel()
     {
-        foreach(Transform child in iconParent)
+        foreach (Transform child in iconParent)
         {
             Destroy(child.gameObject);
         }

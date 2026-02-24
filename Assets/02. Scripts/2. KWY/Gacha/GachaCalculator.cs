@@ -4,20 +4,33 @@ public class GachaCalculator
 {
     public static ItemSO Roll(GachaDataSO data)
     {
-        float total = data.TotalChance();
-        float rand = Random.Range(0, total);
-        float current = 0;
+        float rand = Random.Range(0f, 100f);
 
-        foreach(var item in data.items)
+        // 1️⃣ 등급 결정
+        if (rand < data.legendChance)
         {
-            current += item.chance;
-
-            if(rand <= current)
-            {
-                return item.item;
-            }
+            return GetRandomItem(data.legendItems);
         }
-        return null;
+        else if (rand < data.legendChance + data.epicChance)
+        {
+            return GetRandomItem(data.epicItems);
+        }
+        else
+        {
+            return GetRandomItem(data.normalItems);
+        }
+    }
+
+    private static ItemSO GetRandomItem(System.Collections.Generic.List<ItemSO> list)
+    {
+        if (list == null || list.Count == 0)
+        {
+            Debug.LogError("❌ 해당 등급 아이템 없음");
+            return null;
+        }
+
+        int index = Random.Range(0, list.Count);
+        return list[index];
     }
 }
 

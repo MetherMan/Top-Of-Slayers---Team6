@@ -5,21 +5,13 @@ using UnityEngine;
 
 public class GachaDataSO : ScriptableObject
 {
-    [System.Serializable]
-    public class GachaEntry
-    {
-        public ItemSO item;
-        public float chance;
-    }
-    public List<GachaEntry> items = new List<GachaEntry>();
+    [Header("Grade Probability (Total 100)")]
+    [Range(0, 100)] public float legendChance = 5f;
+    [Range(0, 100)] public float epicChance = 15f;
+    [Range(0, 100)] public float normalChance = 80f;
 
-    public float TotalChance()
-    {
-        float total = 0f;
-        foreach (var item in items)
-        {
-            total += item.chance;
-        }
-        return total;
-    }
+    [Header("Items By Grade")]
+    public List<ItemSO> legendItems = new List<ItemSO>();
+    public List<ItemSO> epicItems = new List<ItemSO>();
+    public List<ItemSO> normalItems = new List<ItemSO>();
 }
