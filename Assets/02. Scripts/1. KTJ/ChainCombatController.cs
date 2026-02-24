@@ -28,10 +28,16 @@ public class ChainCombatController : MonoBehaviour
     private Coroutine resumeRoutine;
     private bool movementLockApplied;
     private Coroutine targetCheckRoutine;
+    private float slowEndTimeRealtime;
+    private float slowDurationRealtime;
 
     public int CurrentChain => currentChain;
     public bool IsSlowActive => isSlowActive;
     public Transform LastTarget => lastTarget;
+    public float SlowRemainingTime => !isSlowActive ? 0f : Mathf.Max(0f, slowEndTimeRealtime - Time.unscaledTime);
+    public float SlowRemainingNormalized => !isSlowActive || slowDurationRealtime <= 0f
+        ? 0f
+        : Mathf.Clamp01(SlowRemainingTime / slowDurationRealtime);
     public event System.Action<bool> OnSlowStateChanged;
 
     private void Awake()
@@ -107,6 +113,9 @@ public class ChainCombatController : MonoBehaviour
     {
         if (duration <= 0f || slowTimeScale <= 0f) return;
 
+        slowDurationRealtime = Mathf.Max(0.0001f, duration);
+        slowEndTimeRealtime = Time.unscaledTime + slowDurationRealtime;
+
         if (slowRoutine != null)
         {
             StopCoroutine(slowRoutine);
@@ -142,6 +151,7 @@ public class ChainCombatController : MonoBehaviour
         }
 
         SetTimeScale(1f);
+        ResetSlowTimerState();
         ResetChainState();
     }
 
@@ -279,5 +289,11 @@ public class ChainCombatController : MonoBehaviour
         }
 
         resumeRoutine = null;
+    }
+
+    private void ResetSlowTimerState()
+    {
+        slowEndTimeRealtime = 0f;
+        slowDurationRealtime = 0f;
     }
 }

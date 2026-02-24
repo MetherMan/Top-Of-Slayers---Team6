@@ -61,6 +61,7 @@ public partial class AutoSlashController : MonoBehaviour
     [Header("체인 동일 타겟 재공격")]
     [SerializeField] private bool useSameTargetRelease = true;
     [SerializeField, Range(0f, 90f)] private float sameTargetReleaseAngle = 25f;
+    [SerializeField, Min(0f)] private float sameTargetAutoReleaseTime = 0.15f;
 
     [Header("조준 자동 보정")]
     [SerializeField] private bool useAimAssist = true;

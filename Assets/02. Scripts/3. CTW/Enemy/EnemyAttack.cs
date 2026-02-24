@@ -30,8 +30,11 @@ public class EnemyAttack : IEnemyState
 
     public void Update()
     {
-        Vector3 lookDir = enemy.player.position;
-        lookDir.y = enemy.player.position.y;
+        var playerTransform = enemy.ResolvePlayer();
+        if (playerTransform == null) return;
+
+        var lookDir = playerTransform.position;
+        lookDir.y = enemy.transform.position.y;
         enemy.transform.LookAt(lookDir);
 
         if (enemy.attackType == AttackType.Ranged && !isShoot)
@@ -54,7 +57,7 @@ public class EnemyAttack : IEnemyState
             return;
         }
 
-        float distance = Vector3.Distance(enemy.transform.position, enemy.player.position);
+        float distance = Vector3.Distance(enemy.transform.position, playerTransform.position);
 
         if(distance > enemy.attackRange)
         {
@@ -73,6 +76,8 @@ public class EnemyAttack : IEnemyState
 
     private void SpawnBullet()
     {
+        var playerTransform = enemy.ResolvePlayer();
+        if (playerTransform == null) return;
         if(enemy.bulletPrefab == null) return;
 
         Vector3 spawnPos = enemy.transform.position + Vector3.up * 1.5f + enemy.transform.forward * 0.5f;
@@ -85,7 +90,7 @@ public class EnemyAttack : IEnemyState
             Bullet bullet = bulletObj.GetComponent<Bullet>();
             if(bullet != null)
             {
-                Vector3 target = enemy.player.position + Vector3.up * 1.5f;
+                Vector3 target = playerTransform.position + Vector3.up * 1.5f;
                 Vector3 shootDir = (target - spawnPos).normalized;
 
                 bullet.Init(enemy.bulletPrefab, enemy.bulletSpeed, shootDir, enemy.attackDamage);
