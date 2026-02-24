@@ -46,6 +46,7 @@ public partial class SlashDashController
         {
             impactTarget = pendingPierceTargets[0];
         }
+        TrySpawnHitImpactVfx(impactTarget);
         OnDashImpactTarget?.Invoke(impactTarget);
         OnDashImpact?.Invoke();
     }
