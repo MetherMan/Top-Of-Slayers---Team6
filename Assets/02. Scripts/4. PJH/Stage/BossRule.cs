@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 [CreateAssetMenu(fileName = "Rule_", menuName = "Rule/BossRule")]
 public class BossRule : WaveRule
@@ -22,10 +22,10 @@ public class BossRule : WaveRule
 
     }
 
-    //Å¬¸®¾î Á¶°Ç
+    //í´ë¦¬ì–´ ì¡°ê±´
     public override void RoundClear(RuleDataContainer data, WaveDirectorSystem context)
     {
-        //º¸½º ¸ó½ºÅÍ ´Ù¿î
+        //ë³´ìŠ¤ ëª¬ìŠ¤í„° ë‹¤ìš´
         context.RoundClear();
     }
     #endregion
