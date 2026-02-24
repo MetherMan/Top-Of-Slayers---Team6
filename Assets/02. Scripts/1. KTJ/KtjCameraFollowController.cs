@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [DefaultExecutionOrder(1000)]
 public class KtjCameraFollowController : MonoBehaviour
@@ -58,14 +58,8 @@ public class KtjCameraFollowController : MonoBehaviour
 
         if (useBoundsClamp)
         {
-            if (maxXDistance > 0f)
-            {
-                targetPosition.x = Mathf.Clamp(targetPosition.x, -maxXDistance, maxXDistance);
-            }
-            if (maxZDistance > 0f)
-            {
-                targetPosition.z = Mathf.Clamp(targetPosition.z, -maxZDistance, maxZDistance);
-            }
+            targetPosition.x = Mathf.Clamp(targetPosition.x, -maxXDistance, maxXDistance);
+            targetPosition.z = Mathf.Clamp(targetPosition.z, -maxZDistance, maxZDistance);
         }
 
         var t = 1f - Mathf.Exp(-Mathf.Max(0f, lerpSpeed) * Time.deltaTime);
