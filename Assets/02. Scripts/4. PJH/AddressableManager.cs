@@ -57,7 +57,7 @@ public class AddressableManager : Singleton<AddressableManager>
         Task ruleSOTask = LoadAllRule();
         Task uITask = LoadAllUI();
         Task monsterSOTask = LoadAllMonsterSO();
-        Task mosnterPfTask = LoadAllMonsterPf() as Task;
+        Task mosnterPfTask = LoadAllMonsterPf();
         //ItemSO
         //ItemPrefab
         //VFX
@@ -204,7 +204,7 @@ public class AddressableManager : Singleton<AddressableManager>
         {
             foreach(GameObject uI in uIHandle.Result)
             {
-                string key = uI.name;
+                string key = uI.name; //하이어락키에 있는 이름
 
                 if (!_uI.ContainsKey(key))
                 {
@@ -219,7 +219,7 @@ public class AddressableManager : Singleton<AddressableManager>
         }
         else if (IsFailed(uIHandle))
         {
-            Debug.LogError("LoadAllUI : Failed");
+            Debug.LogWarning("LoadAllUI : Failed");
         }
     }
 
@@ -255,19 +255,14 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //MonsterPrefab
-    public IEnumerator LoadAllMonsterPf()
+    public async Task LoadAllMonsterPf()
     {
         var loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("MonsterPrefab", typeof(GameObject));
 
-        if (!IsSucceeded(loadResourceLocationHandle))
-        {
-            yield return loadResourceLocationHandle;
-        }
-        else if (IsFailed(loadResourceLocationHandle))
-        {
-            Debug.LogWarning("LoadAllMonsterPf : Failed");
-        }
+        await loadResourceLocationHandle.Task;
+
+        if (IsFailed(loadResourceLocationHandle)) Debug.LogError("loadResourceLocationHandle : Failed");
 
         List<AsyncOperationHandle> opList = new List<AsyncOperationHandle>();
 
@@ -275,30 +270,27 @@ public class AddressableManager : Singleton<AddressableManager>
         {
             AsyncOperationHandle<GameObject> loadAssetHandle
                 = Addressables.LoadAssetAsync<GameObject>(location);
-            loadedAssets.Add(loadAssetHandle);
 
-            if (IsSucceeded(loadAssetHandle))
+            loadAssetHandle.Completed += op =>
             {
-                if (!_monsterPf.ContainsKey(location.PrimaryKey))
+                if (IsSucceeded(op))
                 {
-                    _monsterPf.Add(location.PrimaryKey, loadAssetHandle.Result);
-                    opList.Add(loadAssetHandle);
+                    _monsterPf.Add(location.PrimaryKey, op.Result);
                 }
-                else
+                else if (IsFailed(op))
                 {
-                    Debug.Log($"몬스터프리팹 중복 : {location.PrimaryKey}");
+                    Debug.LogError("LoadAllMonsterPf : Failed");
                 }
-            }
-            else if (IsFailed(loadAssetHandle))
-            {
-                Debug.LogWarning("LoadAllmonsterPf_loadAssetHandle : Failed");
-            }
+
+                opList.Add(loadAssetHandle);
+            };
         }
 
         //create a GroupOperation to wait on all the above loads at once.
         var groupOp = Addressables.ResourceManager.CreateGenericGroupOperation(opList);
 
-        if (!groupOp.IsDone) yield return groupOp;
+        await groupOp.Task;
+        loadedAssets.Add(groupOp);
 
         //ResourceLocation 위치 정보이기에 메모리를 지워도 데이터가 사라지지 않는다.
         Addressables.Release(loadResourceLocationHandle);
@@ -324,7 +316,9 @@ public class AddressableManager : Singleton<AddressableManager>
     //VFX
     public async Task LoadAllVFX()
     {
-
+        //폴더로 등록되어있어서
+        //파이프라인 구조로 작성
+        //통채로 가져와서 타입별로 형변환
     }
 
     //SFX
