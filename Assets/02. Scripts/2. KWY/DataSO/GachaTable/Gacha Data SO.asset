@@ -12,34 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7010cd0ede4ed174099e68af93812af2, type: 3}
   m_Name: Gacha Data SO
   m_EditorClassIdentifier: 
-  items:
-  - item: {fileID: 11400000, guid: 13b8313775a9f584cbbaf371cc1e2523, type: 2}
-    chance: 12
-  - item: {fileID: 11400000, guid: be008f3602dbedc4f8ab551a67851a68, type: 2}
-    chance: 12
-  - item: {fileID: 11400000, guid: 7cb103c8a7fbe814bb1719d551f47f2c, type: 2}
-    chance: 12
-  - item: {fileID: 11400000, guid: b2ce1ce6bee3a8a4f8f3cb02367e8a7a, type: 2}
-    chance: 10
-  - item: {fileID: 11400000, guid: 8e786f46b53d7fa4e862b06784c38f33, type: 2}
-    chance: 10
-  - item: {fileID: 11400000, guid: d56404c3c1e03e040be699e172b95ad3, type: 2}
-    chance: 7
-  - item: {fileID: 11400000, guid: c3069e64fef322643a55551fddf40672, type: 2}
-    chance: 7
-  - item: {fileID: 11400000, guid: 07a179a728c7b9546b822160a8e80811, type: 2}
-    chance: 7
-  - item: {fileID: 11400000, guid: d3ec10ed176a38a43afbfa48a453defb, type: 2}
-    chance: 5
-  - item: {fileID: 11400000, guid: f223a9fcbcc8c664b9569bb2cbd9f149, type: 2}
-    chance: 5
-  - item: {fileID: 11400000, guid: 50e58a7d61f4ef748a40a8f3987924b5, type: 2}
-    chance: 3
-  - item: {fileID: 11400000, guid: cdc01fb0ec61cec4880ffa59c695344f, type: 2}
-    chance: 3
-  - item: {fileID: 11400000, guid: 3b8e55d9ff0a19948acc3044703badc7, type: 2}
-    chance: 3
-  - item: {fileID: 11400000, guid: 0d9820869fa2d0a49a093b112db577ef, type: 2}
-    chance: 2
-  - item: {fileID: 11400000, guid: 4af14abaea8167c4d914e86547978ad5, type: 2}
-    chance: 2
+  legendChance: 5
+  epicChance: 15
+  normalChance: 80
+  legendItems:
+  - {fileID: 11400000, guid: 50e58a7d61f4ef748a40a8f3987924b5, type: 2}
+  - {fileID: 11400000, guid: 0d9820869fa2d0a49a093b112db577ef, type: 2}
+  - {fileID: 11400000, guid: cdc01fb0ec61cec4880ffa59c695344f, type: 2}
+  - {fileID: 11400000, guid: 3b8e55d9ff0a19948acc3044703badc7, type: 2}
+  - {fileID: 11400000, guid: 4af14abaea8167c4d914e86547978ad5, type: 2}
+  epicItems:
+  - {fileID: 11400000, guid: d56404c3c1e03e040be699e172b95ad3, type: 2}
+  - {fileID: 11400000, guid: d3ec10ed176a38a43afbfa48a453defb, type: 2}
+  - {fileID: 11400000, guid: c3069e64fef322643a55551fddf40672, type: 2}
+  - {fileID: 11400000, guid: 07a179a728c7b9546b822160a8e80811, type: 2}
+  - {fileID: 11400000, guid: f223a9fcbcc8c664b9569bb2cbd9f149, type: 2}
+  normalItems:
+  - {fileID: 11400000, guid: 13b8313775a9f584cbbaf371cc1e2523, type: 2}
+  - {fileID: 11400000, guid: b2ce1ce6bee3a8a4f8f3cb02367e8a7a, type: 2}
+  - {fileID: 11400000, guid: be008f3602dbedc4f8ab551a67851a68, type: 2}
+  - {fileID: 11400000, guid: 7cb103c8a7fbe814bb1719d551f47f2c, type: 2}
+  - {fileID: 11400000, guid: 8e786f46b53d7fa4e862b06784c38f33, type: 2}

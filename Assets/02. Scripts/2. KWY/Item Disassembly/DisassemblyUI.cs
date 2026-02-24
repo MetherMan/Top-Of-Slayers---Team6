@@ -11,6 +11,8 @@ public class DisassemblyUI : MonoBehaviour
     [SerializeField] Sprite defaultSelectedItemImage;
     [SerializeField] Sprite defaultDisassemblyItemImage;
 
+    [SerializeField] TextMeshProUGUI disassemblyItemCount;
+
     [SerializeField] GameObject inventoryPanel;
     [SerializeField] GameObject failPanel;
     [SerializeField] TextMeshProUGUI failText;
@@ -59,10 +61,12 @@ public class DisassemblyUI : MonoBehaviour
         if (recipe != null && recipe.resultItems.Length > 0) 
         {
             disassemblyItemImage.sprite = recipe.resultItems[0].sprite;
+            disassemblyItemCount.text = recipe.resultCounts[0].ToString();
         }
         else
         {
             disassemblyItemImage.sprite = defaultDisassemblyItemImage;
+            disassemblyItemCount.text = "";
 
         }
 
@@ -86,6 +90,7 @@ public class DisassemblyUI : MonoBehaviour
 
         selectedItemImage.sprite = defaultSelectedItemImage;
         disassemblyItemImage.sprite = defaultDisassemblyItemImage;
+        disassemblyItemCount.text = "";
 
     }
 }

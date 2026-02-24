@@ -14,18 +14,17 @@ public class GachaTableUI : MonoBehaviour
 
     public void ShowTable()
     {
-        if(gachaData == null)
+        if (gachaData == null)
         {
             return;
         }
 
-        float totalChance = gachaData.TotalChance();
+        tableText.text = "";
 
-        foreach(var entry in gachaData.items)
-        {
-            float percent = (entry.chance / totalChance) * 100f;
-            //테이블에 아이템 이름과 확률
-            tableText.text += $"{entry.item.name}({percent}%)\n";
-        }
+        tableText.text += $"Legend : {gachaData.legendChance}%\n\n";
+        tableText.text += $"Epic : {gachaData.epicChance}%\n\n";
+        tableText.text += $"Normal : {gachaData.normalChance}%\n\n";
+
+
     }
 }

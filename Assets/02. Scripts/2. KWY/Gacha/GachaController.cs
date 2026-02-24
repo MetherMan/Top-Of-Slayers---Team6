@@ -1,4 +1,6 @@
-﻿using TMPro;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using TMPro;
 using UnityEngine;
 
 public class GachaController : MonoBehaviour
@@ -9,6 +11,10 @@ public class GachaController : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI ticketCountText;
     [SerializeField] ItemSO ticketItem;
+    [SerializeField] GachaChestUI chestUI;
+
+    ItemSO cachedItem;
+    List<ItemSO> cachedItems;
 
 
     private void OnEnable()
@@ -24,9 +30,12 @@ public class GachaController : MonoBehaviour
             failPanel.SetActive(true);
             return;
         } 
-
+        cachedItem = item;
         RefreshTicket();
-        resultUI.ShowOne(item);
+
+        chestUI.PlayChest(OnChestOpenedOne);
+
+
     }
 
     public void OnClickTen()
@@ -39,13 +48,26 @@ public class GachaController : MonoBehaviour
 
         }
 
+        cachedItems = items;
+
         RefreshTicket();
-        resultUI.ShowTen(items);
+
+        chestUI.PlayChest(OnChestOpenedTen);
     }
 
     private void RefreshTicket()
     {
         int count = InventoryManager.Instance.GetItemCount(ticketItem);
         ticketCountText.text = count.ToString();
+    }
+
+    private void OnChestOpenedOne()
+    {
+        resultUI.ShowOne(cachedItem);
+    }
+
+    private void OnChestOpenedTen()
+    {
+        resultUI.ShowTen(cachedItems);
     }
 }
