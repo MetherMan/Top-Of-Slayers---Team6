@@ -2,8 +2,8 @@
 
 public class EnemyFollow : IEnemyState
 {
-    private EnemyBase enemy;
-    private EnemyStateMachine enemyStateMachine;
+    private readonly EnemyBase enemy;
+    private readonly EnemyStateMachine enemyStateMachine;
 
     public EnemyFollow(EnemyBase enemy, EnemyStateMachine enemyStateMachine)
     {
@@ -14,14 +14,19 @@ public class EnemyFollow : IEnemyState
     public void Enter()
     {
         enemy.enemyAnim.EnemyRunning(true);
-        Debug.Log("에너미 팔로우 들어감");
     }
 
     public void Update()
     {
-        float distance = Vector3.Distance(enemy.transform.position, enemy.player.position);
+        var playerTransform = enemy.ResolvePlayer();
+        if (playerTransform == null) return;
 
-        if (distance <= enemy.attackRange)
+        var currentPosition = enemy.rb != null ? enemy.rb.position : enemy.transform.position;
+        var targetPosition = playerTransform.position;
+        targetPosition.y = currentPosition.y;
+
+        var toTarget = targetPosition - currentPosition;
+        if (toTarget.sqrMagnitude <= enemy.attackRange * enemy.attackRange)
         {
             enemyStateMachine.ChangeState(enemy.AttackState);
         }
@@ -29,18 +34,38 @@ public class EnemyFollow : IEnemyState
 
     public void FixedUpdate()
     {
-        Vector3 dir = (enemy.player.position - enemy.transform.position).normalized;
-        dir.y = 0; //y고정
-        enemy.rb.MovePosition(enemy.transform.position + dir * enemy.moveSpeed * Time.deltaTime);
+        var playerTransform = enemy.ResolvePlayer();
+        if (playerTransform == null) return;
 
-        Vector3 lookDir = enemy.player.position;
-        lookDir.y = 0; //y고정
-        enemy.transform.LookAt(lookDir);
+        var currentPosition = enemy.rb != null ? enemy.rb.position : enemy.transform.position;
+        var targetPosition = playerTransform.position;
+        targetPosition.y = currentPosition.y;
+
+        var toTarget = targetPosition - currentPosition;
+        var sqrDistance = toTarget.sqrMagnitude;
+        if (sqrDistance <= enemy.attackRange * enemy.attackRange) return;
+        if (sqrDistance <= 0.0001f) return;
+
+        var moveDirection = toTarget.normalized;
+        var moveStep = enemy.moveSpeed * Time.fixedDeltaTime;
+        if (moveStep <= 0f) return;
+
+        var nextPosition = currentPosition + moveDirection * moveStep;
+        var targetRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+
+        if (enemy.rb != null)
+        {
+            enemy.rb.MovePosition(nextPosition);
+            enemy.rb.MoveRotation(targetRotation);
+            return;
+        }
+
+        enemy.transform.position = nextPosition;
+        enemy.transform.rotation = targetRotation;
     }
 
     public void Exit()
     {
         enemy.enemyAnim.EnemyRunning(false);
-        Debug.Log("에너미 팔로우 나감");
     }
 }

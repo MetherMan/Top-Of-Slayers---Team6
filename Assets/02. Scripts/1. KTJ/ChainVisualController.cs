@@ -22,6 +22,22 @@ public partial class ChainVisualController : MonoBehaviour
     [SerializeField, Min(0f)] private float chainTextPunchDuration = 0.12f;
     [SerializeField] private Ease chainTextEase = Ease.OutBack;
 
+    [Header("체인 타이머 바")]
+    [SerializeField] private Image chainTimerBarFillImage;
+    [SerializeField] private Image chainTimerBarBackgroundImage;
+    [SerializeField] private bool autoCreateChainTimerBar = true;
+    [SerializeField, Min(0f)] private float chainTimerBarTopMargin = 0f;
+    [SerializeField, Min(0f)] private float chainTimerBarSidePadding = 0f;
+    [SerializeField, Min(4f)] private float chainTimerBarHeight = 20f;
+    [SerializeField] private Color chainTimerBarColor = new Color(1f, 0.85f, 0.15f, 0.95f);
+    [SerializeField] private Color chainTimerBarBackgroundColor = new Color(0.08f, 0.08f, 0.1f, 0.7f);
+    [SerializeField, Range(0f, 1f)] private float chainTimerBarEmptyAlpha = 0.18f;
+
+    [Header("체인 처치 프리팹")]
+    [SerializeField] private GameObject chainKillPrefab;
+    [SerializeField, Min(0f)] private float chainKillPrefabHeightOffset = 0.2f;
+    [SerializeField, Min(0f)] private float chainKillPrefabAutoDestroyTime = 2f;
+
     [Header("배경 어둡게")]
     [SerializeField] private CanvasGroup darkenGroup;
     [SerializeField] private Graphic darkenGraphic;
@@ -49,6 +65,7 @@ public partial class ChainVisualController : MonoBehaviour
     private bool isChainActive;
     private Vector3 darkenBaseScale = Vector3.one;
     private int pendingTextRefreshFrames;
+    private bool isChainTimerBarConfigured;
 
     private void Awake()
     {
@@ -63,6 +80,7 @@ public partial class ChainVisualController : MonoBehaviour
         if (chainTextRoot == null && chainText != null) chainTextRoot = chainText.rectTransform;
         if (chainTextRoot == null && chainPanel != null) chainTextRoot = chainPanel.GetComponent<RectTransform>();
         if (chainTextGroup == null && chainPanel != null) chainTextGroup = chainPanel.GetComponent<CanvasGroup>();
+        EnsureChainTimerBar();
 
         if (darkenRoot == null)
         {
@@ -129,6 +147,7 @@ public partial class ChainVisualController : MonoBehaviour
         {
             PlayDarken(false);
             HideChain();
+            ResetChainTimerBarImmediate();
             lastChain = -1;
             pendingTextRefreshFrames = 0;
             return;
@@ -141,6 +160,7 @@ public partial class ChainVisualController : MonoBehaviour
     {
         if (result.IsDead)
         {
+            TrySpawnChainKillPrefab(result.Target);
             pendingTextRefreshFrames = 0;
             return;
         }
@@ -181,6 +201,7 @@ public partial class ChainVisualController : MonoBehaviour
         if (chainTextRoot == null && chainText != null) chainTextRoot = chainText.rectTransform;
         if (chainTextRoot == null && chainPanel != null) chainTextRoot = chainPanel.GetComponent<RectTransform>();
         if (chainTextGroup == null && chainPanel != null) chainTextGroup = chainPanel.GetComponent<CanvasGroup>();
+        EnsureChainTimerBar();
         if (darkenGroup == null && darkenRoot != null) darkenGroup = darkenRoot.GetComponent<CanvasGroup>();
         if (darkenGraphic == null && darkenRoot != null) darkenGraphic = darkenRoot.GetComponent<Graphic>();
         if (darkenSprite == null && darkenRoot != null) darkenSprite = darkenRoot.GetComponent<SpriteRenderer>();
@@ -200,6 +221,8 @@ public partial class ChainVisualController : MonoBehaviour
 
     private void LateUpdate()
     {
+        UpdateChainTimerBar();
+
         if (pendingTextRefreshFrames <= 0) return;
 
         UpdateChainText();
@@ -215,6 +238,7 @@ public partial class ChainVisualController : MonoBehaviour
     private void ForceResetVisualState()
     {
         HideChainImmediate();
+        ResetChainTimerBarImmediate();
         ResetDarkenImmediate();
         isChainActive = false;
         lastChain = -1;

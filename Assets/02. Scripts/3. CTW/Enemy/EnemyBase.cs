@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class EnemyBase : MonoBehaviour
 {
@@ -14,11 +13,11 @@ public class EnemyBase : MonoBehaviour
     public EnemyAnim enemyAnim;
 
     public EnemyStateMachine enemyStateMachine;
+    private PlayerMoveController cachedPlayerMoveController;
 
     public EnemyIdleState IdleState { get; private set; }
     public EnemyFollow FollowState { get; private set; }
     public EnemyAttack AttackState { get; private set; }
-
 
     [SerializeField] private EnemyConfigSO enemySO;
     public float moveSpeed => enemySO.moveSpeed;
@@ -26,19 +25,25 @@ public class EnemyBase : MonoBehaviour
     public AttackType attackType => enemySO.attackType;
     public GameObject bulletPrefab => enemySO.bulletPrefab;
     public float bulletSpeed => enemySO.bulletSpeed;
-    public int attackDamage => enemySO.strength;  
+    public int attackDamage => enemySO.strength;
     public float attackAngle => enemySO.attackAngle;
 
     private void Awake()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
         rb = GetComponent<Rigidbody>();
         enemyAnim = GetComponent<EnemyAnim>();
         enemyStateMachine = GetComponent<EnemyStateMachine>();
+        ResolvePlayer();
 
         IdleState = new EnemyIdleState(this, enemyStateMachine);
         FollowState = new EnemyFollow(this, enemyStateMachine);
         AttackState = new EnemyAttack(this, enemyStateMachine);
+    }
+
+    private void OnEnable()
+    {
+        EnsureRuntimeState();
+        ResolvePlayer();
     }
 
     private void Start()
@@ -46,14 +51,47 @@ public class EnemyBase : MonoBehaviour
         enemyStateMachine.ChangeState(IdleState);
     }
 
+    private void FixedUpdate()
+    {
+        enemyStateMachine?.FixedUpdate();
+    }
+
     public void Init(GameObject enemyPrefab)
     {
         this.enemyPrefab = enemyPrefab;
     }
 
-    private void FixedUpdate()
+    public Transform ResolvePlayer()
     {
-        enemyStateMachine.FixedUpdate();
+        if (cachedPlayerMoveController == null || !cachedPlayerMoveController.gameObject.activeInHierarchy)
+        {
+            cachedPlayerMoveController = FindObjectOfType<PlayerMoveController>();
+        }
+
+        if (cachedPlayerMoveController != null)
+        {
+            player = cachedPlayerMoveController.transform;
+            return player;
+        }
+
+        if (player != null && player.gameObject.activeInHierarchy)
+        {
+            return player;
+        }
+
+        try
+        {
+            var taggedPlayer = GameObject.FindGameObjectWithTag("Player");
+            if (taggedPlayer != null)
+            {
+                player = taggedPlayer.transform;
+            }
+        }
+        catch (UnityException)
+        {
+        }
+
+        return player;
     }
 
     public void Die()
@@ -62,9 +100,21 @@ public class EnemyBase : MonoBehaviour
         ObjectPoolManager.Instance.ReturnPool(enemyPrefab, gameObject);
     }
 
+    private void EnsureRuntimeState()
+    {
+        if (rb == null)
+        {
+            rb = GetComponent<Rigidbody>();
+        }
+        if (rb == null) return;
+
+        rb.isKinematic = false;
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+    }
+
     private void OnDrawGizmos()
     {
-        //근접공격 범위 시각화
         Gizmos.color = Color.red;
         if (enemySO.attackType == AttackType.Melee)
         {
@@ -74,7 +124,6 @@ public class EnemyBase : MonoBehaviour
         if (enemySO.attackType == AttackType.Corn)
         {
             Gizmos.DrawWireSphere(transform.position, enemySO.attackRange);
-            //부채꼴 방향선
             Vector3 leftDir = Quaternion.Euler(0, -enemySO.attackAngle / 2, 0) * transform.forward;
             Vector3 rightDir = Quaternion.Euler(0, enemySO.attackAngle / 2, 0) * transform.forward;
             Gizmos.DrawLine(transform.position, transform.position + leftDir * enemySO.attackRange);

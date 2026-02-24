@@ -9,6 +9,7 @@ public partial class AutoSlashController
     private Vector2 lastAttackInput;
     private bool hasLastAttackInput;
     private float sameTargetReleaseTimer;
+    private float sameTargetAutoReleaseTimer;
 
     private Transform GetIgnoreTarget(bool isChainActive, Vector3 aimDirection)
     {
@@ -41,6 +42,8 @@ public partial class AutoSlashController
         if (target == null) return;
         lastAttackTarget = target;
         sameTargetReleased = false;
+        sameTargetReleaseTimer = 0f;
+        sameTargetAutoReleaseTimer = 0f;
         rawAimDirection.y = 0f;
         if (rawAimDirection.sqrMagnitude > 0f)
         {
@@ -61,6 +64,7 @@ public partial class AutoSlashController
         hasLastAttackAim = false;
         hasLastAttackInput = false;
         sameTargetReleaseTimer = 0f;
+        sameTargetAutoReleaseTimer = 0f;
     }
 
     private void UpdateSameTargetRelease(Vector3 rawAimDirection)
@@ -72,9 +76,20 @@ public partial class AutoSlashController
             return;
         }
         if (lastAttackTarget == null) return;
+        if (sameTargetReleased) return;
 
         var releaseHoldTime = chainTargetConfirmTime > 0f ? chainTargetConfirmTime : 0.05f;
         var delta = Time.unscaledDeltaTime;
+        if (sameTargetAutoReleaseTime > 0f)
+        {
+            sameTargetAutoReleaseTimer += delta;
+            if (sameTargetAutoReleaseTimer >= sameTargetAutoReleaseTime)
+            {
+                sameTargetReleased = true;
+                sameTargetReleaseTimer = 0f;
+                return;
+            }
+        }
 
         if (moveController != null && hasLastAttackInput)
         {
