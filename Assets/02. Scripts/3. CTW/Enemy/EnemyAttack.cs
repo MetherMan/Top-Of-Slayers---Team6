@@ -10,6 +10,8 @@ public class EnemyAttack : IEnemyState
     private bool isAttackEnded;
     private bool isShoot;
 
+    private bool isStateChaged = false;
+
     public EnemyAttack(EnemyBase enemy, EnemyStateMachine enemyStateMachine)
     {
         this.enemy = enemy;
@@ -26,6 +28,9 @@ public class EnemyAttack : IEnemyState
         enemy.enemyAnim.EnemyAttack(true);
         //재생중인 애니메이션 길이 가져오기
         attackDuration = enemy.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
+
+        isStateChaged = false;
+        Debug.Log("에너미 어택 들어감");
     }
 
     public void Update()
@@ -59,19 +64,23 @@ public class EnemyAttack : IEnemyState
 
         float distance = Vector3.Distance(enemy.transform.position, playerTransform.position);
 
-        if(distance > enemy.attackRange)
+        if (distance > enemy.attackRange && !isStateChaged)
         {
+            isStateChaged = true;
             enemyStateMachine.ChangeState(enemy.FollowState);
         }
         else
         {
             Enter();
         }
+
+        
     }
 
     public void Exit()
     {
         enemy.enemyAnim.EnemyAttack(false);
+        Debug.Log("에너미 어택 나감");
     }
 
     private void SpawnBullet()
@@ -96,5 +105,10 @@ public class EnemyAttack : IEnemyState
                 bullet.Init(enemy.bulletPrefab, enemy.bulletSpeed, shootDir, enemy.attackDamage);
             }
         }
+    }
+
+    public void FixedUpdate()
+    {
+
     }
 }

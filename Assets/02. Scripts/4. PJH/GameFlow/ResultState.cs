@@ -2,37 +2,23 @@
 
 public class ResultState : IGameState
 {
-    private GameFlowMachine _machine;
-    private bool _isClear;
-    private bool _eventClear;
+    /*
+    어떤 역할?
+    결과상태다 라고 상태만 전달?
+    UI를 어떤걸 활성화 시킬지 확인하고 여기서 활성화 시킬 필요가?
 
-    public ResultState(GameFlowMachine machine, bool isClear, bool eventClear)
+    재시작 할 건지 로비로 갈 건지 어떤 선택을 했는지만 받아오면?
+    */
+    private GameFlowMachine _machine;
+
+    public ResultState(GameFlowMachine machine)
     {
         _machine = machine;
-        _isClear = isClear;
-        _eventClear = eventClear;
     }
 
     public void Enter()
     {
-        if (_isClear)
-        {
-            if (_eventClear)
-            {
-                Debug.Log("결과창 UI / 스테이지 보상 + 이벤트 보상 획득");
-                return;
-            }
-            Debug.Log("결과창 UI / 스테이지 보상 획득");
-        }
-        else if (!_isClear)
-        {
-            if (_eventClear)
-            {
-                Debug.Log("결과창 UI 활성화 / 보상 획득 불가 / 이벤트 보상 획득");
-                return;
-            }
-            Debug.Log("결과창 UI 활성화 / 보상 획득 불가");
-        }
+     
     }
 
     public void Execute()
@@ -40,12 +26,12 @@ public class ResultState : IGameState
         if (Input.GetKeyDown(KeyCode.Escape)) //UI '나가기' 터치로 변경
         {
             //로비로 돌아가기
-            _machine.ChangeState(new LobbyState(_machine));
+            _machine.ChangeState(new LobbyState(_machine), State.Lobby);
         }
         else if (Input.GetKeyDown(KeyCode.R)) //UI '재시작' 터치로 변경
         {
             //스테이지 재도전
-            _machine.ChangeState(new LoadingState(_machine));
+            _machine.ChangeState(new LoadingState(_machine), State.Play);
         }
     }
 

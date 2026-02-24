@@ -10,15 +10,15 @@ public class EquipmentSlotUI : MonoBehaviour
 
     private void OnEnable()
     {
-
+        if (EquipmentManager.Instance != null)
             EquipmentManager.Instance.OnEquipmentChanged += Refresh;
             Refresh();
     }
 
     private void OnDisable()
     {
-
-            EquipmentManager.Instance.OnEquipmentChanged -= Refresh;
+        if (EquipmentManager.Instance == null) return;
+        EquipmentManager.Instance.OnEquipmentChanged -= Refresh;
     }
 
     public void Refresh()

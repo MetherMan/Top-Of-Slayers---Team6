@@ -18,7 +18,7 @@ public class LoginState : IGameState
     {
         Debug.Log("로그인 완료");
         //해당 유저 데이터 가져오기, 신규 유저일 경우 건너뛰기
-        _machine.ChangeState(new LobbyState(_machine));
+        _machine.ChangeState(new LobbyState(_machine), State.Lobby);
     }
 
     public void Exit()

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class EnemyBase : MonoBehaviour
@@ -51,6 +51,11 @@ public class EnemyBase : MonoBehaviour
         enemyStateMachine.ChangeState(IdleState);
     }
 
+    private void FixedUpdate()
+    {
+        enemyStateMachine?.FixedUpdate();
+    }
+
     public void Init(GameObject enemyPrefab)
     {
         this.enemyPrefab = enemyPrefab;
@@ -88,6 +93,7 @@ public class EnemyBase : MonoBehaviour
 
         return player;
     }
+
     public void Die()
     {
         OnEnemyKilled?.Invoke(killScore);

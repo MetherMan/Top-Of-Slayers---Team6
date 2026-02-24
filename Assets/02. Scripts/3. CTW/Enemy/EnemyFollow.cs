@@ -26,17 +26,28 @@ public class EnemyFollow : IEnemyState
         targetPosition.y = currentPosition.y;
 
         var toTarget = targetPosition - currentPosition;
-        var sqrDistance = toTarget.sqrMagnitude;
-        if (sqrDistance <= enemy.attackRange * enemy.attackRange)
+        if (toTarget.sqrMagnitude <= enemy.attackRange * enemy.attackRange)
         {
             enemyStateMachine.ChangeState(enemy.AttackState);
-            return;
         }
+    }
 
+    public void FixedUpdate()
+    {
+        var playerTransform = enemy.ResolvePlayer();
+        if (playerTransform == null) return;
+
+        var currentPosition = enemy.rb != null ? enemy.rb.position : enemy.transform.position;
+        var targetPosition = playerTransform.position;
+        targetPosition.y = currentPosition.y;
+
+        var toTarget = targetPosition - currentPosition;
+        var sqrDistance = toTarget.sqrMagnitude;
+        if (sqrDistance <= enemy.attackRange * enemy.attackRange) return;
         if (sqrDistance <= 0.0001f) return;
 
         var moveDirection = toTarget.normalized;
-        var moveStep = enemy.moveSpeed * Time.deltaTime;
+        var moveStep = enemy.moveSpeed * Time.fixedDeltaTime;
         if (moveStep <= 0f) return;
 
         var nextPosition = currentPosition + moveDirection * moveStep;

@@ -28,10 +28,10 @@ public class LoadingState : IGameState
         //!Enter에서 역할을 인지하고 해당되는 메서드를 여기서 실행한다
         _loadingTimer += Time.deltaTime;
 
-        //서버에서 데이터를 전부 가져왔을 때 실행하는 조건으로 변경해야 됨
-        if (_loadingTimer > 2.0f)
+        //상황에 맞춰 조건문 추가 작성 필요
+        if (_loadingTimer > 2.0f) //'데이터를 전부 다 받아왔을 때'를 조건식으로 변경 필요
         {
-            _machine.ChangeState(new LobbyState(_machine));
+            _machine.ChangeState(new LoginState(_machine), State.Login);
         }
     }
 
