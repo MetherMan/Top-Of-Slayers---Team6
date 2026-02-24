@@ -36,4 +36,8 @@ public class EnemyIdleState : IEnemyState
     {
 
     }
+
+    public void FixedUpdate()
+    {
+    }
 }

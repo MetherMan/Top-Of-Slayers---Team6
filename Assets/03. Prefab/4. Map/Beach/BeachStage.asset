@@ -12,11 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea8bb6303b74a4b4e8fc6f63e5dc726b, type: 3}
   m_Name: BeachStage
   m_EditorClassIdentifier: 
-  stageNum: 0
+  sceneReference:
+    m_AssetGUID: 
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  stageKey: 
   stageType: 0
   stageRule: {fileID: 0}
   stageTime: 0
-  roundDatas: []
+  roundDatas:
+  - spawnPattern: 2
+    monsterSpawnList:
+    - {fileID: 11400000, guid: 0051a12fa9e7e4f42b699ad04a7b589a, type: 2}
+    - {fileID: 11400000, guid: 2261d40eaae89bc41b92cc0c19ce38eb, type: 2}
+    - {fileID: 11400000, guid: 515fad8995eabf340b31760fb54774a8, type: 2}
+    - {fileID: 11400000, guid: 515fad8995eabf340b31760fb54774a8, type: 2}
+    - {fileID: 11400000, guid: 5a03f66d0366e4d4e88d37271f05b6b9, type: 2}
+    - {fileID: 11400000, guid: 5a03f66d0366e4d4e88d37271f05b6b9, type: 2}
+    elite: {fileID: 0}
+    boss: {fileID: 0}
   clearResult: 0
   FirstClearCoin: 
   ClearCoin: 

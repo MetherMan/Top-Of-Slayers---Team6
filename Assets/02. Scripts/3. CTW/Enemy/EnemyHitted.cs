@@ -38,4 +38,8 @@ public class EnemyHitted : IEnemyState
     {
 
     }
+
+    public void FixedUpdate()
+    {
+    }
 }
