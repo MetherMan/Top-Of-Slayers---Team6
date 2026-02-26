@@ -14,8 +14,9 @@ public class EquipmentEnhancementUI : MonoBehaviour
     [SerializeField] TextMeshProUGUI afterStatText;
     [SerializeField] TextMeshProUGUI costText;
 
-    [SerializeField] GameObject inventoryPanel; 
-
+    [SerializeField] GameObject inventoryPanel;
+    [SerializeField] GameObject failPanel;
+    [SerializeField] TextMeshProUGUI failText;
 
     [SerializeField] EquipmentEnhancementSystem enhancementSystem;
     [SerializeField] InventorySelection inventorySelection;
@@ -35,7 +36,13 @@ public class EquipmentEnhancementUI : MonoBehaviour
 
     public void OnItemSelected(InventoryItem data)
     {
-        if (!(data.item is EquipmentSO equip)) return;
+        if (!(data.item is EquipmentSO equip)) 
+        {
+            failText.text = "재료아이템은\r\n 분해하지 못합니다.";
+            failPanel.SetActive(true );
+            inventorySelection.EnableSelectMode(OnItemSelected);
+            return;
+        }
 
         selectedItem = data;
 

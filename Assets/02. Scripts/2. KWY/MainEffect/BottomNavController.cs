@@ -34,7 +34,7 @@ public class BottomNavController : MonoBehaviour
         UpdateLayout(false);
     }
 
-    void UpdateLayout(bool instant)
+    private void UpdateLayout(bool instant)
     {
         float startX = pozX;
 
