@@ -8,6 +8,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
     {
         public GameObject prefab;
         public int size;
+        public int maxSize;
     }
 
     [SerializeField] private List<Pool> pools;
@@ -15,6 +16,9 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
     //프리팹과 오브젝트 큐를 매핑하는 딕셔너리
     private Dictionary<GameObject, Queue<GameObject>> poolDictionary
         = new Dictionary<GameObject, Queue<GameObject>>();
+
+    //풀에서 현재 개수 추적하는 딕셔너리
+    private Dictionary<GameObject, int> poolCurrent = new Dictionary<GameObject, int>();
 
     protected override void Awake()
     {
@@ -40,6 +44,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             }
             //딕셔너리에 큐 추가
             poolDictionary.Add(pool.prefab, objectQ);
+            poolCurrent.Add(pool.prefab, pool.size);
         }
     }
 
@@ -65,8 +70,16 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         }
         else
         {
+            int maxSize = pools.Find(p => p.prefab == prefab).maxSize;
+
+            //맥스사이즈 이상이면 널
+            if(poolCurrent[prefab] >= maxSize)
+            {
+                return null;
+            }
             //큐가 비어있으면 새로 생성
             obj = Instantiate(prefab, transform);
+            poolCurrent[prefab]++;
         }
 
         obj.transform.SetPositionAndRotation(position, rotation);

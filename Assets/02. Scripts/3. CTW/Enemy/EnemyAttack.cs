@@ -30,7 +30,6 @@ public class EnemyAttack : IEnemyState
         attackDuration = enemy.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
 
         isStateChaged = false;
-        Debug.Log("에너미 어택 들어감");
     }
 
     public void Update()
@@ -51,11 +50,20 @@ public class EnemyAttack : IEnemyState
                 isShoot = true;
             }
         }
+        else if(enemy.attackType == AttackType.Melee || enemy.attackType == AttackType.Corn)
+        {
+            //애니메이션 끝에 공격
+            if(timer >= attackDuration * 0.9f && !isShoot)
+            {
+                MeleeAttack();
+                isShoot = true;
+            }
+        }
 
-        if(!isAttackEnded)
+        if (!isAttackEnded)
         {
             timer += Time.deltaTime;
-            if(timer >= attackDuration)
+            if (timer >= attackDuration)
             {
                 isAttackEnded = true;
             }
@@ -80,7 +88,6 @@ public class EnemyAttack : IEnemyState
     public void Exit()
     {
         enemy.enemyAnim.EnemyAttack(false);
-        Debug.Log("에너미 어택 나감");
     }
 
     private void SpawnBullet()
@@ -104,6 +111,34 @@ public class EnemyAttack : IEnemyState
 
                 bullet.Init(enemy.bulletPrefab, enemy.bulletSpeed, shootDir, enemy.attackDamage);
             }
+        }
+    }
+
+    private void MeleeAttack()
+    {
+        var playerTransform = enemy.ResolvePlayer();
+        if(playerTransform == null) return;
+
+        Vector3 enemyPos = enemy.transform.position;
+        Vector3 playerPos = playerTransform.position;
+
+        enemyPos.y = 0f;
+        playerPos.y = 0f;
+
+        float distance = Vector3.Distance(enemyPos, playerPos);
+
+        if(distance <= enemy.attackRange + 0.1f)
+        {
+            PlayerHP playerHP = playerTransform.GetComponent<PlayerHP>();
+            if(playerHP != null)
+            {
+                playerHP.TakeDamage(enemy.attackDamage);
+                Debug.Log($"{enemy.name}이 때림({enemy.attackDamage})");
+            }
+        }
+        else
+        {
+             Debug.Log($"{enemy.name}의 공격이 빗나감");
         }
     }
 
