@@ -25,7 +25,6 @@ public class SceneLoadManager : Singleton<SceneLoadManager>
     */
     #region field
     [Header("고정 씬 설정")]
-    public AssetReference lodingScene;
     public AssetReference loginScene;
     public AssetReference lobbyScene;
 
@@ -67,7 +66,7 @@ public class SceneLoadManager : Singleton<SceneLoadManager>
         {
             case State.Loding:
                 {
-
+                    LoadingSceneController.LoadScene("asdf");
                 }
                 break;
             case State.Login:
