@@ -1,20 +1,27 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerHP : MonoBehaviour
 {
-    [SerializeField] private int maxHP = 100;
-    private int currentHP;
+    [SerializeField] public int maxHP = 100;
+    public int currentHP;
+
+    public event Action<int, int> OnHPChanged;
 
     private void Awake()
     {
         currentHP = maxHP;
+
+        OnHPChanged?.Invoke(currentHP, maxHP);
     }
 
     public void TakeDamage(int damage)
     {
         currentHP -= damage;
 
-        if(currentHP <= 0)
+        OnHPChanged?.Invoke(currentHP, maxHP);
+
+        if (currentHP <= 0)
         {
             currentHP = 0;
             Die();

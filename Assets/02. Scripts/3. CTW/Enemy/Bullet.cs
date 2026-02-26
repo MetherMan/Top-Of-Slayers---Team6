@@ -36,6 +36,7 @@ public class Bullet : MonoBehaviour
             if (playerHP != null)
             {
                 playerHP.TakeDamage(attackDamage);
+                Debug.Log($"불렛이 때림({attackDamage})");
             }
             ReturnPool();
         }

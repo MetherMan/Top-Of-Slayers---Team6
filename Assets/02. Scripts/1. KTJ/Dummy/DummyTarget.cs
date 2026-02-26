@@ -11,6 +11,11 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
 
     private void OnEnable()
     {
+        if(enemyBase == null)
+        {
+            enemyBase = GetComponent<EnemyBase>();
+        }
+
         if (targeting == null)
         {
             targeting = FindObjectOfType<TargetingSystem>();
@@ -35,6 +40,9 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
         if (amount <= 0) return;
 
         hp -= amount;
+
+        if(DamageUI.Instance != null) DamageUI.Instance.ShowDamage(transform, amount);
+
         if (hp <= 0)
         {
             Die();
