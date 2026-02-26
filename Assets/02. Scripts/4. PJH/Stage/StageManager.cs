@@ -36,11 +36,6 @@ public class StageManager : Singleton<StageManager>
         }
     }
 
-    void Update()
-    {
-
-    }
-
     #region method
     //스테이지 UI 클릭 시 실행될 매서드
     public void StageData(string key)
