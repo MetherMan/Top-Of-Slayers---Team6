@@ -11,8 +11,7 @@ public class EquipmentEnhancementSystem : MonoBehaviour
 
         if (targetItem.enhancementLevel >= maxLevel)
         {
-
-            Debug.Log("최대 강화 도달");
+            //최대레벨 도달 강화 불가 판넬 활성화
             return false;
         }
 
@@ -20,7 +19,6 @@ public class EquipmentEnhancementSystem : MonoBehaviour
 
         if (!CurrencyManager.Instance.HasEnough(cost))
         {
-            Debug.Log("골드 부족");
             return false;
         }
 
@@ -28,10 +26,6 @@ public class EquipmentEnhancementSystem : MonoBehaviour
 
 
         targetItem.enhancementLevel++;
-
-
-
-        Debug.Log($"강화 성공! 현재 레벨: {targetItem.enhancementLevel}");
 
         InventoryManager.Instance.NotifyInventoryChanged();
 

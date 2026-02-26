@@ -28,7 +28,7 @@ public class CraftingItemSlot : MonoBehaviour
         }
     }
 
-    public void ApplyGradeColor(Grade grade)
+    private void ApplyGradeColor(Grade grade)
     {
         switch (grade)
         {

@@ -21,7 +21,6 @@ public class InventorySelection : MonoBehaviour
     {
         if (item == null) return;
 
-        // 선택 모드라면 → 콜백
         if (onItemSelected != null)
         {
             onItemSelected.Invoke(item);

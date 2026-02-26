@@ -1,9 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 public enum Grade
 {
-    Legend,
+    Normal,
     Epic,
-    Normal
+    Legend
 }
 [CreateAssetMenu(fileName = "ItemData", menuName = "Data/ItemData")]
 

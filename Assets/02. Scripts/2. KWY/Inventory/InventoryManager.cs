@@ -33,7 +33,6 @@ public class InventoryManager : Singleton<InventoryManager>
         }
         else
         {
-            // 재료는 스택
             var slot = inventory.Find(x => x.item == item);
 
             if (slot != null)

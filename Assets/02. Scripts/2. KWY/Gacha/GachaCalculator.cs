@@ -6,7 +6,6 @@ public class GachaCalculator
     {
         float rand = Random.Range(0f, 100f);
 
-        // 1️⃣ 등급 결정
         if (rand < data.legendChance)
         {
             return GetRandomItem(data.legendItems);
@@ -25,7 +24,6 @@ public class GachaCalculator
     {
         if (list == null || list.Count == 0)
         {
-            Debug.LogError("❌ 해당 등급 아이템 없음");
             return null;
         }
 

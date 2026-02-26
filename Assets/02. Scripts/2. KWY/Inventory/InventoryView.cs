@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 public class InventoryView : MonoBehaviour
 {
@@ -41,11 +42,13 @@ public class InventoryView : MonoBehaviour
 
         var inventoryData = InventoryManager.Instance.inventory;
 
+        var sortList = inventoryData.OrderBy(x => x.item.grade).ToList();
+
         for (int i = 0; i < slotsUI.Length; i++)
         {
-            if (i < inventoryData.Count)
+            if (i < sortList.Count)
             {
-                slotsUI[i].SetItem(inventoryData[i]);
+                slotsUI[i].SetItem(sortList[i]);
             }
             else
             {
