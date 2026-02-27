@@ -9,6 +9,7 @@ public class InventoryItemSlot : MonoBehaviour
     [SerializeField] TextMeshProUGUI itemName;
     [SerializeField] TextMeshProUGUI itemCount;
     [SerializeField] TextMeshProUGUI itemLevel;
+    [SerializeField] Image equipMark;
 
     [SerializeField] Sprite legendColor;
     [SerializeField] Sprite epicColor;
@@ -26,9 +27,18 @@ public class InventoryItemSlot : MonoBehaviour
         itemSprite.enabled = true;
 
         itemName.text = data.item.itemName;
-        itemCount.text = data.count.ToString();
 
-        if(data.item is EquipmentSO && data.enhancementLevel > 0)
+        if(data.item is EquipmentSO)
+        {
+            itemCount.text = "";
+        }
+        else
+        {
+            itemCount.text = data.count.ToString();
+
+        }
+
+        if (data.item is EquipmentSO && data.enhancementLevel > 0)
         {
             itemLevel.text = $"+{data.enhancementLevel}";
         }
@@ -38,6 +48,9 @@ public class InventoryItemSlot : MonoBehaviour
         }
 
         ApplyGradeColor(data.item.grade);
+
+        bool isEquipped = EquipmentManager.Instance.IsEquipped(data);
+        equipMark.gameObject.SetActive(isEquipped);
     }
 
 
@@ -65,6 +78,7 @@ public class InventoryItemSlot : MonoBehaviour
         itemCount.text = "";
         itemLevel.text = "";
         backGround.sprite = normalColor;
+        equipMark.gameObject.SetActive (false);
     }
 
     public void OnClickSlot()

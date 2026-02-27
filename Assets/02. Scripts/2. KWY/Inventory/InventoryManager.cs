@@ -23,17 +23,20 @@ public class InventoryManager : Singleton<InventoryManager>
         if (item == null) return;
 
         if (item is EquipmentSO)
-        {
-            inventory.Add(new InventoryItem
+        {   
             {
-                item = item,
-                count = 1,
-                enhancementLevel = 0
-            });
+                inventory.Add(new InventoryItem
+                {
+                    item = item,
+                    //count = 1,
+                    enhancementLevel = 0
+                });
+            }
+
         }
         else
         {
-            var slot = inventory.Find(x => x.item == item);
+            InventoryItem slot = inventory.Find(x => x.item == item);
 
             if (slot != null)
             {
@@ -58,11 +61,11 @@ public class InventoryManager : Singleton<InventoryManager>
         OnInventoryChanged?.Invoke();
     }
 
-    //소비아이템 사용(가챠권 사용때 사용 예정)
+    //소비아이템 사용
 
     public bool RemoveItem(ItemSO item, int amount)
     {
-        var slot = inventory.Find(x => x.item == item);
+        InventoryItem slot = inventory.Find(x => x.item == item);
 
         if (slot == null) return false;
 
