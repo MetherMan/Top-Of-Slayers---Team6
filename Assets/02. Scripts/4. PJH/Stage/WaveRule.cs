@@ -1,23 +1,10 @@
 ﻿using UnityEngine;
 
-public enum RuleType
-{
-    StageRule,
-    BossRule,
-    ChellengeRule
-}
-
 public abstract class WaveRule : ScriptableObject
 {
     /*
         공통적으로 적용되는 룰
     */
-    #region field
-    [Header("룰 타입")]
-    [SerializeField] RuleType _ruleType;
-    public string RuleType { get => _ruleType.ToString(); }
-    #endregion
-
     #region method
     public abstract void OnStart(RuleDataContainer data, WaveDirectorSystem context);
 

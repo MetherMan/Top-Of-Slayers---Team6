@@ -21,7 +21,6 @@ public class AddressableManager : Singleton<AddressableManager>
     public Dictionary<string, GameObject> _monsterPf = new Dictionary<string, GameObject>();
     public Dictionary<string, GameObject> _vFX = new Dictionary<string, GameObject>();
 
-    float completeCount;
     Slider loadingBar;
     TextMeshProUGUI loadingText;
     #endregion
@@ -91,12 +90,8 @@ public class AddressableManager : Singleton<AddressableManager>
         { stageSOTask, ruleSOTask, uITask, monsterSOTask, monsterPfTask, vFXTask };
 
         //로딩
-        while (completeCount < tasks.Count)
-        {
-            loadingText.text = $"{completeCount / tasks.Count}%";
-            progress.Report(completeCount);
-            await Task.WhenAll(tasks);
-        }
+
+        await Task.WhenAll(tasks);
 
         Debug.Log("모든 데이터 로드 완료");
     }
@@ -105,34 +100,51 @@ public class AddressableManager : Singleton<AddressableManager>
     //StageConfigSO : 게임을 종료할 때까지 가지고 있는다.
     public async Task LoadAllStageSO()
     {
-        AsyncOperationHandle<IList<StageConfigSO>> stageSOHandle 
-            = Addressables.LoadAssetsAsync<StageConfigSO>("StageSO", null);
-        loadedAssets.Add(stageSOHandle);
+        AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
+            = Addressables.LoadResourceLocationsAsync("StageSO", typeof(StageConfigSO));
 
-        await stageSOHandle.Task;
+        await loadResourceLocationHandle.Task;
 
-        if (IsSucceeded(stageSOHandle))
+        if (IsFailed(loadResourceLocationHandle)) 
+            Debug.LogError("LoadAllStageSO LoadResourceLocationsAsync : Failed");
+
+        List<AsyncOperationHandle> stageSOOpList = new List<AsyncOperationHandle>();
+
+        foreach (IResourceLocation location in loadResourceLocationHandle.Result)
         {
-            foreach (StageConfigSO data in stageSOHandle.Result)
+            AsyncOperationHandle<StageConfigSO> loadAssetHandle
+                = Addressables.LoadAssetAsync<StageConfigSO>(location);
+
+            loadAssetHandle.Completed += stageSOOp =>
             {
-                //중복 키 방지
-                if (!_stageSO.ContainsKey(data.stageKey))
+                if (IsSucceeded(stageSOOp))
                 {
-                    _stageSO.Add(data.stageKey, data);
-                    Debug.Log($"stageConfigSO 등록완료 : {data.stageKey}");
+                    if (!_stageSO.ContainsKey(location.PrimaryKey))
+                    {
+                        _stageSO.Add(location.PrimaryKey, stageSOOp.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"StageConfigSO 중복 : {location.PrimaryKey}");
+                    }
                 }
-                else
-                {
-                    Debug.LogWarning($"동일한 이름의 stageSO가 존재합니다. : {data.stageKey}");
-                }
-            }
+            };
+
+            stageSOOpList.Add(loadAssetHandle);
         }
-        else if (IsFailed(stageSOHandle))
+
+        AsyncOperationHandle stageSOGroupOp
+            = Addressables.ResourceManager.CreateGenericGroupOperation(stageSOOpList);
+
+        await stageSOGroupOp.Task;
+        loadedAssets.Add(stageSOGroupOp);
+
+        foreach (KeyValuePair<string, StageConfigSO> item in _stageSO)
         {
-            Debug.LogError("LoadAllStageDB : Failed");
-            return;
+            Debug.Log(item.Key + " - " + item.Value.name);
         }
-        completeCount++;
+
+        Debug.Log("LoadAllStageSO : Completed");
     }
 
     //SceneInstance
@@ -191,34 +203,56 @@ public class AddressableManager : Singleton<AddressableManager>
     //RuleSO
     public async Task LoadAllRule()
     {
-        AsyncOperationHandle<IList<WaveRule>> ruleDbHandle
-            = Addressables.LoadAssetsAsync<WaveRule>("RuleSO", null);
-        loadedAssets.Add(ruleDbHandle);
+        AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
+            = Addressables.LoadResourceLocationsAsync("RuleSO", typeof(WaveRule));
         
-        await ruleDbHandle.Task;
+        await loadResourceLocationHandle.Task;
 
-        if (IsSucceeded(ruleDbHandle))
+        if (IsFailed(loadResourceLocationHandle)) 
+            Debug.LogError("LoadAllRule LoadResourceLocation Failed");
+
+        List<AsyncOperationHandle> ruleOpList = new List<AsyncOperationHandle>();
+
+        foreach (IResourceLocation location in loadResourceLocationHandle.Result)
         {
-            foreach (WaveRule rule in ruleDbHandle.Result)
+            AsyncOperationHandle<WaveRule> loadAssetHandle
+                = Addressables.LoadAssetAsync<WaveRule>(location);
+
+            loadAssetHandle.Completed += op =>
             {
-                if (!_ruleSO.ContainsKey(rule.RuleType))
+                if (IsSucceeded(op))
                 {
-                    _ruleSO.Add(rule.RuleType, rule);
-                    Debug.Log($"rule 등록 완료 : {rule.RuleType}");
+                    if (!_ruleSO.ContainsKey(location.PrimaryKey))
+                    {
+                        _ruleSO.Add(location.PrimaryKey, op.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"RuleSO 중복 : {location.PrimaryKey}");
+                    }
                 }
-                else
+                else if (IsFailed(op))
                 {
-                    Debug.LogWarning($"동일한 이름의 rule이 존재합니다. : {rule.RuleType}");
+                    Debug.LogError("LoadAllRule Failed");
                 }
-            }
-        }
-        else if (IsFailed(ruleDbHandle))
-        {
-            Debug.LogError("LoadAllRule : Failed");
-            return;
+            };
+            ruleOpList.Add(loadAssetHandle);
         }
 
-        completeCount++;
+        AsyncOperationHandle ruleGroupOp
+            = Addressables.ResourceManager.CreateGenericGroupOperation(ruleOpList);
+
+        await ruleGroupOp.Task;
+        loadedAssets.Add(ruleGroupOp);
+
+        Addressables.Release(loadResourceLocationHandle);
+
+        foreach (KeyValuePair<string, WaveRule> item in _ruleSO)
+        {
+            Debug.Log(item.Key + " - " + item.Value.name);
+        }
+
+        Debug.Log("LoadAllRule : Completed");
     }
 
     //UI
@@ -242,7 +276,14 @@ public class AddressableManager : Singleton<AddressableManager>
             {
                 if (IsSucceeded(op))
                 {
-                    _uI.Add(location.PrimaryKey, op.Result);
+                    if (!_uI.ContainsKey(location.PrimaryKey))
+                    {
+                        _uI.Add(location.PrimaryKey, op.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"UI 중복 : {location.PrimaryKey}");
+                    }
                 }
                 else if (IsFailed(op))
                 {
@@ -261,40 +302,66 @@ public class AddressableManager : Singleton<AddressableManager>
 
         Addressables.Release(loadResourceLocationHandle);
 
-        completeCount++;
+        foreach (KeyValuePair<string, GameObject> item in _uI)
+        {
+            Debug.Log(item.Key + " - " + item.Value.name);
+        }
+
+        Debug.Log("LoadAllUI : Completed");
     }
 
     //MonsterSO
     public async Task LoadAllMonsterSO()
     {
-        AsyncOperationHandle<IList<EnemyConfigSO>> MonsterSOHandle
-            = Addressables.LoadAssetsAsync<EnemyConfigSO>("MonsterSO", null);
-        loadedAssets.Add(MonsterSOHandle);
+        AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
+            = Addressables.LoadResourceLocationsAsync("MonsterSO", typeof(EnemyConfigSO));
 
-        await MonsterSOHandle.Task;
+        await loadResourceLocationHandle.Task;
 
-        if (IsSucceeded(MonsterSOHandle))
+        if (IsFailed(loadResourceLocationHandle)) 
+            Debug.LogError("LoadAllMonsterSO LoadResourceLocationsAsync IsValid() : Failed");
+
+        List<AsyncOperationHandle> MonsterSOOpList = new List<AsyncOperationHandle>();
+
+        foreach (IResourceLocation location in loadResourceLocationHandle.Result)
         {
-            foreach (EnemyConfigSO monsterSO in MonsterSOHandle.Result)
+            AsyncOperationHandle<EnemyConfigSO> loadAssetHandle
+                = Addressables.LoadAssetAsync<EnemyConfigSO>(location);
+
+            loadAssetHandle.Completed += op =>
             {
-                if (!_enemySO.ContainsKey(monsterSO.MonsterName))
+                if (IsSucceeded(op))
                 {
-                    _enemySO.Add(monsterSO.MonsterName, monsterSO);
-                    Debug.Log($"monsterConfigSO 등록완료 : {monsterSO.MonsterName}");
+                    if (!_enemySO.ContainsKey(location.PrimaryKey))
+                    {
+                        _enemySO.Add(location.PrimaryKey, op.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"LoadAllMonsterSO 중복 : {location.PrimaryKey}");
+                    }
                 }
-                else
+                else if (IsFailed(op))
                 {
-                    Debug.LogWarning($"동일한 이름의 monsterSO가 존재합니다. : {monsterSO.MonsterName}");
+                    Debug.LogError("LoadAllMonesterSO : Failed");
                 }
-            }
-        }
-        else if (IsFailed(MonsterSOHandle))
-        {
-            Debug.LogError("LoadAllMonsterSO : Failed");
-            return;
+            };
+
+            MonsterSOOpList.Add(loadAssetHandle);
         }
 
-        completeCount++;
+        AsyncOperationHandle MonsterSOGroupOp
+            = Addressables.ResourceManager.CreateGenericGroupOperation(MonsterSOOpList);
+
+        await MonsterSOGroupOp.Task;
+        loadedAssets.Add(MonsterSOGroupOp);
+
+        foreach (KeyValuePair<string, EnemyConfigSO> item in _enemySO)
+        {
+            Debug.Log(item.Key + " - " + item.Value.name);
+        }
+
+        Debug.Log("LoadAllMonsterSO : Completed");
     }
 
     //MonsterPrefab
@@ -318,7 +385,14 @@ public class AddressableManager : Singleton<AddressableManager>
             {
                 if (IsSucceeded(op))
                 {
-                    _monsterPf.Add(location.PrimaryKey, op.Result);
+                    if (!_monsterPf.ContainsKey(location.PrimaryKey))
+                    {
+                        _monsterPf.Add(location.PrimaryKey, op.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"MonsterPf 중복 : {location.PrimaryKey}");
+                    }
                 }
                 else if (IsFailed(op))
                 {
@@ -340,12 +414,12 @@ public class AddressableManager : Singleton<AddressableManager>
         //ResourceLocation 위치 정보이기에 메모리를 지워도 데이터가 사라지지 않는다.
         Addressables.Release(loadResourceLocationHandle);
 
-        foreach (var item in _monsterPf)
+        foreach (KeyValuePair<string, GameObject> item in _monsterPf)
         {
             Debug.Log(item.Key + " - " + item.Value.name);
         }
 
-        completeCount++;
+        Debug.Log("LoadAllMonsterPf : Completed");
     }
 
     //ItemSO
@@ -381,7 +455,14 @@ public class AddressableManager : Singleton<AddressableManager>
             {
                 if (IsSucceeded(vFXOp))
                 {
-                    _vFX.Add(location.PrimaryKey, vFXOp.Result);
+                    if (!_vFX.ContainsKey(location.PrimaryKey))
+                    {
+                        _vFX.Add(location.PrimaryKey, vFXOp.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"VFX 중복 : {location.PrimaryKey}");
+                    }
                 }
                 else if (IsFailed(vFXOp))
                 {
@@ -394,11 +475,18 @@ public class AddressableManager : Singleton<AddressableManager>
 
         AsyncOperationHandle vFXGroupOp
             = Addressables.ResourceManager.CreateGenericGroupOperation(vFXOpList);
+        
         await vFXGroupOp.Task;
+        loadedAssets.Add(vFXGroupOp);
 
         Addressables.Release(loadResourceLocationHandle);
 
-        completeCount++;
+        foreach (KeyValuePair<string, GameObject> item in _vFX)
+        {
+            Debug.Log(item.Key + " - " + item.Value.name);
+        }
+
+        Debug.Log("LoadAllVFX : Completed");
     }
 
     //SFX
