@@ -20,8 +20,37 @@ MonoBehaviour:
   stageKey: 
   stageType: 0
   stageRule: {fileID: 11400000, guid: 14a3973d77ec90341a38ed7b70032f15, type: 2}
-  stageTime: 0
-  roundDatas: []
+  stageTime: 100
+  roundDatas:
+  - spawnPattern: 0
+    monsterSpawnList:
+    - {fileID: 11400000, guid: e56cb31bacb89cb4291a85b57e8cbf1b, type: 2}
+    - {fileID: 11400000, guid: e56cb31bacb89cb4291a85b57e8cbf1b, type: 2}
+    - {fileID: 11400000, guid: 3da890310af10414fbe38d6db5535c3e, type: 2}
+    - {fileID: 11400000, guid: db289dcae9f4c9a439d4939fd726640c, type: 2}
+    elite: {fileID: 0}
+    boss: {fileID: 0}
+  - spawnPattern: 6
+    monsterSpawnList:
+    - {fileID: 11400000, guid: b16a2834035b38044bc9b4f0d3d1ea57, type: 2}
+    - {fileID: 11400000, guid: e56cb31bacb89cb4291a85b57e8cbf1b, type: 2}
+    - {fileID: 11400000, guid: 61b0af0e8fbbdf347b9f954881460444, type: 2}
+    elite: {fileID: 0}
+    boss: {fileID: 0}
+  - spawnPattern: 5
+    monsterSpawnList:
+    - {fileID: 11400000, guid: 8122f62cf0a59314984def3f12735650, type: 2}
+    - {fileID: 11400000, guid: 3da890310af10414fbe38d6db5535c3e, type: 2}
+    - {fileID: 11400000, guid: 8122f62cf0a59314984def3f12735650, type: 2}
+    - {fileID: 11400000, guid: 61b0af0e8fbbdf347b9f954881460444, type: 2}
+    - {fileID: 11400000, guid: e56cb31bacb89cb4291a85b57e8cbf1b, type: 2}
+    - {fileID: 11400000, guid: 61b0af0e8fbbdf347b9f954881460444, type: 2}
+    elite: {fileID: 0}
+    boss: {fileID: 0}
+  - spawnPattern: 0
+    monsterSpawnList: []
+    elite: {fileID: 0}
+    boss: {fileID: 0}
   clearResult: 0
   FirstClearCoin: 
   ClearCoin: 

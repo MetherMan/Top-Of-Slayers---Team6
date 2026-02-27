@@ -12,19 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64d3c5b45e25cd640b755436b1a42b1d, type: 3}
   m_Name: ArcherOrcSO
   m_EditorClassIdentifier: 
+  MonsterName: 
   level: 0
   monsterType: 0
   monsterPrefab: {fileID: 7033876190963091194, guid: 17b952c104a1cd445b479b1ff75bd662,
     type: 3}
-  maxHp: 0
+  maxHp: 60
   hp: 0
-  strength: 0
+  strength: 20
   defence: 0
   moveSpeed: 2
   attackRange: 5
   NormalDropCoin: 
   HardDropCoin: 
-  attackType: 0
-  bulletPrefab: {fileID: 0}
-  bulletSpeed: 0
+  attackType: 1
+  bulletPrefab: {fileID: 6552070071221831658, guid: 82266da0a18a50a4691f927756abbcdc,
+    type: 3}
+  bulletSpeed: 8
   attackAngle: 0

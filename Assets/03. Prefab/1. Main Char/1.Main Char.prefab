@@ -6094,6 +6094,7 @@ GameObject:
   - component: {fileID: 5680457019729186227}
   - component: {fileID: 5235778052283311294}
   - component: {fileID: 8183997392503413366}
+  - component: {fileID: -5712205007895140337}
   m_Layer: 0
   m_Name: 1.Main Char
   m_TagString: Untagged
@@ -6273,10 +6274,22 @@ MonoBehaviour:
   dashTrailEndColor: {r: 0.4, g: 1, b: 0.85, a: 0}
   dashTrailMaterial: {fileID: 0}
   dashTrailOnlyDuringDash: 1
-  dashPathVfxPrefab: {fileID: 2613462060424995206, guid: d102f3500c2d405494d41037a837a872, type: 3}
+  dashPathVfxPrefab: {fileID: 2613462060424995206, guid: d102f3500c2d405494d41037a837a872,
+    type: 3}
   dashPathVfxAnchor: {fileID: 0}
   keepDashPathVfxAfterDash: 1
   dashPathVfxDestroyDelay: 1
+  useHitImpactVfx: 1
+  weakHitImpactVfxPrefab: {fileID: 4021103657954561961, guid: 5c755f9bc5253ea418e919994537dcc7,
+    type: 3}
+  mediumHitImpactVfxPrefab: {fileID: 5880797563127281583, guid: 265d3a5ba69981a4698ceabcedf368b0,
+    type: 3}
+  strongHitImpactVfxPrefab: {fileID: 8525990746615576120, guid: b85d21f3b8fed714bacf0c4fd50fa512,
+    type: 3}
+  mediumHitChainThreshold: 3
+  strongHitChainThreshold: 6
+  hitImpactHeightOffset: 0.2
+  hitImpactAutoDestroyTime: 1.2
 --- !u!114 &59366865248515028
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6328,6 +6341,7 @@ MonoBehaviour:
   spec: {fileID: 11400000, guid: 1302e25790afa0e4a8f46f8675d4693e, type: 2}
   moveController: {fileID: 0}
   chainCombat: {fileID: 1175399574350167929}
+  combatResource: {fileID: 0}
   detectInterval: 0
   useSpecCooldown: 1
   manualCooldown: 0.2
@@ -6368,6 +6382,8 @@ MonoBehaviour:
   autoGrade: 1
   useTargetingRange: 1
   manualRange: 0
+  useSpecAttackCost: 1
+  manualAttackCost: 1
   useReadyDelay: 1
   readyDelay: 0.2
   readyDelayOnlyWhenNotChain: 1
@@ -6508,12 +6524,6 @@ MonoBehaviour:
   detectedLineColor: {r: 0.55, g: 1, b: 0.75, a: 0.95}
   lineWidthMultiplier: 0.18
   minLineWidth: 0.04
-  useTargetRing: 1
-  targetRing: {fileID: 0}
-  targetRingRadius: 0.75
-  targetRingSegments: 24
-  targetRingHeight: 0.03
-  targetRingWidthMultiplier: 1
   useTargetConfirmFx: 1
   targetReadyColor: {r: 0.3, g: 1, b: 0.45, a: 0.95}
   targetCautionColor: {r: 1, g: 0.92, b: 0.25, a: 0.98}
@@ -6533,28 +6543,55 @@ MonoBehaviour:
   confirmPulseAmount: 0.18
   confirmPulseSpeed: 10
   confirmLineWidthBoost: 1.15
-  targetRingGradientStrength: 0.85
-  targetRingPulseAmount: 0.12
-  targetRingPulseSpeed: 12
-  targetRingConfirmRadiusMultiplier: 1.1
-  targetRingConfirmWidthMultiplier: 1.35
-  targetRingSpinSpeed: 140
-  useGroundTargetMarker: 1
-  groundTargetMarkerPrefab: {fileID: 9057764777064642318, guid: a1bbcb01e9d7c4941a2a690f05e694be, type: 3}
-  groundMarkerBaseScale: {x: 1, y: 1, z: 1}
-  groundMarkerScaleByRadius: 1.4
-  groundMarkerConfirmScaleMultiplier: 1.2
-  groundMarkerRotationOffset: {x: 0, y: 0, z: 0}
-  groundMarkerSpinSpeed: 80
-  groundMarkerHeightOffset: 0.02
-  groundMarkerUseGroundRaycast: 1
-  groundMarkerRaycastHeight: 2
-  groundMarkerRaycastDistance: 6
-  groundMarkerRaycastMask:
+  useMonsterExistingRingFx: 1
+  monsterRingIdleFallbackColor: {r: 1, g: 1, b: 1, a: 1}
+  monsterRingColorBlend: 0.85
+  monsterRingPulseAmount: 0.1
+  monsterRingPulseSpeed: 10
+  monsterRingBaseScaleMultiplier: 0.4
+  monsterRingConfirmScaleMultiplier: 1.12
+  monsterRingStageScaleMultiplier: 1.05
+  monsterRingEmission: 0.6
+  restoreMonsterRingOnRelease: 1
+  showMonsterRingForAllTargets: 1
+  monsterRingPrefab: {fileID: 9057764777064642318, guid: a1bbcb01e9d7c4941a2a690f05e694be,
+    type: 3}
+  monsterRingBaseScale: {x: 1, y: 1, z: 1}
+  monsterRingScaleByTargetRadius: 1.4
+  monsterRingHeightOffset: 0.02
+  monsterRingUseGroundRaycast: 1
+  monsterRingRaycastHeight: 2
+  monsterRingRaycastDistance: 6
+  monsterRingRaycastMask:
     serializedVersion: 2
-    m_Bits: -1
-  groundMarkerColorBlend: 0.85
-  groundMarkerEmission: 0.6
+    m_Bits: 4294967295
+  targetColorFillDuration: 0.25
+  confirmColorEarlyRedWindow: 0.22
+  confirmColorLeadProgress: 0.32
+  postConfirmColorHoldDuration: 0.12
+  forceRedRingDuringChain: 1
+  chainForcedRingColor: {r: 1, g: 0, b: 0, a: 1}
+  useMonsterRingDynamicTween: 1
+  monsterRingLockOnPunchScale: 0.45
+  monsterRingLockOnPunchDuration: 0.24
+  monsterRingStagePunchScale: 0.24
+  monsterRingStagePunchDuration: 0.18
+  useLockOnIcon: 1
+  lockOnIconPrefab: {fileID: 0}
+  lockOnIconSprite: {fileID: 0}
+  lockOnIconColor: {r: 1, g: 0.16, b: 0.16, a: 1}
+  lockOnIconOffset: {x: 0, y: 0.5, z: 0}
+  lockOnIconScale: 1.8
+  lockOnIconUseFlatPlane: 1
+  lockOnIconFlatPlanePitch: 90
+  lockOnIconBillboard: 0
+  lockOnIconAppearSpeed: 10
+  lockOnIconMinAlpha: 0.85
+  lockOnIconColorBlend: 0.25
+  lockOnIconPulseAmount: 0.03
+  lockOnIconPulseSpeed: 10
+  lockOnIconSpinSpeed: 120
+  lockOnIconConfirmScaleBoost: 0.05
 --- !u!114 &1175399574350167929
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6641,6 +6678,20 @@ MonoBehaviour:
   darkenSprite: {fileID: 0}
   autoFindSceneRefs: 1
   maxBindFrames: 30
+--- !u!114 &-5712205007895140337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8084851860919373225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7eb8213819a0d34f984371fa48598e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHP: 100
+  currentHP: 0
 --- !u!1 &8104052154759113481
 GameObject:
   m_ObjectHideFlags: 0

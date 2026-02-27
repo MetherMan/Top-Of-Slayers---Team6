@@ -1,0 +1,150 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2041930516336096818
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4906300775306390538}
+  - component: {fileID: 6197681349652296973}
+  m_Layer: 0
+  m_Name: PoolManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4906300775306390538
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041930516336096818}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.984919, y: 17.051651, z: -12.381952}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6197681349652296973
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041930516336096818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e072cb8d35b7fe47ac5ff5337421c0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DontDestroy: 1
+  pools:
+  - prefab: {fileID: 88765464168824294, guid: 156b930a94d730946ba9dd057d1b4f4e, type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 6894537265837943145, guid: f0705845d0294d648977ac71abda33f6,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 8900322110555678200, guid: fb7418af45ce4204cb140739f1d2b105,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 2352133779448626446, guid: f6a3327b3fb70934bba3ea06f71e4a64,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 5418955719088714859, guid: f3b7f52204dc18b43953038b6b7099bd,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 8650478267010630108, guid: 7ec7ad43388cdf346921272b383379eb,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 4473915067632824885, guid: 9a355768e1ce30744af40e776f77fb32,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 8098704049800012142, guid: 8b3d77950a1942c49951020869b9c109,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 8836585347788811212, guid: 309f7ef5a1b86a34995b3c89d164194e,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 155146675914907393, guid: 575b43a8287e7db44937a65678999ec5, type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 2565520563525683074, guid: 8d04770e36b26e148bd6fcefcbb41540,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 1664177579354428396, guid: 478475862fabdfb428726c31fb92e149,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 8294692102919553221, guid: 27aed2f698cd0cf48bf08a591b4e7a10,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 6839221160334375102, guid: def360eb09777f54ba0344808f5d27a5,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 2126490218828785439, guid: fa4b8140a73400043bf2f6ccce417c4d,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 3284208706260134489, guid: d85023981cbf58e4b963d74cfeac62cb,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 4445716005501724157, guid: 94dbfe9c7a00cb4438edefed77754e01,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 7033876190963091194, guid: 17b952c104a1cd445b479b1ff75bd662,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 4794253799374665824, guid: 19429beff9bc82b45ad54894f5f16b20,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 8460124159154434444, guid: 0d4e5c24a806a3a4dbd559aa24a3e207,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 7608898817039318386, guid: b9020b3cf5bcf194cb572703f9bac112,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 2854334822852617960, guid: f7c4e4e73e29fcb448311ee8b949efd8,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 3880941559977473620, guid: d85edbea07cf8854c840765b1a04db13,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 2847735233959903901, guid: 383433b00d5383844acb1b0e236613b7,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 5501781490940454012, guid: 16e71f8c8c6d3f44abcedf2b0eb5ccd4,
+      type: 3}
+    size: 8
+    maxSize: 16
+  - prefab: {fileID: 1655530787725587351, guid: 98f9dee1eeaedc243b8981f7cdaa47ee,
+      type: 3}
+    size: 8
+    maxSize: 16

@@ -12,16 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64d3c5b45e25cd640b755436b1a42b1d, type: 3}
   m_Name: HippoGryphonSO
   m_EditorClassIdentifier: 
+  MonsterName: 
   level: 0
   monsterType: 0
   monsterPrefab: {fileID: 8098704049800012142, guid: 8b3d77950a1942c49951020869b9c109,
     type: 3}
-  maxHp: 0
+  maxHp: 120
   hp: 0
-  strength: 0
+  strength: 12
   defence: 0
   moveSpeed: 5
-  attackRange: 2
+  attackRange: 3
   NormalDropCoin: 
   HardDropCoin: 
   attackType: 0

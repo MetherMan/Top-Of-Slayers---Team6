@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64d3c5b45e25cd640b755436b1a42b1d, type: 3}
   m_Name: RangerDwarfSO
   m_EditorClassIdentifier: 
+  MonsterName: 
   level: 0
   monsterType: 0
   monsterPrefab: {fileID: 2126490218828785439, guid: fa4b8140a73400043bf2f6ccce417c4d,
     type: 3}
-  maxHp: 0
+  maxHp: 60
   hp: 0
-  strength: 10
+  strength: 20
   defence: 0
   moveSpeed: 3
   attackRange: 5
@@ -27,4 +28,5 @@ MonoBehaviour:
   attackType: 1
   bulletPrefab: {fileID: 6552070071221831658, guid: 82266da0a18a50a4691f927756abbcdc,
     type: 3}
-  bulletSpeed: 5
+  bulletSpeed: 8
+  attackAngle: 0
