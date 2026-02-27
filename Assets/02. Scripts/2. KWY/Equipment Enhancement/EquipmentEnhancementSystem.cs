@@ -1,17 +1,23 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 
 public class EquipmentEnhancementSystem : MonoBehaviour
 {
     [SerializeField] int baseCost = 1000;
     [SerializeField] float multiplier = 1.2f;
     [SerializeField] int maxLevel = 10;
+
+    [SerializeField] GameObject failPanel;
+    [SerializeField] TextMeshProUGUI failText;
+
     public bool TryEnhance(InventoryItem targetItem)
     {
         if (targetItem == null) return false;
 
         if (targetItem.enhancementLevel >= maxLevel)
         {
-            //최대레벨 도달 강화 불가 판넬 활성화
+            failPanel.SetActive(true);
+            failText.text = "최대레벨은 강화를 할 수 없습니다.";
             return false;
         }
 
@@ -37,13 +43,13 @@ public class EquipmentEnhancementSystem : MonoBehaviour
     {
         if(level >= maxLevel)
         {
-            return -1;
+            return 0;
         }
 
         return Mathf.RoundToInt(baseCost * Mathf.Pow(multiplier, level));
     }
 
-    public bool IsMaxLevel(int level) 
+    public bool IsMaxLevel(int level)
     {
         return level >= maxLevel;
     }

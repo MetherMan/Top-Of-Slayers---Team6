@@ -11,7 +11,9 @@ public class EquipmentEnhancementUI : MonoBehaviour
     [SerializeField] Sprite defaultAfterSprite;
 
     [SerializeField] TextMeshProUGUI beforeStatText;
+    [SerializeField] TextMeshProUGUI beforeLevelText;
     [SerializeField] TextMeshProUGUI afterStatText;
+    [SerializeField] TextMeshProUGUI afterLevelText;
     [SerializeField] TextMeshProUGUI costText;
 
     [SerializeField] GameObject inventoryPanel;
@@ -70,10 +72,22 @@ public class EquipmentEnhancementUI : MonoBehaviour
         EquipmentSO equip = selectedItem.item as EquipmentSO;
 
         int currentLevel = selectedItem.enhancementLevel;
-        int nextLevel = currentLevel + 1;
 
         beforeStatText.text = equip.GetStatText(currentLevel);
+        beforeLevelText.text = $"+{currentLevel}";
+        
+
+        if (enhancementSystem.IsMaxLevel(currentLevel))
+        {
+            afterStatText.text = equip.GetStatText(currentLevel);
+            costText.text = "";
+            return;
+        }
+
+        int nextLevel = currentLevel + 1;
+
         afterStatText.text = equip.GetStatText(nextLevel);
+        afterLevelText.text = $"+{nextLevel}";
 
         int cost = enhancementSystem.GetCost(currentLevel);
         costText.text = cost.ToString();
@@ -88,7 +102,9 @@ public class EquipmentEnhancementUI : MonoBehaviour
         afterImage.sprite = defaultAfterSprite;
 
         beforeStatText.text = "";
+        beforeLevelText.text = "";
         afterStatText.text = "";
+        afterLevelText.text = "";
         costText.text = "";
     }
 }

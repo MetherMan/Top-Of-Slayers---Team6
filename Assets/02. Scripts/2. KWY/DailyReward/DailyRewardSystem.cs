@@ -9,7 +9,7 @@ public class DailyRewardSystem : MonoBehaviour
     [field: SerializeField] public string lastDate { get; private set; }
 
 
-    private void Awake()
+    private void Start()
     {
         today = DateTime.Now.ToString("yyyyMMdd"); // 오늘 날짜
         currentDay = PlayerPrefs.GetInt("CurrentDay", 0);
@@ -19,12 +19,6 @@ public class DailyRewardSystem : MonoBehaviour
         {
             RestReward();
         }
-
-        if (CanReward())
-        {
-            GetReward();
-        }
-
     }
 
     public bool CanReward()
