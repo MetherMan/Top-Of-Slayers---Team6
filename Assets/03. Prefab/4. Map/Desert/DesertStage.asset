@@ -12,11 +12,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea8bb6303b74a4b4e8fc6f63e5dc726b, type: 3}
   m_Name: DesertStage
   m_EditorClassIdentifier: 
-  stageNum: 0
+  sceneReference:
+    m_AssetGUID: 
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  stageKey: 
   stageType: 0
   stageRule: {fileID: 0}
   stageTime: 0
-  roundDatas: []
+  roundDatas:
+  - spawnPattern: 0
+    monsterSpawnList: []
+    elite: {fileID: 0}
+    boss: {fileID: 0}
+  - spawnPattern: 0
+    monsterSpawnList: []
+    elite: {fileID: 0}
+    boss: {fileID: 0}
+  - spawnPattern: 0
+    monsterSpawnList: []
+    elite: {fileID: 0}
+    boss: {fileID: 0}
+  - spawnPattern: 0
+    monsterSpawnList: []
+    elite: {fileID: 0}
+    boss: {fileID: 0}
   clearResult: 0
   FirstClearCoin: 
   ClearCoin: 

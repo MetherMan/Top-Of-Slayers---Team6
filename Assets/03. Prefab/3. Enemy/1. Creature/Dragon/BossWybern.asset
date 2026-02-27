@@ -12,16 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64d3c5b45e25cd640b755436b1a42b1d, type: 3}
   m_Name: BossWybern
   m_EditorClassIdentifier: 
+  MonsterName: 
   level: 0
   monsterType: 0
   monsterPrefab: {fileID: 8900322110555678200, guid: fb7418af45ce4204cb140739f1d2b105,
     type: 3}
-  maxHp: 0
+  maxHp: 120
   hp: 0
-  strength: 0
+  strength: 20
   defence: 0
   moveSpeed: 5
-  attackRange: 2
+  attackRange: 4
   NormalDropCoin: 
   HardDropCoin: 
   attackType: 0

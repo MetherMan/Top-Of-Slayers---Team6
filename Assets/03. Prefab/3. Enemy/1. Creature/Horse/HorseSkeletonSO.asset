@@ -12,16 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64d3c5b45e25cd640b755436b1a42b1d, type: 3}
   m_Name: HorseSkeletonSO
   m_EditorClassIdentifier: 
+  MonsterName: 
   level: 0
   monsterType: 0
   monsterPrefab: {fileID: 155146675914907393, guid: 575b43a8287e7db44937a65678999ec5,
     type: 3}
-  maxHp: 0
+  maxHp: 150
   hp: 0
-  strength: 0
+  strength: 15
   defence: 0
-  moveSpeed: 5
-  attackRange: 2
+  moveSpeed: 6
+  attackRange: 3
   NormalDropCoin: 
   HardDropCoin: 
   attackType: 0

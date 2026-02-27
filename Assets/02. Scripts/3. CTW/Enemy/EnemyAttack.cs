@@ -127,7 +127,7 @@ public class EnemyAttack : IEnemyState
 
         float distance = Vector3.Distance(enemyPos, playerPos);
 
-        if(distance <= enemy.attackRange + 0.1f)
+        if(distance <= enemy.attackRange + 0.2f)
         {
             PlayerHP playerHP = playerTransform.GetComponent<PlayerHP>();
             if(playerHP != null)

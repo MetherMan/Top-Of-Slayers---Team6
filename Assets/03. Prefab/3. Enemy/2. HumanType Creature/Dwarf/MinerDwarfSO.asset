@@ -12,16 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64d3c5b45e25cd640b755436b1a42b1d, type: 3}
   m_Name: MinerDwarfSO
   m_EditorClassIdentifier: 
+  MonsterName: 
   level: 0
   monsterType: 0
   monsterPrefab: {fileID: 6839221160334375102, guid: def360eb09777f54ba0344808f5d27a5,
     type: 3}
-  maxHp: 0
+  maxHp: 80
   hp: 0
-  strength: 20
+  strength: 15
   defence: 0
   moveSpeed: 3
-  attackRange: 2
+  attackRange: 1.5
   NormalDropCoin: 
   HardDropCoin: 
   attackType: 0
