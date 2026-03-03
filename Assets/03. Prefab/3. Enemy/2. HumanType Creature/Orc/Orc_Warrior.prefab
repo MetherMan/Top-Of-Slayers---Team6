@@ -2138,6 +2138,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targeting: {fileID: 0}
+  enemyBase: {fileID: 0}
   hp: 30
 --- !u!114 &7928032831762989816
 MonoBehaviour:
@@ -2193,6 +2194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3ecf76b23681e848b868d144f83fb13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  killScore: 100
   player: {fileID: 0}
   rb: {fileID: 0}
   enemyAnim: {fileID: 0}
@@ -2577,7 +2579,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 3907d7f5e427a9841baad0bb8b62f48a, type: 2}
+      objectReference: {fileID: 2100000, guid: e1d73a52c6d1fc248906dcdb46ade903, type: 2}
     - target: {fileID: 919132149155446097, guid: 876d7c1fab9865d42b27ff14a28a7f3f,
         type: 3}
       propertyPath: m_Name
