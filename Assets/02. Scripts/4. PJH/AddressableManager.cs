@@ -21,8 +21,10 @@ public class AddressableManager : Singleton<AddressableManager>
     public Dictionary<string, GameObject> _monsterPf = new Dictionary<string, GameObject>();
     public Dictionary<string, GameObject> _vFX = new Dictionary<string, GameObject>();
 
-    Slider loadingBar;
-    TextMeshProUGUI loadingText;
+    [SerializeField] GameObject loadingUI;
+    [SerializeField] Slider loadingBar;
+    [SerializeField] TextMeshProUGUI loadingText;
+    float visualProgress = 0f;
     #endregion
 
     protected override void Awake()
@@ -37,7 +39,9 @@ public class AddressableManager : Singleton<AddressableManager>
     {
         Progress<float> progressHandle = new Progress<float>( value =>
         {
-            loadingBar.value = value;
+            visualProgress = Mathf.Lerp(visualProgress, value, 0.1f);
+            loadingBar.value = visualProgress;
+            loadingText.text = $"{visualProgress * 100}%";
         });
 
         await LoadAllData(progressHandle);
@@ -46,9 +50,10 @@ public class AddressableManager : Singleton<AddressableManager>
     #region method
     private void TakeObject()
     {
-        loadingBar = GameObject.Find("Canvas/Background/LoadingBar")
+        loadingUI = GameObject.Find("Canvas/Background/LoadingUI");
+        loadingBar = GameObject.Find("Canvas/Background/LoadingUI/LoadingBar")
             .GetComponent<Slider>();
-        loadingText = GameObject.Find("Canvas/Background/LoadingBar/LoadingText")
+        loadingText = GameObject.Find("Canvas/Background/LoadingUI/LoadingBar/LoadingText")
             .GetComponent<TextMeshProUGUI>();
     }
 
@@ -75,6 +80,10 @@ public class AddressableManager : Singleton<AddressableManager>
 
     private async Task LoadAllData(IProgress<float> progress)
     {
+        await CheckUpdate();
+        await DownloadWithCapacityUI("Preload");
+        progress.Report(0.5f);
+
         //호출 리스트
         Task stageSOTask = LoadAllStageSO();
         Task ruleSOTask = LoadAllRule();
@@ -93,7 +102,65 @@ public class AddressableManager : Singleton<AddressableManager>
 
         await Task.WhenAll(tasks);
 
+        progress.Report(1.0f);
+        visualProgress = 1.0f;
+
+        await Task.Delay(1000);
+        loadingUI.SetActive(false);
         Debug.Log("모든 데이터 로드 완료");
+    }
+
+    private async Task DownloadWithCapacityUI(object key)
+    {
+        AsyncOperationHandle<long> sizeHandle = Addressables.GetDownloadSizeAsync(key);
+        long totalBytes = await sizeHandle.Task;
+        if (totalBytes > 0)
+        {
+            float totalMB = totalBytes / (1024f * 1024f);
+            Debug.Log($"총 다운로드 용량 : {Math.Ceiling(totalMB * 100) / 100} MB");
+
+            AsyncOperationHandle downloadHandle
+                = Addressables.DownloadDependenciesAsync(key, true);
+            /*
+            UnityEngine.AddressableAssets.Utility.ResourceManagerDiagnostics.GenerateCompletedOperationDisplayName
+            오류발생으로 핸들 유효성 체크 추가
+            */
+            while (downloadHandle.IsValid() && !downloadHandle.IsDone)
+            {
+                float currentMB = totalMB * downloadHandle.PercentComplete;
+
+                loadingText.text = $"다운로드 중 ... {Math.Ceiling(currentMB * 100) / 100}" +
+                    $" / {Math.Ceiling(totalMB * 100) / 100} MB";
+
+                await Task.Delay(100); // 무한 루프 방지 (Yield보다 cpu 점유율이 낮다)
+            }
+
+            if (downloadHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                Debug.Log("다운로드 완료");
+            }
+        }
+
+        if (sizeHandle.IsValid())
+        {
+            Addressables.Release(sizeHandle);
+        }
+
+        Debug.Log("다운로드 프로세스 종료");
+    }
+
+    private async Task CheckUpdate()
+    {
+        AsyncOperationHandle<List<string>> updateHandle
+            = Addressables.CheckForCatalogUpdates(false);
+        await updateHandle.Task;
+
+        if (updateHandle.Result.Count > 0)
+        {
+            await Addressables.UpdateCatalogs(updateHandle.Result).Task;
+            Debug.Log("카탈로그 업데이트");
+        }
+        Addressables.Release(updateHandle);
     }
 
     #region Load
@@ -141,7 +208,7 @@ public class AddressableManager : Singleton<AddressableManager>
 
         foreach (KeyValuePair<string, StageConfigSO> item in _stageSO)
         {
-            Debug.Log(item.Key + " - " + item.Value.name);
+            Debug.Log($"stageSO Key : {item.Key} value : {item.Value.name}");
         }
 
         Debug.Log("LoadAllStageSO : Completed");
@@ -249,7 +316,7 @@ public class AddressableManager : Singleton<AddressableManager>
 
         foreach (KeyValuePair<string, WaveRule> item in _ruleSO)
         {
-            Debug.Log(item.Key + " - " + item.Value.name);
+            Debug.Log($"ruleSO Key : {item.Key} value : {item.Value.name}");
         }
 
         Debug.Log("LoadAllRule : Completed");
@@ -304,7 +371,7 @@ public class AddressableManager : Singleton<AddressableManager>
 
         foreach (KeyValuePair<string, GameObject> item in _uI)
         {
-            Debug.Log(item.Key + " - " + item.Value.name);
+            Debug.Log($"UI Key : {item.Key} value : {item.Value.name}");
         }
 
         Debug.Log("LoadAllUI : Completed");
@@ -358,7 +425,7 @@ public class AddressableManager : Singleton<AddressableManager>
 
         foreach (KeyValuePair<string, EnemyConfigSO> item in _enemySO)
         {
-            Debug.Log(item.Key + " - " + item.Value.name);
+            Debug.Log($"MonsterSO Key : {item.Key} value : {item.Value.name}");
         }
 
         Debug.Log("LoadAllMonsterSO : Completed");
@@ -416,7 +483,7 @@ public class AddressableManager : Singleton<AddressableManager>
 
         foreach (KeyValuePair<string, GameObject> item in _monsterPf)
         {
-            Debug.Log(item.Key + " - " + item.Value.name);
+            Debug.Log($"MonsterPf Key : {item.Key} value : {item.Value.name}");
         }
 
         Debug.Log("LoadAllMonsterPf : Completed");
@@ -483,7 +550,7 @@ public class AddressableManager : Singleton<AddressableManager>
 
         foreach (KeyValuePair<string, GameObject> item in _vFX)
         {
-            Debug.Log(item.Key + " - " + item.Value.name);
+            Debug.Log($"VFX Key : {item.Key} value : {item.Value.name}");
         }
 
         Debug.Log("LoadAllVFX : Completed");

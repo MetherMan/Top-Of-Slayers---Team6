@@ -31,7 +31,7 @@ public class LoadingSceneController : MonoBehaviour
         while (op.isDone == false)
         {
             slider.value = op.progress;
-            loadingText.text = $"{Mathf.RoundToInt(op.progress * 100)}%";
+            if (op.progress < 0.9f) loadingText.text = $"{Mathf.RoundToInt(op.progress * 100)}%";
 
             if (op.progress >= 0.9f)
             {
