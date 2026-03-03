@@ -1,18 +1,36 @@
-using System.Collections;
-using System.Collections.Generic;
+﻿using TMPro;
 using UnityEngine;
 
 public class LoginSystem : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    #region field
+    [Header("Login")]
+    [SerializeField] GameObject loginUI;
+    [SerializeField] TextMeshProUGUI inputID;
+    [SerializeField] TextMeshProUGUI inputPW;
+
+    [Header("Sign Up")]
+    [SerializeField] GameObject signUpUI;
+    #endregion
+
+    void Awake()
     {
-        
+        TakeObject();
     }
 
-    // Update is called once per frame
     void Update()
     {
         
     }
+
+    #region method
+    void TakeObject()
+    {
+        loginUI = GameObject.Find("");
+        inputID = GameObject.Find("").GetComponent<TextMeshProUGUI>();
+        inputPW = GameObject.Find("").GetComponent<TextMeshProUGUI>();
+
+        signUpUI = GameObject.Find("");
+    }
+    #endregion
 }
