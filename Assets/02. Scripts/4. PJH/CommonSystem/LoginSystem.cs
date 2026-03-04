@@ -26,11 +26,7 @@ public class LoginSystem : MonoBehaviour
     #region method
     void TakeObject()
     {
-        loginUI = GameObject.Find("");
-        inputID = GameObject.Find("").GetComponent<TextMeshProUGUI>();
-        inputPW = GameObject.Find("").GetComponent<TextMeshProUGUI>();
 
-        signUpUI = GameObject.Find("");
     }
     #endregion
 }
