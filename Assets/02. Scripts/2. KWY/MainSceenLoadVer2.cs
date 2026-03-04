@@ -3,8 +3,16 @@ using UnityEngine.SceneManagement;
 
 public class MainSceenLoadVer2 : MonoBehaviour
 {
-    public void MapSceneLoad()
+    [SerializeField] private CirculDrag circulDrag;
+    [SerializeField] private string[] stageSceneNames;
+
+    public void LoadSelectedStage()
     {
-        SceneManager.LoadScene("Forest Scene Ver 2");
+        int index = circulDrag.CurrentIdex;
+
+        if(index >= 0 && index < stageSceneNames.Length)
+        {
+            SceneManager.LoadScene(stageSceneNames[index]);
+        }
     }
 }

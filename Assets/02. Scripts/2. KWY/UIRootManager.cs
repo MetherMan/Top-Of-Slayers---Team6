@@ -7,6 +7,7 @@ public class UIRootManager : MonoBehaviour
     [SerializeField] GameObject shopPanel;
     [SerializeField] GameObject gachaPanel;
     [SerializeField] GameObject dailyRewardPanel;
+    [SerializeField] GameObject settingPanel;
 
     [Header("Inventory Sub Panels")]
     [SerializeField] GameObject inventoryScrollPanel;
@@ -61,6 +62,7 @@ public class UIRootManager : MonoBehaviour
         shopPanel.SetActive(false);
         gachaPanel.SetActive(false);
         dailyRewardPanel.SetActive(false);
+        settingPanel.SetActive(false);
 
         inventoryScrollPanel.SetActive(true);
         craftingScrollPanel.SetActive(false);
@@ -80,6 +82,7 @@ public class UIRootManager : MonoBehaviour
         shopPanel.SetActive(true);
         gachaPanel.SetActive(false);
         dailyRewardPanel.SetActive(false);
+        settingPanel.SetActive(false);
 
         gachaResultOne.SetActive(false);
         gachaResultTen.SetActive(false);
@@ -90,11 +93,23 @@ public class UIRootManager : MonoBehaviour
         shopPanel.SetActive(false);
         gachaPanel.SetActive(true);
         dailyRewardPanel.SetActive(false);
+        settingPanel.SetActive(false);
 
         gachaResultOne.SetActive(false);
         gachaResultTen.SetActive(false);
 
+    }
 
+    public void OpenSetting()
+    {
+        inventoryPanel.SetActive(false);
+        shopPanel.SetActive(false);
+        gachaPanel.SetActive(false);
+        dailyRewardPanel.SetActive(false);
+        settingPanel.SetActive(true);
+
+        gachaResultOne.SetActive(false);
+        gachaResultTen.SetActive(false);
     }
 
     public void OpenDailyReward()
@@ -103,6 +118,7 @@ public class UIRootManager : MonoBehaviour
         shopPanel.SetActive(false);
         gachaPanel.SetActive(false);
         dailyRewardPanel.SetActive(true);
+        settingPanel.SetActive(false);
 
         gachaResultOne.SetActive(false);
         gachaResultTen.SetActive(false);
@@ -115,7 +131,6 @@ public class UIRootManager : MonoBehaviour
         itemDisassemblyScrollPanel.SetActive(false);
         EquipmentEnhancementPanel.SetActive(false);
 
-
     }
 
     public void OpenCraftList()
@@ -126,14 +141,7 @@ public class UIRootManager : MonoBehaviour
         itemDisassemblyScrollPanel.SetActive(false);
         EquipmentEnhancementPanel.SetActive(false);
     }
-    //public void OpenCraftingUI()
-    //{
-    //    inventoryScrollPanel.SetActive(false);
-    //    craftingScrollPanel.SetActive(false);
-    //    craftingUIPanel.SetActive(true);
-    //    itemDisassemblyScrollPanel.SetActive(false);
-    //    EquipmentEnhancementPanel.SetActive(false);
-    //}
+
     public void OpenItemDisassemblyScroll()
     {
         inventoryScrollPanel.SetActive(false);

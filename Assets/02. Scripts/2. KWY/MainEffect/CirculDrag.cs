@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using DG.Tweening;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -15,6 +15,8 @@ public class CirculDrag : MonoBehaviour
     [SerializeField] private Button nextButton;
     [SerializeField] private Button prevButton;
 
+    public int CurrentIdex => currentIndex;
+
     private void Start()
     {
         currentIndex = 0;
@@ -26,7 +28,7 @@ public class CirculDrag : MonoBehaviour
         nextButton.onClick.AddListener(() => ShowPanel(currentIndex + 1));
         prevButton.onClick.AddListener(() => ShowPanel(currentIndex - 1));
     }
-
+    
     public void ShowPanel(int index)
     {
         if (index < 0 || index >= panels.Length) return;
