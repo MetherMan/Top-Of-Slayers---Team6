@@ -1,27 +1,27 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class RuleDataContainer
 {
-    public StageConfigSO stageData; //½ºÅ×ÀÌÁö ³²Àº ½Ã°£
-    public int playTime; //½ºÅ×ÀÌÁö ÁøÇà½Ã°£ -> Å¸ÀÓ¿À¹ö
+    public StageConfigSO stageData; //ìŠ¤í…Œì´ì§€ ë‚¨ì€ ì‹œê°„
+    public int playTime; //ìŠ¤í…Œì´ì§€ ì§„í–‰ì‹œê°„ -> íƒ€ì„ì˜¤ë²„
 
-    public int currentPlayerHp; //ÇÃ·¹ÀÌ¾î Ã¼·Â -> RIP
+    public int currentPlayerHp; //í”Œë ˆì´ì–´ ì²´ë ¥ -> RIP
 
-    public int waveCount; //ÇØ´ç ¶ó¿îµå ¿şÀÌºê ¼ö
-    public int waveIndex; //¿şÀÌºê Å¬¸®¾î È®ÀÎ
+    public int waveCount; //í•´ë‹¹ ë¼ìš´ë“œ ì›¨ì´ë¸Œ ìˆ˜
+    public int waveIndex; //ì›¨ì´ë¸Œ í´ë¦¬ì–´ í™•ì¸
 }
 
 public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 {
     /*
-        ½ºÅ×ÀÌÁö ÇÑÁ¤ ½Ì±ÛÅæ
-        !Àü·«ÆĞÅÏ ·ê ¸Å´ÏÀú
+        ìŠ¤í…Œì´ì§€ í•œì • ì‹±ê¸€í†¤
+        !ì „ëµíŒ¨í„´ ë£° ë§¤ë‹ˆì €
 
-        ½ºÅ×ÀÌÁö ¸Ê Hierarchy¿¡ »ı¼º
+        ìŠ¤í…Œì´ì§€ ë§µ Hierarchyì— ìƒì„±
     */
 
     #region field
-    [Header("È°¼ºÈ­ µÈ ½ºÅ×ÀÌÁö ·ê")]
+    [Header("í™œì„±í™” ëœ ìŠ¤í…Œì´ì§€ ë£°")]
     [SerializeField] private WaveRule ruleType;
     public WaveRule RuleType
     {
@@ -32,7 +32,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         }
     }
 
-    [Header("½ºÅ×ÀÌÁö ½Ç½Ã°£ µ¥ÀÌÅÍ ¿¬µ¿")]
+    [Header("ìŠ¤í…Œì´ì§€ ì‹¤ì‹œê°„ ë°ì´í„° ì—°ë™")]
     RuleDataContainer ruleDataContainer = new RuleDataContainer();
     private bool isRoundClearResolved;
     #endregion
@@ -44,7 +44,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         var stageManager = StageManager.Instance;
         if (stageManager == null || stageManager.selectDB == null)
         {
-            Debug.LogWarning("StageManager.selectDB°¡ ¾ø¾î WaveDirectorSystem ÃÊ±âÈ­¸¦ º¸·ùÇÕ´Ï´Ù.");
+            Debug.LogWarning("StageManager.selectDBê°€ ì—†ì–´ WaveDirectorSystem ì´ˆê¸°í™”ë¥¼ ë³´ë¥˜í•©ë‹ˆë‹¤.");
             return;
         }
 
@@ -56,7 +56,6 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         ConnectData();
         if (ruleType != null) ruleType.OnUpdate(ruleDataContainer, this);
 
-        //ruleType.OnExit(ruleDataContainer, this);
     }
 
     #region method
@@ -83,7 +82,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
     }
 
 
-    //½Ç½Ã°£ µ¥ÀÌÅÍ ¿¬µ¿
+    //ì‹¤ì‹œê°„ ë°ì´í„° ì—°ë™
     private void ConnectData()
     {
         var stageFlow = StageFlowManager.Instance;
@@ -91,9 +90,11 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 
         ruleDataContainer.playTime = stageFlow.playTime;
         ruleDataContainer.waveIndex = stageFlow.waveIndex;
-        //ruleDataContainer.currentPlayerHp = ÇÃ·¹ÀÌ¾î ½ºÅİ ¿¬µ¿
+        //ruleDataContainer.currentPlayerHp = í”Œë ˆì´ì–´ ìŠ¤í…Ÿ ì—°ë™
     }
+    #endregion
 
+    #region ë£°
     public void TimeOver()
     {
         var stageManager = StageManager.Instance;
@@ -112,7 +113,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 
     public void WaveClear()
     {
-        //¿şÀÌºê ÀüÈ¯ ½ÃÁ¡¿¡¸¸ È£Ãâ
+        //ì›¨ì´ë¸Œ ì „í™˜ ì‹œì ì—ë§Œ í˜¸ì¶œ
         var gameFlow = GameFlowManager.Instance;
         if (gameFlow == null) return;
 
@@ -132,17 +133,19 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         }
         else
         {
-            Debug.LogWarning("RoundClear È£Ãâ ½Ã StageManager.selectDB°¡ nullÀÔ´Ï´Ù.");
+            Debug.LogWarning("RoundClear í˜¸ì¶œ ì‹œ StageManager.selectDBê°€ nullì…ë‹ˆë‹¤.");
         }
 
         var gameFlow = GameFlowManager.Instance;
         if (gameFlow == null)
         {
-            Debug.LogWarning("RoundClear È£Ãâ ½Ã GameFlowManager°¡ nullÀÔ´Ï´Ù.");
+            Debug.LogWarning("RoundClear í˜¸ì¶œ ì‹œ GameFlowManagerê°€ nullì…ë‹ˆë‹¤.");
             return;
         }
 
         gameFlow.RoundClear();
+
+        ruleType.OnExit(ruleDataContainer, this);
     }
     #endregion
 }

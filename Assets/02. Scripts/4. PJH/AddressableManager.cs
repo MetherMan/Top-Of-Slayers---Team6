@@ -21,16 +21,14 @@ public class AddressableManager : Singleton<AddressableManager>
     public Dictionary<string, GameObject> _monsterPf = new Dictionary<string, GameObject>();
     public Dictionary<string, GameObject> _vFX = new Dictionary<string, GameObject>();
 
-    [SerializeField] GameObject loadingUI;
-    [SerializeField] Slider loadingBar;
-    [SerializeField] TextMeshProUGUI loadingText;
+    Slider loadingBar;
+    TextMeshProUGUI loadingText;
     float visualProgress = 0f;
     #endregion
 
     protected override void Awake()
     {
         base.Awake();
-        TakeObject();
     }
 
     //비동기 매서드 실행하기 위해서 async 필요
@@ -48,13 +46,10 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     #region method
-    private void TakeObject()
+    public void TakeObject(Slider bar, TextMeshProUGUI text)
     {
-        loadingUI = GameObject.Find("Canvas/Background/LoadingUI");
-        loadingBar = GameObject.Find("Canvas/Background/LoadingUI/LoadingBar")
-            .GetComponent<Slider>();
-        loadingText = GameObject.Find("Canvas/Background/LoadingUI/LoadingBar/LoadingText")
-            .GetComponent<TextMeshProUGUI>();
+        loadingBar = bar;
+        loadingText = text;
     }
 
     //유효성 && 완료 && 성공 체크 메서드
@@ -80,9 +75,8 @@ public class AddressableManager : Singleton<AddressableManager>
 
     private async Task LoadAllData(IProgress<float> progress)
     {
-        await CheckUpdate();
-        await DownloadWithCapacityUI("Preload");
-        progress.Report(0.5f);
+        await CheckUpdate(progress);
+        await DownloadWithCapacityUI("Preload", progress);
 
         //호출 리스트
         Task stageSOTask = LoadAllStageSO();
@@ -105,12 +99,12 @@ public class AddressableManager : Singleton<AddressableManager>
         progress.Report(1.0f);
         visualProgress = 1.0f;
 
-        await Task.Delay(1000);
-        loadingUI.SetActive(false);
+        await Task.Delay(2000);
+        LoginUI.Instance.CompleteLoding();
         Debug.Log("모든 데이터 로드 완료");
     }
 
-    private async Task DownloadWithCapacityUI(object key)
+    private async Task DownloadWithCapacityUI(object key, IProgress<float> progress)
     {
         AsyncOperationHandle<long> sizeHandle = Addressables.GetDownloadSizeAsync(key);
         long totalBytes = await sizeHandle.Task;
@@ -146,10 +140,11 @@ public class AddressableManager : Singleton<AddressableManager>
             Addressables.Release(sizeHandle);
         }
 
+        progress.Report(0.5f);
         Debug.Log("다운로드 프로세스 종료");
     }
 
-    private async Task CheckUpdate()
+    private async Task CheckUpdate(IProgress<float> progress)
     {
         AsyncOperationHandle<List<string>> updateHandle
             = Addressables.CheckForCatalogUpdates(false);
@@ -161,6 +156,7 @@ public class AddressableManager : Singleton<AddressableManager>
             Debug.Log("카탈로그 업데이트");
         }
         Addressables.Release(updateHandle);
+        progress.Report(0.2f);
     }
 
     #region Load

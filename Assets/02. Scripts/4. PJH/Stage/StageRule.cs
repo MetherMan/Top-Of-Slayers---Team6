@@ -21,13 +21,10 @@ public class StageRule : WaveRule
         
     }
 
-    //클리어 조건
     public override void RoundClear(RuleDataContainer data, WaveDirectorSystem context)
     {
-        if (data.stageData.roundDatas.Count < data.waveIndex)
-        {
-            context.RoundClear();
-        }
+        //stage 클리어 조건을 if문으로 작성
+        context.RoundClear();
     }
     #endregion
 }

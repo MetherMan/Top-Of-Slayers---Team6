@@ -1,21 +1,17 @@
-﻿using TMPro;
-using UnityEngine;
-
+﻿using UnityEngine;
+/*
+기능만 작성
+UI 활성화 비활성화는 LoginSceneManager에서
+*/
 public class LoginSystem : MonoBehaviour
 {
     #region field
-    [Header("Login")]
-    [SerializeField] GameObject loginUI;
-    [SerializeField] TextMeshProUGUI inputID;
-    [SerializeField] TextMeshProUGUI inputPW;
-
-    [Header("Sign Up")]
-    [SerializeField] GameObject signUpUI;
+    
     #endregion
 
     void Awake()
     {
-        TakeObject();
+        
     }
 
     void Update()
@@ -24,13 +20,13 @@ public class LoginSystem : MonoBehaviour
     }
 
     #region method
-    void TakeObject()
+    public void PushUserData()
     {
-        loginUI = GameObject.Find("");
-        inputID = GameObject.Find("").GetComponent<TextMeshProUGUI>();
-        inputPW = GameObject.Find("").GetComponent<TextMeshProUGUI>();
-
-        signUpUI = GameObject.Find("");
+        LoginUI.Instance.onClickLogin = (data) =>
+        {
+            Debug.LogFormat("id : {0}, pw : {1}", data.Item1, data.Item2);
+        };
     }
+
     #endregion
 }
