@@ -36,19 +36,15 @@ public class DailyRewardSystem : MonoBehaviour
         if (currentDay == 7)
         {
             CurrencyManager.Instance.Add(10000);
-
         }
         else
         {
             CurrencyManager.Instance.Add(1000);
-
         }
 
         lastDate = today;
         PlayerPrefs.SetInt("CurrentDay", currentDay);
         PlayerPrefs.SetString("LastDate", lastDate);
-
-
         PlayerPrefs.Save();
     }
 
@@ -62,6 +58,5 @@ public class DailyRewardSystem : MonoBehaviour
     public void ResetButton()
     {
         PlayerPrefs.DeleteAll();
-
     }
 }
