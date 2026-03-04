@@ -100,7 +100,7 @@ public class AddressableManager : Singleton<AddressableManager>
         visualProgress = 1.0f;
 
         await Task.Delay(2000);
-        LoginSceneManager.Instance.CompleteLoding();
+        LoginUI.Instance.CompleteLoding();
         Debug.Log("모든 데이터 로드 완료");
     }
 

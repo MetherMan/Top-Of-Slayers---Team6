@@ -20,7 +20,14 @@ public class SceneSlot : MonoBehaviour
         //인스펙터 할당 없이 코드로 연동
         //https://youtu.be/l0QwB7xafl4?si=dTBTe71V7pU-arU1
         button = GetComponent<Button>();
+
         button.onClick.AddListener(OnClick);
+
+        //익명함수로 구현
+        //this.button.onClick.AddListener(() =>
+        //{
+        //    OnClick();
+        //});
     }
 
     #region method

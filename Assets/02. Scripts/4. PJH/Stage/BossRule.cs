@@ -25,7 +25,7 @@ public class BossRule : WaveRule
     //클리어 조건
     public override void RoundClear(RuleDataContainer data, WaveDirectorSystem context)
     {
-        //보스 몬스터 다운
+        //boss 클리어 조건을 if문으로 작성
         context.RoundClear();
     }
     #endregion

@@ -23,7 +23,7 @@ public class ChellengeRule : WaveRule
 
     public override void RoundClear(RuleDataContainer data, WaveDirectorSystem context)
     {
-        //
+        //cellenge 클리어 조건을 if문으로 작성
         context.RoundClear();
     }
 }
