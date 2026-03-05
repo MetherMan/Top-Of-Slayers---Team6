@@ -8,6 +8,7 @@ public partial class ChainVisualController : MonoBehaviour
     [Header("참조")]
     [SerializeField] private ChainCombatController chainCombat;
     [SerializeField] private DamageSystem damageSystem;
+    [SerializeField] private HitSequenceController hitSequence;
     [SerializeField] private ChainUI chainUI;
     [SerializeField] private GameObject chainPanel;
     [SerializeField] private TextMeshProUGUI chainText;
@@ -33,10 +34,48 @@ public partial class ChainVisualController : MonoBehaviour
     [SerializeField] private Color chainTimerBarBackgroundColor = new Color(0.08f, 0.08f, 0.1f, 0.7f);
     [SerializeField, Range(0f, 1f)] private float chainTimerBarEmptyAlpha = 0.18f;
 
+    [Header("체인 마일스톤 비트")]
+    [SerializeField] private bool useChainMilestoneBeat = true;
+    [SerializeField] private bool useMilestoneHitStop = true;
+    [SerializeField, Min(0f)] private float milestoneTextPunchScale = 0.26f;
+    [SerializeField, Min(0f)] private float milestoneTextPunchDuration = 0.14f;
+    [SerializeField] private Color milestoneTextFlashColor = new Color(1f, 0.45f, 0.2f, 1f);
+    [SerializeField, Min(0.01f)] private float milestoneTextFlashReturn = 0.16f;
+    [SerializeField] private Color milestoneTimerBarFlashColor = new Color(1f, 0.35f, 0.2f, 1f);
+    [SerializeField, Min(0.01f)] private float milestoneTimerBarFlashReturn = 0.14f;
+
     [Header("체인 처치 프리팹")]
     [SerializeField] private GameObject chainKillPrefab;
     [SerializeField, Min(0f)] private float chainKillPrefabHeightOffset = 0.2f;
     [SerializeField, Min(0f)] private float chainKillPrefabAutoDestroyTime = 2f;
+
+    [Header("체인 처치 피니시 비트")]
+    [SerializeField] private bool useChainKillFinishBeat = true;
+    [SerializeField] private bool useKillFinishHitStop = true;
+    [SerializeField, Min(0f)] private float killFinishTextPunchScale = 0.34f;
+    [SerializeField, Min(0f)] private float killFinishTextPunchDuration = 0.18f;
+    [SerializeField] private Color killFinishTextFlashColor = new Color(1f, 0.28f, 0.2f, 1f);
+    [SerializeField, Min(0.01f)] private float killFinishTextFlashReturn = 0.18f;
+
+    [Header("피해량 텍스트")]
+    [SerializeField] private bool useDamageText = true;
+    [SerializeField] private Camera damageTextCamera;
+    [SerializeField] private Vector3 damageTextOffset = new Vector3(0f, 0.14f, 0f);
+    [SerializeField, Min(0f)] private float damageTextRandomHorizontal = 0.16f;
+    [SerializeField, Min(0f)] private float damageTextRiseDistance = 0.72f;
+    [SerializeField, Min(0.05f)] private float damageTextDuration = 0.42f;
+    [SerializeField, Min(0.01f)] private float damageTextScale = 0.18f;
+    [SerializeField, Min(1f)] private float damageTextFontSize = 7f;
+    [SerializeField, Range(1f, 3f)] private float damageTextPopScaleMultiplier = 1.75f;
+    [SerializeField, Min(0f)] private float damageTextPopDuration = 0.09f;
+    [SerializeField, Min(0f)] private float damageTextDriftDistance = 0.14f;
+    [SerializeField, Min(1)] private int damageTextBigHitThreshold = 30;
+    [SerializeField, Range(0f, 1f)] private float damageTextAmountScaleWeight = 0.42f;
+    [SerializeField, Min(0f)] private float damageTextBigHitExtraScale = 0.2f;
+    [SerializeField] private TMP_FontAsset damageTextFontAsset;
+    [SerializeField] private Color damageTextColor = new Color(1f, 0.9f, 0.22f, 1f);
+    [SerializeField] private Color damageTextBigHitColor = new Color(1f, 0.63f, 0.2f, 1f);
+    [SerializeField] private Color killDamageTextColor = new Color(1f, 0.36f, 0.28f, 1f);
 
     [Header("배경 어둡게")]
     [SerializeField] private CanvasGroup darkenGroup;
@@ -66,6 +105,9 @@ public partial class ChainVisualController : MonoBehaviour
     private Vector3 darkenBaseScale = Vector3.one;
     private int pendingTextRefreshFrames;
     private bool isChainTimerBarConfigured;
+    private Color chainTextBaseColor = Color.white;
+    private Tween chainTextColorTween;
+    private Tween chainTimerBarColorTween;
 
     private void Awake()
     {
@@ -75,11 +117,16 @@ public partial class ChainVisualController : MonoBehaviour
         if (damageSystem == null) damageSystem = GetComponent<DamageSystem>();
         if (damageSystem == null) damageSystem = GetComponentInParent<DamageSystem>();
         if (damageSystem == null) damageSystem = FindObjectOfType<DamageSystem>();
+        if (hitSequence == null) hitSequence = GetComponent<HitSequenceController>();
+        if (hitSequence == null) hitSequence = GetComponentInParent<HitSequenceController>();
+        if (hitSequence == null) hitSequence = FindObjectOfType<HitSequenceController>();
         if (chainUI == null) chainUI = GetComponentInChildren<ChainUI>(true);
 
         if (chainTextRoot == null && chainText != null) chainTextRoot = chainText.rectTransform;
         if (chainTextRoot == null && chainPanel != null) chainTextRoot = chainPanel.GetComponent<RectTransform>();
         if (chainTextGroup == null && chainPanel != null) chainTextGroup = chainPanel.GetComponent<CanvasGroup>();
+        if (damageTextFontAsset == null && chainText != null) damageTextFontAsset = chainText.font;
+        if (chainText != null) chainTextBaseColor = chainText.color;
         EnsureChainTimerBar();
 
         if (darkenRoot == null)
@@ -108,6 +155,7 @@ public partial class ChainVisualController : MonoBehaviour
         if (chainCombat != null)
         {
             chainCombat.OnSlowStateChanged += HandleSlowStateChanged;
+            chainCombat.OnChainMilestoneReached += HandleChainMilestoneReached;
             HandleSlowStateChanged(chainCombat.IsSlowActive);
         }
         if (damageSystem != null)
@@ -121,6 +169,7 @@ public partial class ChainVisualController : MonoBehaviour
         if (chainCombat != null)
         {
             chainCombat.OnSlowStateChanged -= HandleSlowStateChanged;
+            chainCombat.OnChainMilestoneReached -= HandleChainMilestoneReached;
         }
         if (damageSystem != null)
         {
@@ -147,6 +196,7 @@ public partial class ChainVisualController : MonoBehaviour
         {
             PlayDarken(false);
             HideChain();
+            ResetChainBeatImmediate();
             ResetChainTimerBarImmediate();
             lastChain = -1;
             pendingTextRefreshFrames = 0;
@@ -158,8 +208,11 @@ public partial class ChainVisualController : MonoBehaviour
 
     private void HandleDamageApplied(DamageSystem.DamageResult result)
     {
+        TrySpawnDamageText(result);
+
         if (result.IsDead)
         {
+            PlayKillFinishBeat();
             TrySpawnChainKillPrefab(result.Target);
             pendingTextRefreshFrames = 0;
             return;
@@ -180,9 +233,17 @@ public partial class ChainVisualController : MonoBehaviour
     {
         if (externalChainCombat != null && chainCombat != externalChainCombat)
         {
-            if (chainCombat != null) chainCombat.OnSlowStateChanged -= HandleSlowStateChanged;
+            if (chainCombat != null)
+            {
+                chainCombat.OnSlowStateChanged -= HandleSlowStateChanged;
+                chainCombat.OnChainMilestoneReached -= HandleChainMilestoneReached;
+            }
             chainCombat = externalChainCombat;
-            if (isActiveAndEnabled) chainCombat.OnSlowStateChanged += HandleSlowStateChanged;
+            if (isActiveAndEnabled)
+            {
+                chainCombat.OnSlowStateChanged += HandleSlowStateChanged;
+                chainCombat.OnChainMilestoneReached += HandleChainMilestoneReached;
+            }
         }
 
         if (externalDamageSystem != null && damageSystem != externalDamageSystem)
@@ -201,6 +262,7 @@ public partial class ChainVisualController : MonoBehaviour
         if (chainTextRoot == null && chainText != null) chainTextRoot = chainText.rectTransform;
         if (chainTextRoot == null && chainPanel != null) chainTextRoot = chainPanel.GetComponent<RectTransform>();
         if (chainTextGroup == null && chainPanel != null) chainTextGroup = chainPanel.GetComponent<CanvasGroup>();
+        if (chainText != null) chainTextBaseColor = chainText.color;
         EnsureChainTimerBar();
         if (darkenGroup == null && darkenRoot != null) darkenGroup = darkenRoot.GetComponent<CanvasGroup>();
         if (darkenGraphic == null && darkenRoot != null) darkenGraphic = darkenRoot.GetComponent<Graphic>();
@@ -238,10 +300,16 @@ public partial class ChainVisualController : MonoBehaviour
     private void ForceResetVisualState()
     {
         HideChainImmediate();
+        ResetChainBeatImmediate();
         ResetChainTimerBarImmediate();
         ResetDarkenImmediate();
         isChainActive = false;
         lastChain = -1;
         pendingTextRefreshFrames = 0;
+    }
+
+    private void HandleChainMilestoneReached(int chain)
+    {
+        PlayChainMilestoneBeat(chain);
     }
 }

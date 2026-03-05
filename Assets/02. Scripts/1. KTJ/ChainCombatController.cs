@@ -14,8 +14,14 @@ public class ChainCombatController : MonoBehaviour
     [Header("체인")]
     [SerializeField, Min(0f)] private float damageIncreaseRate = 0.1f;
 
+    [Header("체인 마일스톤")]
+    [SerializeField] private bool useChainMilestoneBeat = true;
+    [SerializeField, Min(1)] private int firstMilestoneChain = 3;
+    [SerializeField, Min(1)] private int secondMilestoneChain = 5;
+    [SerializeField, Min(1)] private int thirdMilestoneChain = 7;
+
     [Header("슬로우")]
-    [SerializeField, Range(0f, 1f)] private float slowTimeScale = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float slowTimeScale = 0.1f;
     [SerializeField, Min(0f)] private float firstSlowDuration = 1f;
     [SerializeField, Min(0f)] private float chainSlowDuration = 0.8f;
     [SerializeField] private bool lockMovementDuringSlow = true;
@@ -30,6 +36,7 @@ public class ChainCombatController : MonoBehaviour
     private Coroutine targetCheckRoutine;
     private float slowEndTimeRealtime;
     private float slowDurationRealtime;
+    private int lastTriggeredMilestoneChain;
 
     public int CurrentChain => currentChain;
     public bool IsSlowActive => isSlowActive;
@@ -39,6 +46,7 @@ public class ChainCombatController : MonoBehaviour
         ? 0f
         : Mathf.Clamp01(SlowRemainingTime / slowDurationRealtime);
     public event System.Action<bool> OnSlowStateChanged;
+    public event System.Action<int> OnChainMilestoneReached;
 
     private void Awake()
     {
@@ -92,10 +100,16 @@ public class ChainCombatController : MonoBehaviour
     {
         if (result.Target == null) return;
 
+        var previousChain = currentChain;
         var isNewTarget = result.Target != lastTarget;
         if (isNewTarget || currentChain <= 0)
         {
             currentChain = Mathf.Max(1, currentChain + 1);
+        }
+
+        if (currentChain != previousChain)
+        {
+            TryNotifyChainMilestone(currentChain);
         }
 
         lastTarget = result.Target;
@@ -273,6 +287,7 @@ public class ChainCombatController : MonoBehaviour
     {
         currentChain = 0;
         lastTarget = null;
+        lastTriggeredMilestoneChain = 0;
     }
 
     private IEnumerator WaitForTimeScaleResume()
@@ -295,5 +310,24 @@ public class ChainCombatController : MonoBehaviour
     {
         slowEndTimeRealtime = 0f;
         slowDurationRealtime = 0f;
+    }
+
+    private void TryNotifyChainMilestone(int chain)
+    {
+        if (!useChainMilestoneBeat) return;
+        if (chain <= 0) return;
+        if (chain == lastTriggeredMilestoneChain) return;
+        if (!IsMilestoneChain(chain)) return;
+
+        lastTriggeredMilestoneChain = chain;
+        OnChainMilestoneReached?.Invoke(chain);
+    }
+
+    private bool IsMilestoneChain(int chain)
+    {
+        var first = Mathf.Max(1, firstMilestoneChain);
+        var second = Mathf.Max(1, secondMilestoneChain);
+        var third = Mathf.Max(1, thirdMilestoneChain);
+        return chain == first || chain == second || chain == third;
     }
 }

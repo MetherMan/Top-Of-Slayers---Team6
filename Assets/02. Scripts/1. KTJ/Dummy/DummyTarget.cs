@@ -41,8 +41,6 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
 
         hp -= amount;
 
-        if(DamageUI.Instance != null) DamageUI.Instance.ShowDamage(transform, amount);
-
         if (hp <= 0)
         {
             Die();

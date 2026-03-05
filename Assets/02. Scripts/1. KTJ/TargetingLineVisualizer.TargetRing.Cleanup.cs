@@ -19,6 +19,7 @@ public partial class TargetingLineVisualizer
         monsterRingTargets.Clear();
         monsterRingCleanupTargets.Clear();
         lastFocusedRingTarget = null;
+        previewRingTarget = null;
     }
 
     private void CleanupMonsterRingEntry(MonsterRingEntry entry, bool forceIdleRestore)
@@ -36,6 +37,7 @@ public partial class TargetingLineVisualizer
 
         if (entry.RingRenderer != null && (restoreMonsterRingOnRelease || forceIdleRestore))
         {
+            SetMonsterRingVisible(entry, true);
             ApplyMonsterRingColor(entry, entry.IdleColor);
         }
 

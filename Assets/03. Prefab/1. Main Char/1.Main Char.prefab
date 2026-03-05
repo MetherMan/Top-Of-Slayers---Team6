@@ -6565,6 +6565,7 @@ MonoBehaviour:
   monsterRingRaycastMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  monsterRingGroundClearance: 0.03
   targetColorFillDuration: 0.25
   confirmColorEarlyRedWindow: 0.22
   confirmColorLeadProgress: 0.32
@@ -6577,6 +6578,7 @@ MonoBehaviour:
   monsterRingStagePunchScale: 0.24
   monsterRingStagePunchDuration: 0.18
   useLockOnIcon: 1
+  hideMonsterRingWhenLocked: 1
   lockOnIconPrefab: {fileID: 0}
   lockOnIconSprite: {fileID: 0}
   lockOnIconColor: {r: 1, g: 0.16, b: 0.16, a: 1}
@@ -6609,7 +6611,7 @@ MonoBehaviour:
   targetingSystem: {fileID: 0}
   endChainWhenNoTargets: 1
   damageIncreaseRate: 0.1
-  slowTimeScale: 0.9
+  slowTimeScale: 0.1
   firstSlowDuration: 0.8
   chainSlowDuration: 0.8
   lockMovementDuringSlow: 1

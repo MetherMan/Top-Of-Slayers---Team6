@@ -14,6 +14,17 @@ public class EnemyBase : MonoBehaviour
 
     public EnemyStateMachine enemyStateMachine;
     private PlayerMoveController cachedPlayerMoveController;
+    private ChainCombatController cachedChainCombatController;
+
+    [Header("체인 추적 감속")]
+    [SerializeField] private bool useChainChaseSlow = true;
+    [SerializeField, Min(0f)] private float chainChaseSlowRadius = 7f;
+    [SerializeField, Range(0f, 1f)] private float chainChaseSlowMultiplier = 0.35f;
+
+    [Header("체인 반응 연출")]
+    [SerializeField] private bool useChainReactionAnimSlow = true;
+    [SerializeField, Range(0.1f, 1f)] private float chainReactionAnimSpeed = 0.72f;
+    [SerializeField, Min(0f)] private float chainReactionBlendSpeed = 8f;
 
     public EnemyIdleState IdleState { get; private set; }
     public EnemyFollow FollowState { get; private set; }
@@ -27,6 +38,7 @@ public class EnemyBase : MonoBehaviour
     public float bulletSpeed => enemySO.bulletSpeed;
     public int attackDamage => enemySO.strength;
     public float attackAngle => enemySO.attackAngle;
+    private float chainReactionWeight;
 
     private void Awake()
     {
@@ -51,9 +63,23 @@ public class EnemyBase : MonoBehaviour
         enemyStateMachine.ChangeState(IdleState);
     }
 
+    private void Update()
+    {
+        UpdateChainReactionVisual();
+    }
+
     private void FixedUpdate()
     {
         enemyStateMachine?.FixedUpdate();
+    }
+
+    private void OnDisable()
+    {
+        chainReactionWeight = 0f;
+        if (enemyAnim != null)
+        {
+            enemyAnim.SetPlaybackSpeed(1f);
+        }
     }
 
     public void Init(GameObject enemyPrefab)
@@ -94,6 +120,27 @@ public class EnemyBase : MonoBehaviour
         return player;
     }
 
+    public float GetChaseSpeedMultiplier(Vector3 enemyPosition)
+    {
+        if (!useChainChaseSlow) return 1f;
+        if (!IsChainSlowActive()) return 1f;
+
+        var playerTransform = ResolvePlayer();
+        if (playerTransform == null) return 1f;
+
+        if (chainChaseSlowRadius > 0f)
+        {
+            var playerPosition = playerTransform.position;
+            playerPosition.y = enemyPosition.y;
+            if ((playerPosition - enemyPosition).sqrMagnitude > chainChaseSlowRadius * chainChaseSlowRadius)
+            {
+                return 1f;
+            }
+        }
+
+        return Mathf.Clamp01(chainChaseSlowMultiplier);
+    }
+
     public void Die()
     {
         OnEnemyKilled?.Invoke(killScore);
@@ -111,6 +158,45 @@ public class EnemyBase : MonoBehaviour
         rb.isKinematic = false;
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+    }
+
+    private bool IsChainSlowActive()
+    {
+        if (cachedChainCombatController == null || !cachedChainCombatController.gameObject.activeInHierarchy)
+        {
+            cachedChainCombatController = FindObjectOfType<ChainCombatController>();
+        }
+
+        return cachedChainCombatController != null && cachedChainCombatController.IsSlowActive;
+    }
+
+    private void UpdateChainReactionVisual()
+    {
+        if (!useChainReactionAnimSlow) return;
+        if (enemyAnim == null) return;
+
+        var targetWeight = ShouldApplyChainReaction() ? 1f : 0f;
+        var delta = Time.unscaledDeltaTime > 0f ? Time.unscaledDeltaTime : Time.deltaTime;
+        var blendSpeed = Mathf.Max(0f, chainReactionBlendSpeed);
+        chainReactionWeight = Mathf.MoveTowards(chainReactionWeight, targetWeight, Mathf.Max(0f, delta) * blendSpeed);
+
+        var slowedSpeed = Mathf.Clamp(chainReactionAnimSpeed, 0.1f, 1f);
+        var speed = Mathf.Lerp(1f, slowedSpeed, chainReactionWeight);
+        enemyAnim.SetPlaybackSpeed(speed);
+    }
+
+    private bool ShouldApplyChainReaction()
+    {
+        if (!IsChainSlowActive()) return false;
+
+        var playerTransform = ResolvePlayer();
+        if (playerTransform == null) return false;
+        if (chainChaseSlowRadius <= 0f) return true;
+
+        var playerPosition = playerTransform.position;
+        playerPosition.y = transform.position.y;
+        var maxDistance = chainChaseSlowRadius * chainChaseSlowRadius;
+        return (playerPosition - transform.position).sqrMagnitude <= maxDistance;
     }
 
     private void OnDrawGizmos()

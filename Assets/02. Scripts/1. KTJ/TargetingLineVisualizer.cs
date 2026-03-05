@@ -11,6 +11,7 @@ public partial class TargetingLineVisualizer : MonoBehaviour
     [SerializeField] private SlashDashController dashController;
     [SerializeField] private AutoSlashController autoSlash;
     [SerializeField] private PlayerMoveController moveController;
+    [SerializeField] private ChainCombatController chainCombat;
 
     [Header("표시")]
     [SerializeField] private Vector3 originOffset = new Vector3(0f, 0.1f, 0f);
@@ -81,6 +82,7 @@ public partial class TargetingLineVisualizer : MonoBehaviour
     [SerializeField, Min(0.1f)] private float monsterRingRaycastDistance = 6f;
     [FormerlySerializedAs("groundMarkerRaycastMask")]
     [SerializeField] private LayerMask monsterRingRaycastMask = ~0;
+    [SerializeField, Min(0f)] private float monsterRingGroundClearance = 0.03f;
     [SerializeField, Min(0.05f)] private float targetColorFillDuration = 0.25f;
     [SerializeField, Range(0f, 0.5f)] private float confirmColorEarlyRedWindow = 0.22f;
     [SerializeField, Range(0f, 0.7f)] private float confirmColorLeadProgress = 0.32f;
@@ -92,7 +94,18 @@ public partial class TargetingLineVisualizer : MonoBehaviour
     [SerializeField, Min(0.01f)] private float monsterRingLockOnPunchDuration = 0.24f;
     [SerializeField, Min(0f)] private float monsterRingStagePunchScale = 0.24f;
     [SerializeField, Min(0.01f)] private float monsterRingStagePunchDuration = 0.18f;
+    [SerializeField] private bool useMilestoneRingPulse = true;
+    [SerializeField, Min(0f)] private float milestoneRingPunchScale = 0.36f;
+    [SerializeField, Min(0.01f)] private float milestoneRingPunchDuration = 0.2f;
+    [SerializeField] private bool useNextTargetPreviewRing = true;
+    [SerializeField] private bool nextTargetPreviewOnlyDuringChain = true;
+    [SerializeField] private Color nextTargetPreviewColor = new Color(1f, 0.82f, 0.3f, 0.95f);
+    [SerializeField, Range(0f, 1f)] private float nextTargetPreviewColorBlend = 0.82f;
+    [SerializeField, Min(0.1f)] private float nextTargetPreviewScaleMultiplier = 0.82f;
+    [SerializeField, Range(0f, 0.4f)] private float nextTargetPreviewPulseAmount = 0.06f;
+    [SerializeField, Min(0f)] private float nextTargetPreviewPulseSpeed = 8f;
     [SerializeField] private bool useLockOnIcon = true;
+    [SerializeField] private bool hideMonsterRingWhenLocked = true;
     [SerializeField] private GameObject lockOnIconPrefab;
     [SerializeField] private Sprite lockOnIconSprite;
     [SerializeField] private Color lockOnIconColor = new Color(1f, 0.16f, 0.16f, 1f);
@@ -130,6 +143,10 @@ public partial class TargetingLineVisualizer : MonoBehaviour
     private readonly List<Transform> monsterRingTargets = new List<Transform>(64);
     private readonly List<Transform> monsterRingCleanupTargets = new List<Transform>(64);
     private readonly Dictionary<Transform, MonsterRingEntry> monsterRingEntries = new Dictionary<Transform, MonsterRingEntry>(64);
+    private Vector3 ringAimOrigin;
+    private Vector3 ringAimDirection = Vector3.forward;
+    private float ringAimRange;
+    private Transform previewRingTarget;
 
     private void Awake()
     {
@@ -148,6 +165,9 @@ public partial class TargetingLineVisualizer : MonoBehaviour
         if (autoSlash == null) autoSlash = GetComponentInParent<AutoSlashController>();
         if (moveController == null) moveController = GetComponent<PlayerMoveController>();
         if (moveController == null) moveController = GetComponentInParent<PlayerMoveController>();
+        if (chainCombat == null) chainCombat = GetComponent<ChainCombatController>();
+        if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
+        if (chainCombat == null) chainCombat = FindObjectOfType<ChainCombatController>();
 
         if (line != null)
         {
@@ -196,6 +216,9 @@ public partial class TargetingLineVisualizer : MonoBehaviour
         var length = GetLineLength();
         var baseWorldWidth = Mathf.Max(minLineWidth, targetingSystem.LineWidth * lineWidthMultiplier);
         var renderWorldWidth = useDottedLine ? Mathf.Max(baseWorldWidth, dottedMinWorldWidth) : baseWorldWidth;
+        ringAimOrigin = origin;
+        ringAimDirection = direction;
+        ringAimRange = length;
 
         var target = targetingSystem.GetTarget(origin, direction, length, null);
         var hasTarget = target != null;
