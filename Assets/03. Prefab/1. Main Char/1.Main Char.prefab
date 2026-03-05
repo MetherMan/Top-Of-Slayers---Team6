@@ -6611,10 +6611,10 @@ MonoBehaviour:
   targetingSystem: {fileID: 0}
   endChainWhenNoTargets: 1
   damageIncreaseRate: 0.1
-  slowTimeScale: 0.1
+  slowTimeScale: 1
   firstSlowDuration: 0.8
   chainSlowDuration: 0.8
-  lockMovementDuringSlow: 1
+  lockMovementDuringSlow: 0
 --- !u!114 &5680457019729186227
 MonoBehaviour:
   m_ObjectHideFlags: 0
