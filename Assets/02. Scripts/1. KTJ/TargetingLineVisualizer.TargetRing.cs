@@ -79,10 +79,11 @@ public partial class TargetingLineVisualizer
 
         SyncMonsterRingEntries(target, useChainForcedColor);
         UpdateFocusedRingTarget(target);
+        previewRingTarget = ResolvePreviewRingTarget(target, useChainForcedColor);
 
         if (useChainForcedColor)
         {
-            ApplyChainForcedRingVisual(target);
+            ApplyChainForcedRingVisual(target, previewRingTarget);
             return;
         }
 
@@ -91,6 +92,7 @@ public partial class TargetingLineVisualizer
         if (entry == null || entry.RingRenderer == null) return;
 
         ApplyMonsterRingHighlight(entry, color, confirmProgress, stageFx);
+        TryApplyPreviewRingVisual(color);
     }
 
     private void SyncMonsterRingEntries(Transform focusedTarget, bool skipIdleVisual)
@@ -154,7 +156,7 @@ public partial class TargetingLineVisualizer
         return autoSlash.IsChainSlowActive;
     }
 
-    private void ApplyChainForcedRingVisual(Transform focusedTarget)
+    private void ApplyChainForcedRingVisual(Transform focusedTarget, Transform previewTarget)
     {
         foreach (var pair in monsterRingEntries)
         {
@@ -163,12 +165,87 @@ public partial class TargetingLineVisualizer
             if (entry == null || entry.RingRenderer == null) continue;
 
             UpdateMonsterRingTransform(entry);
-            ApplyMonsterRingColor(entry, chainForcedRingColor);
-            ApplyMonsterLockOnIcon(entry, target == focusedTarget, chainForcedRingColor, 1f);
+            var isFocusedTarget = target == focusedTarget;
+            var isPreviewTarget = previewTarget != null && target == previewTarget && !isFocusedTarget;
+            if (isPreviewTarget)
+            {
+                ApplyMonsterRingPreviewVisual(entry, chainForcedRingColor);
+                continue;
+            }
+
+            var shouldHideBaseRing = isFocusedTarget && useLockOnIcon && hideMonsterRingWhenLocked;
+            SetMonsterRingVisible(entry, !shouldHideBaseRing);
+            if (!shouldHideBaseRing)
+            {
+                ApplyMonsterRingColor(entry, chainForcedRingColor);
+            }
+
+            ApplyMonsterLockOnIcon(entry, isFocusedTarget, chainForcedRingColor, 1f);
             if (entry.RingTransform != null)
             {
                 ApplyMonsterRingScale(entry, monsterRingBaseScaleMultiplier * (1f + entry.RingTweenScale));
             }
+        }
+    }
+
+    private Transform ResolvePreviewRingTarget(Transform focusedTarget, bool isChainForcedColor)
+    {
+        if (!useNextTargetPreviewRing) return null;
+        if (focusedTarget == null) return null;
+        if (nextTargetPreviewOnlyDuringChain && !isChainForcedColor) return null;
+
+        var origin = ringAimOrigin;
+        var direction = ringAimDirection;
+        direction.y = 0f;
+        if (direction.sqrMagnitude <= 0f)
+        {
+            direction = followTarget != null ? followTarget.forward : transform.forward;
+            direction.y = 0f;
+            if (direction.sqrMagnitude <= 0f)
+            {
+                direction = Vector3.forward;
+            }
+        }
+
+        var range = ringAimRange > 0f ? ringAimRange : GetLineLength();
+        var normalized = direction.normalized;
+        var preview = targetingSystem.GetTarget(origin, normalized, range, focusedTarget);
+        if (preview == null || preview == focusedTarget)
+        {
+            preview = targetingSystem.GetTargetByAngle(origin, normalized, range, focusedTarget);
+        }
+
+        if (preview == focusedTarget) return null;
+        return preview;
+    }
+
+    private void TryApplyPreviewRingVisual(Color focusedColor)
+    {
+        if (previewRingTarget == null) return;
+        if (!monsterRingEntries.TryGetValue(previewRingTarget, out var previewEntry)) return;
+        if (previewEntry == null || previewEntry.RingRenderer == null) return;
+        if (previewRingTarget == lastFocusedRingTarget) return;
+
+        ApplyMonsterRingPreviewVisual(previewEntry, focusedColor);
+    }
+
+    private void HandleChainMilestoneReached(int chain)
+    {
+        if (!useMilestoneRingPulse) return;
+        if (milestoneRingPunchScale <= 0f || milestoneRingPunchDuration <= 0f) return;
+        var chainWeight = Mathf.Clamp01((Mathf.Max(1, chain) - 1f) / 6f);
+        var focusedPunchScale = milestoneRingPunchScale * Mathf.Lerp(1f, 1.2f, chainWeight);
+
+        if (lastFocusedRingTarget != null && monsterRingEntries.TryGetValue(lastFocusedRingTarget, out var focusedEntry))
+        {
+            PlayMonsterRingTween(focusedEntry, focusedPunchScale, milestoneRingPunchDuration);
+        }
+
+        if (previewRingTarget != null
+            && previewRingTarget != lastFocusedRingTarget
+            && monsterRingEntries.TryGetValue(previewRingTarget, out var previewEntry))
+        {
+            PlayMonsterRingTween(previewEntry, focusedPunchScale * 0.6f, milestoneRingPunchDuration);
         }
     }
 

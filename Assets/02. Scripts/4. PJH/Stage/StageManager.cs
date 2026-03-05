@@ -41,12 +41,32 @@ public class StageManager : Singleton<StageManager>
     //스테이지 UI 클릭 시 실행될 매서드
     public void StageData(string key)
     {
-        StageConfigSO data = AddressableManager.Instance.GetStageData(key);
-        if (data != null)
+        AddressableManager addressableManager = FindFirstObjectByType<AddressableManager>();
+        if (addressableManager != null)
         {
-            //해당 스테이지 데이터를 불러오기
-            selectDB = data;
-            return;
+            StageConfigSO addressableData = addressableManager.GetStageData(key);
+            if (addressableData != null)
+            {
+                //해당 스테이지 데이터를 불러오기
+                selectDB = addressableData;
+                return;
+            }
+        }
+
+        if (stageDB == null)
+        {
+            stageDB = StageDatabase.Instance;
+        }
+
+        if (stageDB != null)
+        {
+            StageConfigSO localData = stageDB.GetStageData(key);
+            if (localData != null)
+            {
+                //Addressable 데이터가 없을 경우 로컬 DB로 대체
+                selectDB = localData;
+                return;
+            }
         }
 
         Debug.LogWarning($"StageData({key}) 로드에 실패했습니다.");

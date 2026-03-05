@@ -1,13 +1,17 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
 {
     [Header("연동")]
     [SerializeField] private TargetingSystem targeting;
     [SerializeField] private EnemyBase enemyBase;
+    [SerializeField] private EnemyConfigSO enemySO;
 
-    [Header("스탯")]
-    [SerializeField] private int hp = 30;
+    public int maxHp;
+    public int currentHp;
+
+    public event Action<int, int> OnHPChanged;
 
     private void OnEnable()
     {
@@ -25,6 +29,24 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
         {
             targeting.RegisterTarget(transform);
         }
+
+        if(enemySO == null && enemyBase != null)
+        {
+            enemySO = enemyBase.GetEnemySO();
+        }
+
+        if(enemySO != null)
+        {
+            maxHp = enemySO.maxHp;
+            currentHp = maxHp;
+        }
+
+        OnHPChanged?.Invoke(currentHp, maxHp);
+    }
+
+    private void Start()
+    {
+        EnemyHPUIManager.Instance.CreateHPBar(this);
     }
 
     private void OnDisable()
@@ -39,14 +61,14 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
     {
         if (amount <= 0) return;
 
-        hp -= amount;
+        currentHp -= amount;
 
-        if(DamageUI.Instance != null) DamageUI.Instance.ShowDamage(transform, amount);
-
-        if (hp <= 0)
+        if (currentHp <= 0)
         {
             Die();
         }
+
+        OnHPChanged?.Invoke(currentHp, maxHp);
     }
 
     private void Die()
@@ -60,5 +82,5 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
             gameObject.SetActive(false);
         }
     }
-    public bool IsDead => hp <= 0;
+    public bool IsDead => currentHp <= 0;
 }

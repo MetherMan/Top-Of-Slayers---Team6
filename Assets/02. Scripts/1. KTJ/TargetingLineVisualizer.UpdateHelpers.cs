@@ -2,6 +2,12 @@ using UnityEngine;
 
 public partial class TargetingLineVisualizer
 {
+    private void OnEnable()
+    {
+        if (chainCombat == null) return;
+        chainCombat.OnChainMilestoneReached += HandleChainMilestoneReached;
+    }
+
     private float AdjustWidthByScale(float width)
     {
         if (line == null) return width;
@@ -46,6 +52,11 @@ public partial class TargetingLineVisualizer
 
     private void OnDisable()
     {
+        if (chainCombat != null)
+        {
+            chainCombat.OnChainMilestoneReached -= HandleChainMilestoneReached;
+        }
+
         ReleaseMonsterExistingRing(true);
         lastVisualTarget = null;
         targetColorFillTimer = 0f;
@@ -54,6 +65,7 @@ public partial class TargetingLineVisualizer
         postConfirmHoldTarget = null;
         postConfirmHoldTimer = 0f;
         wasChainForcedRingColor = false;
+        previewRingTarget = null;
     }
 
     private float GetVisualTargetFillProgress(Transform target)

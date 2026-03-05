@@ -116,6 +116,10 @@ public partial class ChainVisualController
     {
         if (darkenTween != null) darkenTween.Kill();
         darkenTween = null;
+        if (chainTextColorTween != null) chainTextColorTween.Kill();
+        chainTextColorTween = null;
+        if (chainTimerBarColorTween != null) chainTimerBarColorTween.Kill();
+        chainTimerBarColorTween = null;
         KillEnvironmentTween();
         if (darkenRoot != null) darkenRoot.DOKill();
         if (darkenGroup != null) darkenGroup.DOKill();
