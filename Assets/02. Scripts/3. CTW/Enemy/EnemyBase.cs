@@ -38,7 +38,13 @@ public class EnemyBase : MonoBehaviour
     public float bulletSpeed => enemySO.bulletSpeed;
     public int attackDamage => enemySO.strength;
     public float attackAngle => enemySO.attackAngle;
+    public float attackCooldown => enemySO.attackCooldown;
+    public float dashTime => enemySO.dashTime;
+    public float dashSpeed => enemySO.dashSpeed;
+
     private float chainReactionWeight;
+
+    public bool IsDash { get; set; }
 
     private void Awake()
     {
@@ -214,6 +220,27 @@ public class EnemyBase : MonoBehaviour
             Vector3 rightDir = Quaternion.Euler(0, enemySO.attackAngle / 2, 0) * transform.forward;
             Gizmos.DrawLine(transform.position, transform.position + leftDir * enemySO.attackRange);
             Gizmos.DrawLine(transform.position, transform.position + rightDir * enemySO.attackRange);
+        }
+    }
+
+    public EnemyConfigSO GetEnemySO()
+    {
+        return enemySO;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (enemySO.attackType != AttackType.Dash) return;
+
+        if(IsDash && collision.gameObject.CompareTag("Player"))
+        {
+            PlayerHP playerHP = collision.gameObject.GetComponent<PlayerHP>();
+
+            if(playerHP != null)
+            {
+                playerHP.TakeDamage(enemySO.strength);
+                Debug.Log($"{enemySO.name}이 떄림{enemySO.strength}");
+            }
         }
     }
 }

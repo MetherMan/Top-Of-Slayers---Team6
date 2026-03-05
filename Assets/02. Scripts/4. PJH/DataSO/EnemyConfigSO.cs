@@ -18,7 +18,8 @@ public enum AttackType
 {
     Melee,  //근거리
     Ranged, //원거리
-    Corn    //부채꼴
+    Corn,    //부채꼴
+    Dash
 }
 
 [CreateAssetMenu(fileName = "Enemy_", menuName = "Config/Enemy")]
@@ -41,6 +42,7 @@ public class EnemyConfigSO : ScriptableObject
 
     public float moveSpeed;
     public float attackRange;
+    public float attackCooldown;
 
     [Header("몬스터 루팅 목록")]
     public int[] NormalDropCoin; //ex. 14~17 coin
@@ -57,4 +59,8 @@ public class EnemyConfigSO : ScriptableObject
 
     [Header("부채꼴 전용")]
     public float attackAngle;
+
+    [Header("돌진 전용")]
+    public float dashSpeed;
+    public float dashTime;
 }

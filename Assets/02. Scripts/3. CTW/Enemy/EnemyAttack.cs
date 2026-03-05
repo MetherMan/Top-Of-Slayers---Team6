@@ -12,6 +12,13 @@ public class EnemyAttack : IEnemyState
 
     private bool isStateChaged = false;
 
+    private float coolTimer;
+    private bool isCooldown;
+
+    private bool isDashed;
+    private Vector3 dashDir;
+    private float dashTimer;
+
     public EnemyAttack(EnemyBase enemy, EnemyStateMachine enemyStateMachine)
     {
         this.enemy = enemy;
@@ -24,8 +31,15 @@ public class EnemyAttack : IEnemyState
         isShoot = false;
         timer = 0f;
 
+        coolTimer = 0f;
+        isCooldown = false;
+
+        isDashed = false;
+        dashTimer = 0f;
+
         enemy.enemyAnim.EnemyRunning(false);
         enemy.enemyAnim.EnemyAttack(true);
+
         //재생중인 애니메이션 길이 가져오기
         attackDuration = enemy.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
 
@@ -60,14 +74,36 @@ public class EnemyAttack : IEnemyState
             }
         }
 
+        else if(enemy.attackType == AttackType.Dash && !isShoot)
+        {
+            if (timer >= attackDuration * 0.5f)
+            {
+                DashAttack();
+                isShoot = true;
+            }
+        }
+
         if (!isAttackEnded)
         {
             timer += Time.deltaTime;
             if (timer >= attackDuration)
             {
                 isAttackEnded = true;
+                isCooldown = true;
             }
             return;
+        }
+
+        if (isCooldown)
+        {
+            coolTimer += Time.deltaTime;
+
+            //어택쿨타임 동안 가만히 있기
+            if(coolTimer < enemy.attackCooldown)
+            {
+                return;
+            }
+            isCooldown = false;
         }
 
         float distance = Vector3.Distance(enemy.transform.position, playerTransform.position);
@@ -139,6 +175,32 @@ public class EnemyAttack : IEnemyState
         else
         {
              Debug.Log($"{enemy.name}의 공격이 빗나감");
+        }
+    }
+
+    private void DashAttack()
+    {
+        var playerTransform = enemy.ResolvePlayer();
+        if (playerTransform == null) return;
+
+        if (!isDashed)
+        {
+            dashDir = (playerTransform.position - enemy.transform.position).normalized;
+            isDashed = true;
+            enemy.IsDash = true;
+        }
+
+        dashTimer += Time.deltaTime;
+
+        if (dashTimer <= enemy.dashTime)
+        {
+            enemy.rb.velocity = dashDir * enemy.dashSpeed;
+        }
+        else
+        {
+            enemy.rb.velocity = Vector3.zero;
+            isDashed = false;
+            enemy.IsDash = false;
         }
     }
 
