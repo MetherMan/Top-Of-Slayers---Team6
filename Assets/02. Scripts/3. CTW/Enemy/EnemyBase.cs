@@ -19,7 +19,7 @@ public class EnemyBase : MonoBehaviour
     [Header("체인 추적 감속")]
     [SerializeField] private bool useChainChaseSlow = true;
     [SerializeField, Min(0f)] private float chainChaseSlowRadius = 7f;
-    [SerializeField, Range(0f, 1f)] private float chainChaseSlowMultiplier = 0.35f;
+    [SerializeField, Range(0f, 1f)] private float chainChaseSlowMultiplier = 0.1f;
 
     [Header("체인 반응 연출")]
     [SerializeField] private bool useChainReactionAnimSlow = true;

@@ -21,10 +21,10 @@ public class ChainCombatController : MonoBehaviour
     [SerializeField, Min(1)] private int thirdMilestoneChain = 7;
 
     [Header("슬로우")]
-    [SerializeField, Range(0f, 1f)] private float slowTimeScale = 0.1f;
+    [SerializeField, Range(0f, 1f)] private float slowTimeScale = 1f;
     [SerializeField, Min(0f)] private float firstSlowDuration = 1f;
     [SerializeField, Min(0f)] private float chainSlowDuration = 0.8f;
-    [SerializeField] private bool lockMovementDuringSlow = true;
+    [SerializeField] private bool lockMovementDuringSlow = false;
 
     private Transform lastTarget;
     private int currentChain;
@@ -125,7 +125,7 @@ public class ChainCombatController : MonoBehaviour
 
     private void StartSlow(float duration)
     {
-        if (duration <= 0f || slowTimeScale <= 0f) return;
+        if (duration <= 0f) return;
 
         slowDurationRealtime = Mathf.Max(0.0001f, duration);
         slowEndTimeRealtime = Time.unscaledTime + slowDurationRealtime;
@@ -144,10 +144,8 @@ public class ChainCombatController : MonoBehaviour
         isSlowActive = true;
         if (!wasSlowActive)
         {
-            ApplyMovementLock(true);
             OnSlowStateChanged?.Invoke(true);
         }
-        SetTimeScale(slowTimeScale);
         yield return new WaitForSecondsRealtime(duration);
         StopSlow();
     }
@@ -156,7 +154,6 @@ public class ChainCombatController : MonoBehaviour
     {
         if (!isSlowActive) return;
         isSlowActive = false;
-        ApplyMovementLock(false);
         OnSlowStateChanged?.Invoke(false);
         if (slowRoutine != null)
         {
@@ -164,7 +161,6 @@ public class ChainCombatController : MonoBehaviour
             slowRoutine = null;
         }
 
-        SetTimeScale(1f);
         ResetSlowTimerState();
         ResetChainState();
     }

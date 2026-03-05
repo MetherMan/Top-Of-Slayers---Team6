@@ -14,7 +14,7 @@ public partial class PlayerMoveController : MonoBehaviour
 
     [Header("체인")]
     [SerializeField] private ChainCombatController chainCombat;
-    [SerializeField] private bool lockMovementDuringChain = true;
+    [SerializeField] private bool lockMovementDuringChain = false;
 
     [Header("카메라 기준")]
     [SerializeField] private bool useCameraRelative = true;
