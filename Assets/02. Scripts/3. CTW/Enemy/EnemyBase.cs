@@ -19,7 +19,7 @@ public class EnemyBase : MonoBehaviour
     [Header("체인 추적 감속")]
     [SerializeField] private bool useChainChaseSlow = true;
     [SerializeField, Min(0f)] private float chainChaseSlowRadius = 7f;
-    [SerializeField, Range(0f, 1f)] private float chainChaseSlowMultiplier = 0.35f;
+    [SerializeField, Range(0f, 1f)] private float chainChaseSlowMultiplier = 0.1f;
 
     [Header("체인 반응 연출")]
     [SerializeField] private bool useChainReactionAnimSlow = true;
@@ -228,15 +228,16 @@ public class EnemyBase : MonoBehaviour
         return enemySO;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
+        Debug.Log($"트리거 감지 태그{other.tag}");
         if (enemySO.attackType != AttackType.Dash) return;
 
-        if(IsDash && collision.gameObject.CompareTag("Player"))
+        if (IsDash && other.CompareTag("Player"))
         {
-            PlayerHP playerHP = collision.gameObject.GetComponent<PlayerHP>();
+            PlayerHP playerHP = other.GetComponentInParent<PlayerHP>();
 
-            if(playerHP != null)
+            if (playerHP != null)
             {
                 playerHP.TakeDamage(enemySO.strength);
                 Debug.Log($"{enemySO.name}이 떄림{enemySO.strength}");

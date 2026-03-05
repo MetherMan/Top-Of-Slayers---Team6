@@ -4,7 +4,7 @@ public partial class PlayerMoveController
 {
     private void ExecuteNextCommand(float deltaTime)
     {
-        if (movementLocked)
+        if (IsMovementBlocked())
         {
             currentInput = Vector2.zero;
             currentCommand = stopCommand;
@@ -40,7 +40,7 @@ public partial class PlayerMoveController
         var moveDirection = GetMoveDirection(moveInput);
         if (moveDirection == Vector3.zero) return;
 
-        var move = moveDirection * moveSpeed * deltaTime;
+        var move = moveDirection * GetCurrentMoveSpeed() * deltaTime;
 
         if (cachedRigidbody != null)
         {

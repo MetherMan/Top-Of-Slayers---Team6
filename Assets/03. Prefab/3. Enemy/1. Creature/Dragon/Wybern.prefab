@@ -6001,8 +6001,8 @@ MonoBehaviour:
   targeting: {fileID: 0}
   enemyBase: {fileID: 0}
   enemySO: {fileID: 0}
-  maxHP: 0
-  currentHP: 0
+  maxHp: 0
+  currentHp: 0
 --- !u!54 &543749286859064343
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -6047,6 +6047,12 @@ MonoBehaviour:
   rb: {fileID: 0}
   enemyAnim: {fileID: 0}
   enemyStateMachine: {fileID: 0}
+  useChainChaseSlow: 1
+  chainChaseSlowRadius: 7
+  chainChaseSlowMultiplier: 0.35
+  useChainReactionAnimSlow: 1
+  chainReactionAnimSpeed: 0.72
+  chainReactionBlendSpeed: 8
   enemySO: {fileID: 11400000, guid: 8eceddf2f0dce9e4d87c190c2e6fac73, type: 2}
 --- !u!114 &9222582973685376750
 MonoBehaviour:

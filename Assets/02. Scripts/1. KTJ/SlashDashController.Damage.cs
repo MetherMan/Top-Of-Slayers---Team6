@@ -6,12 +6,22 @@ public partial class SlashDashController
     private int CalculateDamage(TimingGrade grade, AttackSpecSO spec)
     {
         if (spec == null) return 0;
+        var baseDamage = Mathf.Max(0, spec.baseDamage + equipmentAttackBonus);
         switch (grade)
         {
             case TimingGrade.Perfect:
-                return Mathf.RoundToInt(spec.baseDamage * spec.criticalMultiplier);
+                return Mathf.RoundToInt(baseDamage * spec.criticalMultiplier);
             case TimingGrade.Good:
-                return spec.baseDamage;
+                if (equipmentCriticalChanceBonus > 0f)
+                {
+                    var criticalChance = Mathf.Clamp01(equipmentCriticalChanceBonus * 0.01f);
+                    if (Random.value <= criticalChance)
+                    {
+                        return Mathf.RoundToInt(baseDamage * spec.criticalMultiplier);
+                    }
+                }
+
+                return baseDamage;
             default:
                 return 0;
         }
@@ -25,6 +35,7 @@ public partial class SlashDashController
             return;
         }
 
+        var hitCount = 0;
         if (pendingPierceTargets.Count > 0)
         {
             for (int i = 0; i < pendingPierceTargets.Count; i++)
@@ -32,14 +43,30 @@ public partial class SlashDashController
                 var target = pendingPierceTargets[i];
                 if (target == null) continue;
                 damageSystem.ApplyDamage(target, pendingDamage);
+                hitCount++;
             }
         }
         else if (pendingTarget != null)
         {
             damageSystem.ApplyDamage(pendingTarget, pendingDamage);
+            hitCount++;
         }
 
+        ApplyEquipmentHeal(hitCount);
         ClearPendingDamage();
+    }
+
+    private void ApplyPendingDamageSafely()
+    {
+        try
+        {
+            ApplyPendingDamage();
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogWarning($"대미지 적용 중 예외가 발생해 공격 후처리를 정리합니다.\n{exception}");
+            ClearPendingDamage();
+        }
     }
 
     private void ClearPendingDamage()
@@ -96,5 +123,35 @@ public partial class SlashDashController
         }
 
         return true;
+    }
+
+    private void ApplyEquipmentHeal(int hitCount)
+    {
+        if (equipmentHealOnHit <= 0 || hitCount <= 0) return;
+
+        var playerHp = ResolvePlayerHp();
+        if (playerHp == null) return;
+
+        var maxHp = Mathf.Max(1, playerHp.maxHP);
+        var currentHp = Mathf.Clamp(playerHp.currentHP, 0, maxHp);
+        var healAmount = equipmentHealOnHit * hitCount;
+        var nextHp = Mathf.Clamp(currentHp + healAmount, 0, maxHp);
+        if (nextHp == currentHp) return;
+
+        playerHp.currentHP = nextHp;
+        playerHp.TakeDamage(0);
+    }
+
+    private PlayerHP ResolvePlayerHp()
+    {
+        if (cachedPlayerHp != null && cachedPlayerHp.gameObject.activeInHierarchy)
+        {
+            return cachedPlayerHp;
+        }
+
+        cachedPlayerHp = GetComponent<PlayerHP>();
+        if (cachedPlayerHp == null) cachedPlayerHp = GetComponentInParent<PlayerHP>();
+        if (cachedPlayerHp == null) cachedPlayerHp = FindObjectOfType<PlayerHP>();
+        return cachedPlayerHp;
     }
 }

@@ -132,14 +132,19 @@ public partial class ChainVisualController
         if (result.Amount <= 0) return;
         if (result.Target == null) return;
 
-        float amountNormalized = Mathf.Clamp01(Mathf.Log10(result.Amount + 1f) * 0.5f);
+        float amountNormalized = Mathf.Clamp01(
+            Mathf.InverseLerp(
+                1f,
+                Mathf.Max(2f, damageTextBigHitThreshold * 2.5f),
+                result.Amount));
+        float amountCurve = Mathf.SmoothStep(0f, 1f, amountNormalized);
         bool isBigHit = result.Amount >= damageTextBigHitThreshold;
 
         float safeScale = Mathf.Clamp(damageTextScale, DamageTextMinScale, DamageTextMaxScale);
-        safeScale *= 1f + amountNormalized * Mathf.Clamp01(damageTextAmountScaleWeight);
+        safeScale *= 1f + amountCurve * Mathf.Clamp01(damageTextAmountScaleWeight);
         if (isBigHit)
         {
-            safeScale += Mathf.Max(0f, damageTextBigHitExtraScale);
+            safeScale += Mathf.Max(0f, damageTextBigHitExtraScale) * Mathf.Lerp(0.65f, 1f, amountCurve);
         }
         if (result.IsDead)
         {
@@ -148,8 +153,8 @@ public partial class ChainVisualController
         safeScale = Mathf.Clamp(safeScale, DamageTextMinScale, DamageTextMaxScale);
 
         float safeFontSize = Mathf.Clamp(damageTextFontSize, DamageTextMinFontSize, DamageTextMaxFontSize);
-        safeFontSize *= Mathf.Lerp(1f, 1.18f, amountNormalized);
-        if (isBigHit) safeFontSize *= 1.06f;
+        safeFontSize *= Mathf.Lerp(1f, 1.24f, amountCurve);
+        if (isBigHit) safeFontSize *= Mathf.Lerp(1.04f, 1.1f, amountCurve);
         if (result.IsDead) safeFontSize *= 1.22f;
         safeFontSize = Mathf.Clamp(safeFontSize, DamageTextMinFontSize, DamageTextMaxFontSize);
 
@@ -181,7 +186,7 @@ public partial class ChainVisualController
         tmp.fontStyle = FontStyles.Bold;
         tmp.enableWordWrapping = false;
         tmp.alignment = TextAlignmentOptions.Center;
-        var targetColor = ResolveDamageTextColor(result.IsDead, isBigHit);
+        var targetColor = ResolveDamageTextColor(result.IsDead, isBigHit, amountCurve);
         tmp.color = Color.white;
         tmp.outlineWidth = 0.32f;
         tmp.outlineColor = new Color(0f, 0f, 0f, 0.9f);
@@ -278,11 +283,16 @@ public partial class ChainVisualController
         return damageTextCamera;
     }
 
-    private Color ResolveDamageTextColor(bool isDead, bool isBigHit)
+    private Color ResolveDamageTextColor(bool isDead, bool isBigHit, float amountNormalized)
     {
         if (isDead) return killDamageTextColor;
-        if (isBigHit) return damageTextBigHitColor;
-        return damageTextColor;
+        var safeAmount = Mathf.Clamp01(amountNormalized);
+        if (!isBigHit)
+        {
+            return Color.Lerp(damageTextColor, damageTextBigHitColor, safeAmount * 0.35f);
+        }
+
+        return Color.Lerp(damageTextColor, damageTextBigHitColor, Mathf.Lerp(0.45f, 1f, safeAmount));
     }
 
     private VertexGradient BuildDamageTextGradient(Color baseColor)

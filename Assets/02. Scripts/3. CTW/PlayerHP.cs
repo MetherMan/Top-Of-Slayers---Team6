@@ -19,6 +19,9 @@ public class PlayerHP : MonoBehaviour
     {
         currentHP -= damage;
         Debug.Log($"공격받음{currentHP}");
+
+        EnemyDamageUI.Instance.ShowDamage(transform, damage);
+
         OnHPChanged?.Invoke(currentHP, maxHP);
 
         if (currentHP <= 0)

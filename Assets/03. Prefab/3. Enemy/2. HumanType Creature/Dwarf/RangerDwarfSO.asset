@@ -21,8 +21,9 @@ MonoBehaviour:
   hp: 0
   strength: 20
   defence: 0
-  moveSpeed: 3
+  moveSpeed: 2
   attackRange: 5
+  attackCooldown: 1
   NormalDropCoin: 
   HardDropCoin: 
   attackType: 1
@@ -30,3 +31,5 @@ MonoBehaviour:
     type: 3}
   bulletSpeed: 8
   attackAngle: 0
+  dashSpeed: 0
+  dashTime: 0
