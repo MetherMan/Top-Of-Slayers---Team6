@@ -17,15 +17,18 @@ MonoBehaviour:
   monsterType: 0
   monsterPrefab: {fileID: 88765464168824294, guid: 156b930a94d730946ba9dd057d1b4f4e,
     type: 3}
-  maxHp: 50
+  maxHp: 100
   hp: 0
   strength: 10
   defence: 0
   moveSpeed: 5
   attackRange: 3
+  attackCooldown: 1
   NormalDropCoin: 
   HardDropCoin: 
   attackType: 0
   bulletPrefab: {fileID: 0}
   bulletSpeed: 0
   attackAngle: 0
+  dashSpeed: 0
+  dashTime: 0
