@@ -102,6 +102,113 @@ public partial class ChainVisualController
         }
     }
 
+    private void PlayChainMilestoneBeat(int chain)
+    {
+        if (!useChainMilestoneBeat) return;
+        if (!isChainActive) return;
+
+        var chainWeight = Mathf.Clamp01((Mathf.Max(1, chain) - 1f) / 6f);
+        var punchScale = milestoneTextPunchScale * Mathf.Lerp(1f, 1.25f, chainWeight);
+
+        if (useMilestoneHitStop && hitSequence != null)
+        {
+            hitSequence.TriggerHitStop();
+        }
+
+        PunchChainText(punchScale, milestoneTextPunchDuration);
+        FlashChainTextColor(milestoneTextFlashColor, milestoneTextFlashReturn);
+        FlashChainTimerBarColor(milestoneTimerBarFlashColor, milestoneTimerBarFlashReturn);
+    }
+
+    private void PlayKillFinishBeat()
+    {
+        if (!useChainKillFinishBeat) return;
+        if (!isChainActive) return;
+
+        if (useKillFinishHitStop && hitSequence != null)
+        {
+            hitSequence.TriggerHitStop();
+        }
+
+        PunchChainText(killFinishTextPunchScale, killFinishTextPunchDuration);
+        FlashChainTextColor(killFinishTextFlashColor, killFinishTextFlashReturn);
+    }
+
+    private void PunchChainText(float punchScale, float punchDuration)
+    {
+        if (chainTextRoot == null) return;
+        if (punchScale <= 0f || punchDuration <= 0f) return;
+
+        chainTextRoot.DOKill();
+        var punch = Vector3.one * punchScale;
+        chainTextRoot.DOPunchScale(punch, punchDuration, 9, 0.65f)
+            .SetEase(Ease.OutBack)
+            .SetUpdate(useUnscaledTime);
+    }
+
+    private void FlashChainTextColor(Color flashColor, float returnDuration)
+    {
+        if (chainText == null) return;
+        if (returnDuration <= 0f) return;
+
+        if (chainTextColorTween != null)
+        {
+            chainTextColorTween.Kill();
+            chainTextColorTween = null;
+        }
+
+        chainText.color = flashColor;
+        chainTextColorTween = chainText
+            .DOColor(chainTextBaseColor, returnDuration)
+            .SetEase(Ease.OutQuad)
+            .SetUpdate(useUnscaledTime)
+            .OnComplete(() => chainTextColorTween = null);
+    }
+
+    private void FlashChainTimerBarColor(Color flashColor, float returnDuration)
+    {
+        if (chainTimerBarFillImage == null) return;
+        if (returnDuration <= 0f) return;
+
+        if (chainTimerBarColorTween != null)
+        {
+            chainTimerBarColorTween.Kill();
+            chainTimerBarColorTween = null;
+        }
+
+        chainTimerBarFillImage.color = flashColor;
+        chainTimerBarColorTween = chainTimerBarFillImage
+            .DOColor(chainTimerBarColor, returnDuration)
+            .SetEase(Ease.OutQuad)
+            .SetUpdate(useUnscaledTime)
+            .OnComplete(() => chainTimerBarColorTween = null);
+    }
+
+    private void ResetChainBeatImmediate()
+    {
+        if (chainTextColorTween != null)
+        {
+            chainTextColorTween.Kill();
+            chainTextColorTween = null;
+        }
+
+        if (chainTimerBarColorTween != null)
+        {
+            chainTimerBarColorTween.Kill();
+            chainTimerBarColorTween = null;
+        }
+
+        if (chainText != null)
+        {
+            chainText.color = chainTextBaseColor;
+        }
+
+        if (chainTimerBarFillImage != null)
+        {
+            chainTimerBarFillImage.color = chainTimerBarColor;
+        }
+    }
+
     private void UpdateChainTimerBar()
     {
         EnsureChainTimerBar();

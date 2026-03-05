@@ -23,6 +23,7 @@ public class HitSequenceController : MonoBehaviour
     private static float cachedTimeScale = 1f;
     private int localHitStopCount;
     private bool hasCameraBaseValue;
+    private Camera baseValueCamera;
     private float baseFieldOfView;
     private float baseOrthographicSize;
 
@@ -106,7 +107,7 @@ public class HitSequenceController : MonoBehaviour
         var camera = ResolveCamera();
         if (camera == null) return;
 
-        CaptureCameraBaseValue();
+        EnsureCameraBaseValue(camera);
         if (!hasCameraBaseValue) return;
 
         KillHitZoom();
@@ -145,6 +146,8 @@ public class HitSequenceController : MonoBehaviour
             camera.fieldOfView = baseFieldOfView;
         }
 
+        sequence.OnKill(() => hitZoomTween = null);
+        sequence.OnComplete(() => hitZoomTween = null);
         hitZoomTween = sequence;
     }
 
@@ -173,6 +176,8 @@ public class HitSequenceController : MonoBehaviour
             camera.orthographicSize = baseOrthographicSize;
         }
 
+        sequence.OnKill(() => hitZoomTween = null);
+        sequence.OnComplete(() => hitZoomTween = null);
         hitZoomTween = sequence;
     }
 
@@ -192,33 +197,61 @@ public class HitSequenceController : MonoBehaviour
     private void CaptureCameraBaseValue()
     {
         var camera = ResolveCamera();
-        if (camera == null) return;
+        CaptureCameraBaseValue(camera, true);
+    }
 
+    private void CaptureCameraBaseValue(Camera camera, bool force)
+    {
+        if (camera == null) return;
+        if (!force && hasCameraBaseValue && baseValueCamera == camera) return;
+        if (!force && hitZoomTween != null && baseValueCamera == camera) return;
+
+        baseValueCamera = camera;
         if (camera.orthographic)
         {
-            baseOrthographicSize = camera.orthographicSize;
+            baseOrthographicSize = Mathf.Max(0.01f, camera.orthographicSize);
         }
         else
         {
-            baseFieldOfView = camera.fieldOfView;
+            baseFieldOfView = Mathf.Clamp(camera.fieldOfView, 1f, 179f);
+        }
+        hasCameraBaseValue = true;
+    }
+
+    private void EnsureCameraBaseValue(Camera camera)
+    {
+        if (!hasCameraBaseValue || baseValueCamera != camera)
+        {
+            CaptureCameraBaseValue(camera, true);
+            return;
         }
 
-        hasCameraBaseValue = true;
+        // 잘못된 기준값이 남아 있는 경우에만 보정한다.
+        if (camera.orthographic && baseOrthographicSize <= 0f)
+        {
+            baseOrthographicSize = Mathf.Max(0.01f, camera.orthographicSize);
+        }
+        else if (!camera.orthographic && (baseFieldOfView <= 0f || baseFieldOfView > 179f))
+        {
+            baseFieldOfView = Mathf.Clamp(camera.fieldOfView, 1f, 179f);
+        }
     }
 
     private void RestoreCameraBaseValue()
     {
         if (!hasCameraBaseValue) return;
 
-        var camera = ResolveCamera();
+        var camera = baseValueCamera != null ? baseValueCamera : ResolveCamera();
         if (camera == null) return;
 
         if (camera.orthographic)
         {
+            if (baseOrthographicSize <= 0f) return;
             camera.orthographicSize = baseOrthographicSize;
             return;
         }
 
+        if (baseFieldOfView <= 0f) return;
         camera.fieldOfView = baseFieldOfView;
     }
 

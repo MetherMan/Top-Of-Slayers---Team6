@@ -937,13 +937,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 409137366}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.5, y: 0.5, z: -0.5, w: 0.5}
-  m_LocalPosition: {x: 3.5199997, y: 20.15, z: -9.086203}
+  m_LocalRotation: {x: 0.42464006, y: 0.5654033, z: -0.42464006, w: 0.5654033}
+  m_LocalPosition: {x: -0.08, y: 19.1, z: -9.086203}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 90, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 73.816, y: 90, z: 0}
 --- !u!114 &409137371
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1461,9 +1461,11 @@ MonoBehaviour:
   - prefab: {fileID: 2662026273664203377, guid: e406a36e5521e104bbbf8285067074a7,
       type: 3}
     size: 8
+    maxSize: 0
   - prefab: {fileID: 2920899522890661102, guid: ff48af061e135cf41b829b024a5d7030,
       type: 3}
     size: 8
+    maxSize: 0
 --- !u!4 &727216987
 Transform:
   m_ObjectHideFlags: 0
@@ -1707,6 +1709,27 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 3086171719863672065, guid: cf95b8ca829b54e4695b6eef8dc71803,
         type: 3}
+      propertyPath: damageTextScale
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086171719863672065, guid: cf95b8ca829b54e4695b6eef8dc71803,
+        type: 3}
+      propertyPath: damageTextDuration
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086171719863672065, guid: cf95b8ca829b54e4695b6eef8dc71803,
+        type: 3}
+      propertyPath: damageTextFontSize
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086171719863672065, guid: cf95b8ca829b54e4695b6eef8dc71803,
+        type: 3}
+      propertyPath: damageTextFontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 2faf6db7d3b8c4445aa79081b74c1f67,
+        type: 2}
+    - target: {fileID: 3086171719863672065, guid: cf95b8ca829b54e4695b6eef8dc71803,
+        type: 3}
       propertyPath: chainTimerBarColor.b
       value: 1
       objectReference: {fileID: 0}
@@ -1722,8 +1745,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3086171719863672065, guid: cf95b8ca829b54e4695b6eef8dc71803,
         type: 3}
+      propertyPath: damageTextRiseDistance
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086171719863672065, guid: cf95b8ca829b54e4695b6eef8dc71803,
+        type: 3}
       propertyPath: environmentDarkenStrength
       value: 0.817
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086171719863672065, guid: cf95b8ca829b54e4695b6eef8dc71803,
+        type: 3}
+      propertyPath: damageTextRandomHorizontal
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7380308784043911386, guid: cf95b8ca829b54e4695b6eef8dc71803,
         type: 3}

@@ -47,7 +47,8 @@ public class EnemyFollow : IEnemyState
         if (sqrDistance <= 0.0001f) return;
 
         var moveDirection = toTarget.normalized;
-        var moveStep = enemy.moveSpeed * Time.fixedDeltaTime;
+        var chaseSpeedMultiplier = enemy.GetChaseSpeedMultiplier(currentPosition);
+        var moveStep = enemy.moveSpeed * chaseSpeedMultiplier * Time.fixedDeltaTime;
         if (moveStep <= 0f) return;
 
         var nextPosition = currentPosition + moveDirection * moveStep;

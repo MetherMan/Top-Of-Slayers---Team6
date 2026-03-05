@@ -25,6 +25,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         base.Awake();
 
         if (poolDictionary == null) poolDictionary = new Dictionary<GameObject, Queue<GameObject>>();
+        if (poolCurrent == null) poolCurrent = new Dictionary<GameObject, int>();
         if (pools == null || pools.Count == 0)
         {
             return;
@@ -32,6 +33,16 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
         foreach (var pool in pools)
         {
+            if (pool == null || pool.prefab == null)
+            {
+                continue;
+            }
+
+            if (poolDictionary.ContainsKey(pool.prefab))
+            {
+                continue;
+            }
+
             //오브젝트 큐 생성
             Queue<GameObject> objectQ = new Queue<GameObject>();
 
@@ -44,7 +55,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             }
             //딕셔너리에 큐 추가
             poolDictionary.Add(pool.prefab, objectQ);
-            poolCurrent.Add(pool.prefab, pool.size);
+            poolCurrent.Add(pool.prefab, Mathf.Max(0, pool.size));
         }
     }
 
@@ -55,10 +66,18 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             return null;
         }
 
+        if (poolDictionary == null) poolDictionary = new Dictionary<GameObject, Queue<GameObject>>();
+        if (poolCurrent == null) poolCurrent = new Dictionary<GameObject, int>();
+
         if (!poolDictionary.TryGetValue(prefab, out Queue<GameObject> objectQueue))
         {
             objectQueue = new Queue<GameObject>();
             poolDictionary[prefab] = objectQueue;
+
+            if (!poolCurrent.ContainsKey(prefab))
+            {
+                poolCurrent[prefab] = 0;
+            }
         }
 
         GameObject obj = null;
@@ -70,16 +89,19 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         }
         else
         {
-            int maxSize = pools.Find(p => p.prefab == prefab).maxSize;
+            Pool poolSetting = pools?.Find(p => p != null && p.prefab == prefab);
+            bool hasMaxLimit = poolSetting != null && poolSetting.maxSize > 0;
+            int currentCount = poolCurrent.TryGetValue(prefab, out int count) ? count : 0;
 
             //맥스사이즈 이상이면 널
-            if(poolCurrent[prefab] >= maxSize)
+            if (hasMaxLimit && currentCount >= poolSetting.maxSize)
             {
                 return null;
             }
+
             //큐가 비어있으면 새로 생성
             obj = Instantiate(prefab, transform);
-            poolCurrent[prefab]++;
+            poolCurrent[prefab] = currentCount + 1;
         }
 
         obj.transform.SetPositionAndRotation(position, rotation);
