@@ -25,6 +25,11 @@ public class LoginUI : Singleton<LoginUI>
     [SerializeField] Button loginBtn;
     [SerializeField] Button findBtn;
     [SerializeField] Button signupBtn;
+
+    [Header("Comfirm UI")]
+    [SerializeField] GameObject confirmUI;
+    [SerializeField] TextMeshProUGUI confirmText;
+    [SerializeField] Button confirmBtn;
     #endregion
 
     protected override void Awake()
@@ -46,12 +51,30 @@ public class LoginUI : Singleton<LoginUI>
         */
         loginBtn.onClick.AddListener(() =>
         {
+            //람다식 안에 외부 변수를 사용하면 클로저가 형성되어 해당 변수들이 메모리에 더 오래 남을 수 있다.
+            //LoginUI가 씬에서 계속 유지되는 동안에는 큰 문제가 되지 않는다.
             string id = inputID.text;
             string pw = inputPW.text;
-            Debug.LogFormat("id : {0}", id);
-            Debug.LogFormat("pw : {0}", pw);
 
-            this.onClickLogin(new Tuple<string, string>(id, pw));
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(pw))
+            {
+                confirmText.text = "아이디 / 비밀번호를 입력하시오";
+                ConfirmUIOpen();
+            }
+            else if (inputID.text.Trim().Length < 5 || inputPW.text.Trim().Length < 8)
+            {
+                confirmText.text = "아이디 최소 5자 / 비밀번호 최소 8자";
+                ConfirmUIOpen();
+            }
+            //else if ()
+            //{
+            //서버에서 사용자 계정 확인 후 일치하는 정보가 없을 때
+            //}
+            else
+            {
+                this.onClickLogin?.Invoke(new Tuple<string, string>(id, pw));
+                //로비 씬으로 이동
+            }
         });
 
         findBtn.onClick.AddListener(() =>
@@ -63,6 +86,8 @@ public class LoginUI : Singleton<LoginUI>
         {
 
         });
+
+        confirmBtn.onClick.AddListener(ConfirmUIClose);
     }
 
     public void CompleteLoding()
@@ -101,6 +126,16 @@ public class LoginUI : Singleton<LoginUI>
     public void SignupUIClose()
     {
         signupUI.SetActive(false);
+    }
+
+    public void ConfirmUIOpen()
+    {
+        confirmUI.SetActive(true);
+    }
+
+    public void ConfirmUIClose()
+    {
+        confirmUI.SetActive(false);
     }
     #endregion
 
