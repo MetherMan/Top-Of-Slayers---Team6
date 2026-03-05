@@ -8,7 +8,9 @@ public partial class SlashDashController
         if (state != DashState.Dashing) return;
 
         var previousPosition = transform.position;
-        var delta = Time.deltaTime;
+        var delta = chainCombat != null && chainCombat.IsSlowActive
+            ? Time.unscaledDeltaTime
+            : Time.deltaTime;
         var useEase = useDashEase && (!dashEaseOnlyDuringChain || (chainCombat != null && chainCombat.IsSlowActive));
         float step;
         if (useEase && dashTotalTime > 0f && dashTotalDistance > 0f)
