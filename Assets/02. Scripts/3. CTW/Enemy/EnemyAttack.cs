@@ -74,12 +74,23 @@ public class EnemyAttack : IEnemyState
             }
         }
 
-        else if(enemy.attackType == AttackType.Dash && !isShoot)
+        else if(enemy.attackType == AttackType.Dash)
         {
-            if (timer >= attackDuration * 0.5f)
+            if (timer >= attackDuration * 0.5f && !isShoot)
+            {
+                isShoot = true;
+                isDashed = true;
+                enemy.IsDash = true;
+
+                if (playerTransform != null)
+                {
+                    dashDir = (playerTransform.position - enemy.transform.position).normalized;
+                }
+            }
+
+            if (isDashed)
             {
                 DashAttack();
-                isShoot = true;
             }
         }
 
@@ -180,16 +191,6 @@ public class EnemyAttack : IEnemyState
 
     private void DashAttack()
     {
-        var playerTransform = enemy.ResolvePlayer();
-        if (playerTransform == null) return;
-
-        if (!isDashed)
-        {
-            dashDir = (playerTransform.position - enemy.transform.position).normalized;
-            isDashed = true;
-            enemy.IsDash = true;
-        }
-
         dashTimer += Time.deltaTime;
 
         if (dashTimer <= enemy.dashTime)
