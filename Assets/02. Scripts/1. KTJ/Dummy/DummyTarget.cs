@@ -67,6 +67,8 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
         {
             Die();
         }
+
+        OnHPChanged?.Invoke(currentHp, maxHp);
     }
 
     private void Die()
