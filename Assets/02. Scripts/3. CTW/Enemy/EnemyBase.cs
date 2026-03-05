@@ -228,15 +228,16 @@ public class EnemyBase : MonoBehaviour
         return enemySO;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
+        Debug.Log($"트리거 감지 태그{other.tag}");
         if (enemySO.attackType != AttackType.Dash) return;
 
-        if(IsDash && collision.gameObject.CompareTag("Player"))
+        if (IsDash && other.CompareTag("Player"))
         {
-            PlayerHP playerHP = collision.gameObject.GetComponent<PlayerHP>();
+            PlayerHP playerHP = other.GetComponentInParent<PlayerHP>();
 
-            if(playerHP != null)
+            if (playerHP != null)
             {
                 playerHP.TakeDamage(enemySO.strength);
                 Debug.Log($"{enemySO.name}이 떄림{enemySO.strength}");

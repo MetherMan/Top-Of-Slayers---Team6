@@ -21,11 +21,14 @@ MonoBehaviour:
   hp: 0
   strength: 25
   defence: 0
-  moveSpeed: 5
-  attackRange: 4
+  moveSpeed: 3
+  attackRange: 6
+  attackCooldown: 1
   NormalDropCoin: 
   HardDropCoin: 
-  attackType: 0
+  attackType: 3
   bulletPrefab: {fileID: 0}
   bulletSpeed: 0
   attackAngle: 0
+  dashSpeed: 20
+  dashTime: 0.4
