@@ -6,9 +6,11 @@ public class PlayerSceneBinder : MonoBehaviour
 {
     [Header("참조")]
     [SerializeField] private PlayerMoveController moveController;
+    [SerializeField] private SlashDashController slashDashController;
     [SerializeField] private ChainCombatController chainCombat;
     [SerializeField] private ChainVisualController chainVisual;
     [SerializeField] private DamageSystem damageSystem;
+    [SerializeField] private PlayerHP playerHp;
 
     [Header("씬 참조")]
     [SerializeField] private VirtualJoystickController joystick;
@@ -22,8 +24,13 @@ public class PlayerSceneBinder : MonoBehaviour
     [Header("자동 탐색")]
     [SerializeField] private bool autoFindSceneRefs = true;
     [SerializeField, Min(1)] private int maxBindFrames = 30;
+    [SerializeField] private bool applyEquipmentStats = true;
 
     private Coroutine bindRoutine;
+    private EquipmentManager equipmentManager;
+    private bool isEquipmentSubscribed;
+    private int basePlayerMaxHp;
+    private bool hasBasePlayerMaxHp;
 
     private void Awake()
     {
@@ -37,6 +44,8 @@ public class PlayerSceneBinder : MonoBehaviour
             StopCoroutine(bindRoutine);
         }
         bindRoutine = StartCoroutine(BindRoutine());
+        TryBindEquipment();
+        ApplyEquipmentStats();
     }
 
     private void OnDisable()
@@ -45,6 +54,24 @@ public class PlayerSceneBinder : MonoBehaviour
         {
             StopCoroutine(bindRoutine);
             bindRoutine = null;
+        }
+
+        if (isEquipmentSubscribed && equipmentManager != null)
+        {
+            equipmentManager.OnEquipmentChanged -= HandleEquipmentChanged;
+            isEquipmentSubscribed = false;
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (!applyEquipmentStats) return;
+        if (isEquipmentSubscribed) return;
+
+        TryBindEquipment();
+        if (isEquipmentSubscribed)
+        {
+            ApplyEquipmentStats();
         }
     }
 
@@ -59,6 +86,8 @@ public class PlayerSceneBinder : MonoBehaviour
             }
 
             ApplyBindings();
+            TryBindEquipment();
+            ApplyEquipmentStats();
             if (IsBindReady())
             {
                 bindRoutine = null;
@@ -92,10 +121,25 @@ public class PlayerSceneBinder : MonoBehaviour
             if (visuals != null && visuals.Length > 0) chainVisual = visuals[0];
         }
 
+        if (slashDashController == null) slashDashController = GetComponent<SlashDashController>();
+        if (slashDashController == null) slashDashController = GetComponentInParent<SlashDashController>();
+        if (slashDashController == null) slashDashController = GetComponentInChildren<SlashDashController>(true);
+        if (slashDashController == null) slashDashController = FindObjectOfType<SlashDashController>();
+
         if (damageSystem == null) damageSystem = GetComponent<DamageSystem>();
         if (damageSystem == null) damageSystem = GetComponentInParent<DamageSystem>();
         if (damageSystem == null) damageSystem = GetComponentInChildren<DamageSystem>(true);
         if (damageSystem == null) damageSystem = FindObjectOfType<DamageSystem>();
+
+        if (playerHp == null) playerHp = GetComponent<PlayerHP>();
+        if (playerHp == null) playerHp = GetComponentInParent<PlayerHP>();
+        if (playerHp == null) playerHp = GetComponentInChildren<PlayerHP>(true);
+        if (playerHp == null) playerHp = FindObjectOfType<PlayerHP>();
+        if (!hasBasePlayerMaxHp && playerHp != null)
+        {
+            basePlayerMaxHp = Mathf.Max(1, playerHp.maxHP);
+            hasBasePlayerMaxHp = true;
+        }
     }
 
     private void ResolveSceneRefs()
@@ -194,6 +238,112 @@ public class PlayerSceneBinder : MonoBehaviour
         {
             chainVisual.BindSceneRefs(chainUI, chainPanel, chainText, darkenRoot, darkenSprite, chainCombat, damageSystem);
         }
+    }
+
+    private void TryBindEquipment()
+    {
+        if (!applyEquipmentStats) return;
+        if (isEquipmentSubscribed && equipmentManager != null) return;
+        if (!EquipmentManager.HasInstance) return;
+
+        equipmentManager = EquipmentManager.Instance;
+        if (equipmentManager == null) return;
+
+        equipmentManager.OnEquipmentChanged -= HandleEquipmentChanged;
+        equipmentManager.OnEquipmentChanged += HandleEquipmentChanged;
+        isEquipmentSubscribed = true;
+    }
+
+    private void HandleEquipmentChanged()
+    {
+        ApplyEquipmentStats();
+    }
+
+    private void ApplyEquipmentStats()
+    {
+        if (!applyEquipmentStats) return;
+        if (equipmentManager == null)
+        {
+            if (!EquipmentManager.HasInstance) return;
+            equipmentManager = EquipmentManager.Instance;
+        }
+        if (equipmentManager == null) return;
+
+        int bonusAttack = 0;
+        int bonusSpeed = 0;
+        int bonusHp = 0;
+        float bonusCritical = 0f;
+        int bonusHeal = 0;
+
+        AccumulateEquipmentStats(equipmentManager.weapon, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
+        AccumulateEquipmentStats(equipmentManager.shoes, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
+        AccumulateEquipmentStats(equipmentManager.gloves, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
+        AccumulateEquipmentStats(equipmentManager.armor, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
+        AccumulateEquipmentStats(equipmentManager.emblem, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
+
+        if (moveController != null)
+        {
+            moveController.SetEquipmentMoveSpeedBonus(bonusSpeed);
+        }
+
+        if (slashDashController != null)
+        {
+            slashDashController.SetEquipmentCombatBonus(bonusAttack, bonusCritical, bonusHeal);
+        }
+
+        ApplyHpBonus(bonusHp);
+    }
+
+    private void AccumulateEquipmentStats(
+        InventoryItem inventoryItem,
+        ref int bonusAttack,
+        ref int bonusSpeed,
+        ref int bonusHp,
+        ref float bonusCritical,
+        ref int bonusHeal)
+    {
+        if (inventoryItem == null) return;
+        if (!(inventoryItem.item is EquipmentSO equipment)) return;
+
+        int level = Mathf.Max(0, inventoryItem.enhancementLevel);
+        bonusAttack += Mathf.Max(0, equipment.GetAttack(level));
+        bonusSpeed += Mathf.Max(0, equipment.GetSpeed(level));
+        bonusHp += Mathf.Max(0, equipment.GetHP(level));
+        bonusCritical += Mathf.Max(0f, equipment.GetCritical(level));
+        bonusHeal += Mathf.Max(0, equipment.GetHeal(level));
+    }
+
+    private void ApplyHpBonus(int hpBonus)
+    {
+        if (playerHp == null) return;
+        if (!hasBasePlayerMaxHp)
+        {
+            basePlayerMaxHp = Mathf.Max(1, playerHp.maxHP);
+            hasBasePlayerMaxHp = true;
+        }
+
+        int previousMaxHp = Mathf.Max(1, playerHp.maxHP);
+        int nextMaxHp = Mathf.Max(1, basePlayerMaxHp + Mathf.Max(0, hpBonus));
+        if (previousMaxHp == nextMaxHp)
+        {
+            playerHp.currentHP = Mathf.Clamp(playerHp.currentHP, 0, nextMaxHp);
+            return;
+        }
+
+        int nextHp = Mathf.Clamp(playerHp.currentHP, 0, previousMaxHp);
+        int delta = nextMaxHp - previousMaxHp;
+        if (delta > 0)
+        {
+            nextHp = Mathf.Min(nextHp + delta, nextMaxHp);
+        }
+        else
+        {
+            nextHp = Mathf.Min(nextHp, nextMaxHp);
+        }
+
+        playerHp.maxHP = nextMaxHp;
+        playerHp.currentHP = nextHp;
+        playerHp.TakeDamage(0);
     }
 
     private bool IsBindReady()

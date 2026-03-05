@@ -14,7 +14,7 @@ public partial class PlayerMoveController : MonoBehaviour
 
     [Header("체인")]
     [SerializeField] private ChainCombatController chainCombat;
-    [SerializeField] private bool lockMovementDuringChain = false;
+    [SerializeField] private bool lockMovementDuringChain = true;
 
     [Header("카메라 기준")]
     [SerializeField] private bool useCameraRelative = true;
@@ -38,6 +38,7 @@ public partial class PlayerMoveController : MonoBehaviour
     private bool rotationLocked;
     private int rotationLockCount;
     private float nextCameraResolveTime;
+    private float equipmentMoveSpeedBonus;
 
     private void Awake()
     {
@@ -138,7 +139,7 @@ public partial class PlayerMoveController : MonoBehaviour
             return;
         }
 
-        if (movementLocked && allowRotationWhenLocked && !Mathf.Approximately(Time.timeScale, 0f))
+        if (IsMovementBlocked() && allowRotationWhenLocked && !Mathf.Approximately(Time.timeScale, 0f))
         {
             UpdateLockedRotation();
         }
@@ -157,5 +158,35 @@ public partial class PlayerMoveController : MonoBehaviour
         if (animator != null) return;
         animator = GetComponent<Animator>();
         if (animator == null) animator = GetComponentInChildren<Animator>(true);
+    }
+
+    public void SetEquipmentMoveSpeedBonus(float bonus)
+    {
+        equipmentMoveSpeedBonus = Mathf.Max(0f, bonus);
+    }
+
+    public float GetCurrentMoveSpeed()
+    {
+        return Mathf.Max(0f, moveSpeed + equipmentMoveSpeedBonus);
+    }
+
+    private bool IsMovementBlocked()
+    {
+        if (movementLocked)
+        {
+            return true;
+        }
+
+        if (!lockMovementDuringChain)
+        {
+            return false;
+        }
+
+        if (chainCombat == null)
+        {
+            ResolveChainCombat();
+        }
+
+        return chainCombat != null && chainCombat.IsSlowActive;
     }
 }

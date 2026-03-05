@@ -66,6 +66,10 @@ public partial class SlashDashController : MonoBehaviour
     private bool cachedUseGravity;
     private bool dashRotationLockApplied;
     private GameObject activeDashPathVfx;
+    private int equipmentAttackBonus;
+    private float equipmentCriticalChanceBonus;
+    private int equipmentHealOnHit;
+    private PlayerHP cachedPlayerHp;
 
     public bool IsDashing => state == DashState.Dashing;
     public Vector3 DashDirection => dashDirection;
@@ -73,6 +77,13 @@ public partial class SlashDashController : MonoBehaviour
     public event System.Action OnDashStarted;
     public event System.Action OnDashImpact;
     public event System.Action<Transform> OnDashImpactTarget;
+
+    public void SetEquipmentCombatBonus(int attackBonus, float criticalChanceBonus, int healOnHit)
+    {
+        equipmentAttackBonus = Mathf.Max(0, attackBonus);
+        equipmentCriticalChanceBonus = Mathf.Max(0f, criticalChanceBonus);
+        equipmentHealOnHit = Mathf.Max(0, healOnHit);
+    }
 
     public float DefaultDashDistance
     {
@@ -96,6 +107,9 @@ public partial class SlashDashController : MonoBehaviour
         if (chainCombat == null) chainCombat = GetComponent<ChainCombatController>();
         if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
         if (chainCombat == null) chainCombat = FindObjectOfType<ChainCombatController>();
+        if (cachedPlayerHp == null) cachedPlayerHp = GetComponent<PlayerHP>();
+        if (cachedPlayerHp == null) cachedPlayerHp = GetComponentInParent<PlayerHP>();
+        if (cachedPlayerHp == null) cachedPlayerHp = FindObjectOfType<PlayerHP>();
         if (targetingSystem == null) targetingSystem = GetComponent<TargetingSystem>();
         if (targetingSystem == null) targetingSystem = GetComponentInParent<TargetingSystem>();
         if (targetingSystem == null) targetingSystem = FindObjectOfType<TargetingSystem>();

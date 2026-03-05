@@ -42,10 +42,10 @@ public partial class SlashDashController
             state = DashState.Idle;
             SetDashTrailState(false);
             StopDashPathVfx(keepDashPathVfxAfterDash);
-            ApplyPendingDamage();
             RestorePhysics();
             SetMovementLock(false);
             SyncMoveRotation();
+            ApplyPendingDamageSafely();
         }
     }
 }

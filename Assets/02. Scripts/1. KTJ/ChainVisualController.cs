@@ -70,11 +70,11 @@ public partial class ChainVisualController : MonoBehaviour
     [SerializeField, Min(0f)] private float damageTextPopDuration = 0.09f;
     [SerializeField, Min(0f)] private float damageTextDriftDistance = 0.14f;
     [SerializeField, Min(1)] private int damageTextBigHitThreshold = 30;
-    [SerializeField, Range(0f, 1f)] private float damageTextAmountScaleWeight = 0.42f;
-    [SerializeField, Min(0f)] private float damageTextBigHitExtraScale = 0.2f;
+    [SerializeField, Range(0f, 1f)] private float damageTextAmountScaleWeight = 0.62f;
+    [SerializeField, Min(0f)] private float damageTextBigHitExtraScale = 0.26f;
     [SerializeField] private TMP_FontAsset damageTextFontAsset;
-    [SerializeField] private Color damageTextColor = new Color(1f, 0.9f, 0.22f, 1f);
-    [SerializeField] private Color damageTextBigHitColor = new Color(1f, 0.63f, 0.2f, 1f);
+    [SerializeField] private Color damageTextColor = new Color(1f, 1f, 1f, 1f);
+    [SerializeField] private Color damageTextBigHitColor = new Color(1f, 0.28f, 0.28f, 1f);
     [SerializeField] private Color killDamageTextColor = new Color(1f, 0.36f, 0.28f, 1f);
 
     [Header("배경 어둡게")]
