@@ -25,6 +25,13 @@ public class LoginUI : Singleton<LoginUI>
     [SerializeField] Button loginBtn;
     [SerializeField] Button findBtn;
     [SerializeField] Button signupBtn;
+    [SerializeField] Button googleBtn;
+
+    //회원가입 가입하기 버튼
+    [SerializeField] Button signupCheckBtn;
+
+    [Header("panel")]
+    [SerializeField] GameObject panel;
 
     [Header("Comfirm UI")]
     [SerializeField] GameObject confirmUI;
@@ -66,27 +73,42 @@ public class LoginUI : Singleton<LoginUI>
                 confirmText.text = "아이디 최소 5자 / 비밀번호 최소 8자";
                 ConfirmUIOpen();
             }
-            //else if ()
-            //{
-            //서버에서 사용자 계정 확인 후 일치하는 정보가 없을 때
-            //}
             else
             {
                 this.onClickLogin?.Invoke(new Tuple<string, string>(id, pw));
-                //로비 씬으로 이동
+
+                //if ()
+                //{
+                //    //사용자 데이터 확인 후 로비 씬으로 이동
+                //}
             }
         });
 
+        //회원가입
+        signupBtn.onClick.AddListener(() =>
+        {
+            SignupUIOpen();
+        });
+
+        signupCheckBtn.onClick.AddListener(() =>
+        {
+            //아이디, 패스워드 확인 후
+            SignupUIClose();
+        });
+
+        //구글회원가입 || 로그인
+        googleBtn.onClick.AddListener(() =>
+        {
+
+        });
+
+        //
         findBtn.onClick.AddListener(() =>
         {
 
         });
 
-        signupBtn.onClick.AddListener(() =>
-        {
-
-        });
-
+        //알림문구
         confirmBtn.onClick.AddListener(ConfirmUIClose);
     }
 
@@ -130,11 +152,13 @@ public class LoginUI : Singleton<LoginUI>
 
     public void ConfirmUIOpen()
     {
+        panel.SetActive(true);
         confirmUI.SetActive(true);
     }
 
     public void ConfirmUIClose()
     {
+        panel.SetActive(false);
         confirmUI.SetActive(false);
     }
     #endregion
