@@ -12,7 +12,7 @@ public class MainSceenLoadVer2 : MonoBehaviour
 
         if(index >= 0 && index < stageSceneNames.Length)
         {
-            SceneManager.LoadScene(stageSceneNames[index]);
+            LoadingSceneController.LoadScene(stageSceneNames[index]);
         }
     }
 }

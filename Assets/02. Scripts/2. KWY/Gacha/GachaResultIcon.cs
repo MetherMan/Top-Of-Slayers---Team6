@@ -8,7 +8,6 @@ public class GachaResultIcon : MonoBehaviour
     [SerializeField] Image itemImage;
     [SerializeField] TextMeshProUGUI itemText;
 
-    [Header("Grade Backgrounds")]
     [SerializeField] Sprite legendColor;
     [SerializeField] Sprite epicColor;
     [SerializeField] Sprite normalColor;
