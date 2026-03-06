@@ -35,16 +35,6 @@ public class StageConfigSO : ScriptableObject
     [Header("SceneInstance 주소")]
     //public AssetReferenceT<UnityEngine.ResourceManagement.ResourceProviders.SceneInstance> sceneReference;
     public AssetReference sceneReference;
-    /*
-        1번 스테이지 노말맵 10
-        1번 스테이지 하드맵 11
-        10번 스테이지 노말 보스맵 103
-        10번 스테이지 하드 보스맵 104
-        첼린지 스테이지 05
-    */ //넘버링 설정 값
-
-    [Header("스테이지 넘버링")]
-    public string stageKey;
 
     [Header("스테이지 타입")]
     public StageType stageType;
@@ -54,6 +44,9 @@ public class StageConfigSO : ScriptableObject
 
     [Header("스테이지 시간")]
     public int stageTime;
+
+    [Header("스테이지 초회차 여부")]
+    public bool isCleared;
 
     //데이터 중심 설계 : 각 스테이지 데이터에서 웨이브 값 설정
     //웨이브 : 각 웨이브 별 스폰될 몬스터 수, 타입
@@ -72,12 +65,4 @@ public class StageConfigSO : ScriptableObject
 
     [Header("클리어 결과")]
     public ClearResult clearResult; //기본 값 none
-
-    [Header("스테이지 클리어 보상")]
-    //public itemDataSO[] FirstClearReward;
-    public int[] FirstClearCoin;
-
-    [Header("스테이지 반복 클리어 보상")]
-    //public itemDataSO[] ClearReward;
-    public int[] ClearCoin;
 }
