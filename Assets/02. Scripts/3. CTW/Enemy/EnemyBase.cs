@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class EnemyBase : MonoBehaviour
@@ -43,6 +43,7 @@ public class EnemyBase : MonoBehaviour
     public float dashSpeed => enemySO.dashSpeed;
 
     private float chainReactionWeight;
+    private bool dashHitConsumed;
 
     public bool IsDash { get; set; }
 
@@ -62,6 +63,7 @@ public class EnemyBase : MonoBehaviour
     {
         EnsureRuntimeState();
         ResolvePlayer();
+        EndDashAttack();
     }
 
     private void Start()
@@ -74,13 +76,9 @@ public class EnemyBase : MonoBehaviour
         UpdateChainReactionVisual();
     }
 
-    private void FixedUpdate()
-    {
-        enemyStateMachine?.FixedUpdate();
-    }
-
     private void OnDisable()
     {
+        EndDashAttack();
         chainReactionWeight = 0f;
         if (enemyAnim != null)
         {
@@ -149,8 +147,47 @@ public class EnemyBase : MonoBehaviour
 
     public void Die()
     {
+        EndDashAttack();
         OnEnemyKilled?.Invoke(killScore);
         ObjectPoolManager.Instance.ReturnPool(enemyPrefab, gameObject);
+    }
+
+    public void BeginDashAttack()
+    {
+        dashHitConsumed = false;
+        IsDash = true;
+    }
+
+    public void EndDashAttack()
+    {
+        dashHitConsumed = false;
+        IsDash = false;
+
+        if (rb == null) return;
+
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+    }
+
+    public static bool TryApplyPlayerDamage(GameObject targetObject, int damage)
+    {
+        if (targetObject == null) return false;
+        if (damage <= 0) return false;
+
+        var combatResource = targetObject.GetComponent<PlayerCombatResource>();
+        if (combatResource == null) combatResource = targetObject.GetComponentInParent<PlayerCombatResource>();
+        if (combatResource != null)
+        {
+            combatResource.TakeEnemyHit(damage);
+            return true;
+        }
+
+        var playerHP = targetObject.GetComponent<PlayerHP>();
+        if (playerHP == null) playerHP = targetObject.GetComponentInParent<PlayerHP>();
+        if (playerHP == null) return false;
+
+        playerHP.TakeDamage(damage);
+        return true;
     }
 
     private void EnsureRuntimeState()
@@ -207,6 +244,8 @@ public class EnemyBase : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        if (enemySO == null) return;
+
         Gizmos.color = Color.red;
         if (enemySO.attackType == AttackType.Melee)
         {
@@ -230,18 +269,13 @@ public class EnemyBase : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"트리거 감지 태그{other.tag}");
+        if (enemySO == null) return;
         if (enemySO.attackType != AttackType.Dash) return;
+        if (!other.gameObject.CompareTag("Player")) return;
+        if (!IsDash) return;
+        if (dashHitConsumed) return;
 
-        if (IsDash && other.CompareTag("Player"))
-        {
-            PlayerHP playerHP = other.GetComponentInParent<PlayerHP>();
-
-            if (playerHP != null)
-            {
-                playerHP.TakeDamage(enemySO.strength);
-                Debug.Log($"{enemySO.name}이 떄림{enemySO.strength}");
-            }
-        }
+        dashHitConsumed = true;
+        TryApplyPlayerDamage(other.gameObject, enemySO.strength);
     }
 }

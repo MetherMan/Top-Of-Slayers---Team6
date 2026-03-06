@@ -250,7 +250,6 @@ public partial class TargetingLineVisualizer : MonoBehaviour
         line.SetPosition(1, end);
         UpdateMonsterExistingRing(target, ringColor, colorProgress, stageFx);
     }
-
 }
 
 

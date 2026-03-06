@@ -43,6 +43,7 @@ public class PlayerSceneBinder : MonoBehaviour
         {
             StopCoroutine(bindRoutine);
         }
+
         bindRoutine = StartCoroutine(BindRoutine());
         TryBindEquipment();
         ApplyEquipmentStats();
@@ -267,6 +268,7 @@ public class PlayerSceneBinder : MonoBehaviour
             if (!EquipmentManager.HasInstance) return;
             equipmentManager = EquipmentManager.Instance;
         }
+
         if (equipmentManager == null) return;
 
         int bonusAttack = 0;
@@ -326,7 +328,7 @@ public class PlayerSceneBinder : MonoBehaviour
         int nextMaxHp = Mathf.Max(1, basePlayerMaxHp + Mathf.Max(0, hpBonus));
         if (previousMaxHp == nextMaxHp)
         {
-            playerHp.currentHP = Mathf.Clamp(playerHp.currentHP, 0, nextMaxHp);
+            playerHp.SetHpState(nextMaxHp, Mathf.Clamp(playerHp.currentHP, 0, nextMaxHp));
             return;
         }
 
@@ -341,9 +343,7 @@ public class PlayerSceneBinder : MonoBehaviour
             nextHp = Mathf.Min(nextHp, nextMaxHp);
         }
 
-        playerHp.maxHP = nextMaxHp;
-        playerHp.currentHP = nextHp;
-        playerHp.TakeDamage(0);
+        playerHp.SetHpState(nextMaxHp, nextHp);
     }
 
     private bool IsBindReady()
