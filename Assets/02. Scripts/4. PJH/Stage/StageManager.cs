@@ -1,14 +1,9 @@
 ﻿using UnityEngine;
 
 /*
-    !!0303 : 기능 전반적으로 엎어야함 중복, 의미없는 코드
-    !해당 스테이지에 해당하는 데이터 연결
-
-    *싱글톤
-    StageFlowManager 연동
-    StageDatabase 메서드 실행
-
-    스테이지 몬스터 관리
+    !!! 0306 : 코드 엎음
+  
+    StageDatabase에서 StageSO를 가져온다
 */
 public class StageManager : Singleton<StageManager>
 {
@@ -25,7 +20,7 @@ public class StageManager : Singleton<StageManager>
         StageData("21");
         if (selectDB != null) return;
 
-        // 기본 데이터가 없을 때는 첫 유효 스테이지를 대체 로드한다.
+        /*
         if (stageDB == null || stageDB.stageData == null) return;
         for (int i = 0; i < stageDB.stageData.Count; i++)
         {
@@ -35,6 +30,7 @@ public class StageManager : Singleton<StageManager>
             Debug.LogWarning($"StageData(21) 로드 실패. 대체 스테이지({fallback.stageKey})를 사용합니다.");
             return;
         }
+        */ //기본 데이터가 없을 때는 첫 유효 스테이지를 대체 로드한다.
     }
 
     #region method
@@ -71,28 +67,5 @@ public class StageManager : Singleton<StageManager>
 
         Debug.LogWarning($"StageData({key}) 로드에 실패했습니다.");
     }
-
-    //public void StageData(string id)
-    //{
-    //    if (stageDB == null)
-    //    {
-    //        stageDB = StageDatabase.Instance;
-    //    }
-    //    if (stageDB == null)
-    //    {
-    //        Debug.LogWarning("StageDatabase를 찾을 수 없습니다.");
-    //        return;
-    //    }
-
-    //    StageConfigSO data = stageDB.GetStageData(id);
-    //    if (data != null)
-    //    {
-    //        //해당 스테이지 데이터를 불러오기
-    //        selectDB = data;
-    //        return;
-    //    }
-
-    //    Debug.LogWarning($"StageData({id}) 로드에 실패했습니다.");
-    //}
     #endregion
 }
