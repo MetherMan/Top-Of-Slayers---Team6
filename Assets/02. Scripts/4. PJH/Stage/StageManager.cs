@@ -49,21 +49,21 @@ public class StageManager : Singleton<StageManager>
             }
         }
 
-        if (stageDB == null)
-        {
-            stageDB = StageDatabase.Instance;
-        }
+        //if (stageDB == null)
+        //{
+        //    stageDB = StageDatabase.Instance;
+        //}
 
-        if (stageDB != null)
-        {
-            StageConfigSO localData = stageDB.GetStageData(key);
-            if (localData != null)
-            {
-                //Addressable 데이터가 없을 경우 로컬 DB로 대체
-                selectDB = localData;
-                return;
-            }
-        }
+        //if (stageDB != null)
+        //{
+        //    StageConfigSO localData = stageDB.GetStageData(key);
+        //    if (localData != null)
+        //    {
+        //        //Addressable 데이터가 없을 경우 로컬 DB로 대체
+        //        selectDB = localData;
+        //        return;
+        //    }
+        //}
 
         Debug.LogWarning($"StageData({key}) 로드에 실패했습니다.");
     }

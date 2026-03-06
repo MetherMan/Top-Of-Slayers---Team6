@@ -21,7 +21,6 @@ public class StageDatabase : ScriptableObject
                 if (instance == null)
                 {
                     Debug.LogWarning("데이터베이스 파일을 찾을 수 없음");
-                    Debug.LogWarning("데이터베이스 파일을 찾을 수 없음");
                 }
             }
             return instance;
@@ -60,35 +59,13 @@ public class StageDatabase : ScriptableObject
     //        }
     //    }
     //}
-    private void Init()
-    {
-
-    }
-
-
     public StageConfigSO GetStageData(string addressableName)
     {
-        if (string.IsNullOrWhiteSpace(addressableName))
-        {
-            Debug.LogWarning("StageNum이 비어 있어 데이터를 조회할 수 없습니다.");
-            return null;
-        }
+        StageConfigSO data = AddressableManager.Instance.GetStageData(addressableName);
 
-        //if (stageDic == null) Init();
-        string stageKey = addressableName.Trim();
-        /*if (stageDic.TryGetValue(stageKey, out StageConfigSO data))
-        {
-            roundDatas = data.roundDatas;
-            return data;
-        }*/
-
-        Debug.LogWarning($"StageNum {addressableName}에 해당하는 데이터를 찾을 수 없습니다.");
-        return null;
-    }
-
-    public StageConfigSO GetStageData(int num)
-    {
-        return GetStageData(num.ToString());
+        roundDatas = data.roundDatas;
+        selectStage = data;
+        return selectStage;
     }
 
     //private bool TryResolveStageKey(StageConfigSO data, out string stageKey)
