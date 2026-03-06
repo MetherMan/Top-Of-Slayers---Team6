@@ -23,16 +23,10 @@ public class GameFlowManager : Singleton<GameFlowManager>
     #region method
     public void RoundClear()
     {
-        var stageManager = StageManager.Instance;
-        if (stageManager == null || stageManager.selectDB == null)
-        {
-            return;
-        }
+        StageManager stageManager = StageManager.Instance;
+        if (stageManager == null || stageManager.selectDB == null) Debug.LogError("selectDB null");
 
-        if (stageManager.selectDB.clearResult == (ClearResult)1)
-        {
-            Debug.Log("스테이지 클리어.");
-        }
+        if (stageManager.selectDB.clearResult == (ClearResult)1) Debug.Log("스테이지 클리어.");
     }
     #endregion
 }

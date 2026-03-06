@@ -11,20 +11,22 @@ public class StageReward : MonoBehaviour
     [SerializeField] RewardUI rewardUI;
 
     //stageflowManager구독
-    //private void OnEnable()
-    //{
-    //    StageFlowManager.OnStageClear += StageClear;
-    //}
+    private void OnEnable()
+    {
+        StageFlowManager.OnStageClear += StageClear;
+    }
 
-    //private void OnDisable()
-    //{
-    //    StageFlowManager.OnStageClear -= StageClear;
-    //}
+    private void OnDisable()
+    {
+        StageFlowManager.OnStageClear -= StageClear;
+    }
+
     public void StageClear(bool isFirstClear)
     {
         List<RewardData> rewards = new List<RewardData>();
 
-        if (isFirstClear)
+        //스테이지 클리어 보상 : false 미클리어 :: true 클리어
+        if (!isFirstClear)
         {
             rewards = DropSystem.Calculate(dropTable);
 

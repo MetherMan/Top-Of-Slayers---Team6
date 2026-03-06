@@ -14,6 +14,7 @@ public class StageRule : WaveRule
         TimeOver(data, context);
         HpZero(data, context);
         RoundClear(data, context);
+        
     }
 
     public override void OnExit(RuleDataContainer data, WaveDirectorSystem context)
@@ -23,8 +24,10 @@ public class StageRule : WaveRule
 
     public override void RoundClear(RuleDataContainer data, WaveDirectorSystem context)
     {
-        //stage 클리어 조건을 if문으로 작성
-        context.RoundClear();
+        if ()
+        {
+            context.RoundClear();
+        }
     }
     #endregion
 }
