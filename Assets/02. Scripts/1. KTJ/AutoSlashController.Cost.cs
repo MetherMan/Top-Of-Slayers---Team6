@@ -2,8 +2,29 @@ using UnityEngine;
 
 public partial class AutoSlashController
 {
-    public int CurrentAttackCost => combatResource != null ? combatResource.CurrentAttackCost : 0;
-    public int MaxAttackCost => combatResource != null ? combatResource.MaxAttackCost : 0;
+    public int CurrentAttackCost
+    {
+        get
+        {
+            EnsureCombatResource();
+            return combatResource != null ? combatResource.CurrentAttackCost : 0;
+        }
+    }
+
+    public int MaxAttackCost
+    {
+        get
+        {
+            EnsureCombatResource();
+            return combatResource != null ? combatResource.MaxAttackCost : 0;
+        }
+    }
+
+    private void EnsureCombatResource()
+    {
+        if (combatResource != null) return;
+        ResolveLocalRef(ref combatResource, true);
+    }
 
     private int GetAttackCostPerUse()
     {
@@ -17,12 +38,14 @@ public partial class AutoSlashController
 
     private bool CanStartAttackByCost()
     {
+        EnsureCombatResource();
         if (combatResource == null) return true;
         return combatResource.CanStartAttack(IsChainActive(), GetAttackCostPerUse());
     }
 
     private void ConsumeAttackCost()
     {
+        EnsureCombatResource();
         if (combatResource == null) return;
         combatResource.ConsumeAttackCost(IsChainActive(), GetAttackCostPerUse());
     }

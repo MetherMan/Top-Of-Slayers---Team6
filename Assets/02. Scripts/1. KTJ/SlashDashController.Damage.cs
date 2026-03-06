@@ -132,14 +132,8 @@ public partial class SlashDashController
         var playerHp = ResolvePlayerHp();
         if (playerHp == null) return;
 
-        var maxHp = Mathf.Max(1, playerHp.maxHP);
-        var currentHp = Mathf.Clamp(playerHp.currentHP, 0, maxHp);
         var healAmount = equipmentHealOnHit * hitCount;
-        var nextHp = Mathf.Clamp(currentHp + healAmount, 0, maxHp);
-        if (nextHp == currentHp) return;
-
-        playerHp.currentHP = nextHp;
-        playerHp.TakeDamage(0);
+        playerHp.RestoreHp(healAmount);
     }
 
     private PlayerHP ResolvePlayerHp()

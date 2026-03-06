@@ -97,18 +97,32 @@ public partial class AutoSlashController : MonoBehaviour
 
     private void Awake()
     {
-        if (dashController == null) dashController = GetComponent<SlashDashController>();
-        if (dashController == null) dashController = GetComponentInParent<SlashDashController>();
-        if (targetingSystem == null) targetingSystem = GetComponent<TargetingSystem>();
-        if (targetingSystem == null) targetingSystem = GetComponentInParent<TargetingSystem>();
-        if (moveController == null) moveController = GetComponent<PlayerMoveController>();
-        if (moveController == null) moveController = GetComponentInParent<PlayerMoveController>();
-        if (chainCombat == null) chainCombat = GetComponent<ChainCombatController>();
-        if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
-        if (chainCombat == null) chainCombat = FindObjectOfType<ChainCombatController>();
-        if (combatResource == null) combatResource = GetComponent<PlayerCombatResource>();
-        if (combatResource == null) combatResource = GetComponentInParent<PlayerCombatResource>();
-        if (combatResource == null) combatResource = FindObjectOfType<PlayerCombatResource>();
+        ResolveRuntimeRefs();
         if (spec == null && dashController != null) spec = dashController.Spec;
+    }
+
+    private void ResolveRuntimeRefs()
+    {
+        ResolveLocalRef(ref dashController);
+        ResolveLocalRef(ref targetingSystem);
+        ResolveLocalRef(ref moveController);
+        ResolveLocalRef(ref chainCombat, true);
+        ResolveLocalRef(ref combatResource, true);
+    }
+
+    private void ResolveLocalRef<T>(ref T target, bool searchScene = false) where T : Component
+    {
+        if (target != null) return;
+
+        target = GetComponent<T>();
+        if (target != null) return;
+
+        target = GetComponentInParent<T>();
+        if (target != null) return;
+
+        if (searchScene)
+        {
+            target = FindObjectOfType<T>();
+        }
     }
 }

@@ -32,12 +32,7 @@ public class Bullet : MonoBehaviour
     {
         if(other.CompareTag("Player"))
         {
-            PlayerHP playerHP = other.GetComponent<PlayerHP>();
-            if (playerHP != null)
-            {
-                playerHP.TakeDamage(attackDamage);
-                Debug.Log($"불렛이 때림({attackDamage})");
-            }
+            EnemyBase.TryApplyPlayerDamage(other.gameObject, attackDamage);
             ReturnPool();
         }
     }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public partial class TargetingLineVisualizer
 {
@@ -10,24 +10,44 @@ public partial class TargetingLineVisualizer
         if (entry == null || entry.Target == null) return;
         if (entry.LockOnTransform != null) return;
 
-        // 사각형 아티팩트를 피하기 위해 락온 아이콘은 안전한 스프라이트 경로만 사용한다.
-        var iconObject = new GameObject("MonsterLockOnIcon");
-        var spriteRenderer = iconObject.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = GetFallbackLockOnSprite();
-        iconObject.AddComponent<MonsterTargetRingMarker>();
-
-        if (iconObject == null) return;
-
-        iconObject.name = "MonsterLockOnIcon";
-        entry.SpawnedLockOnByVisualizer = true;
-        entry.LockOnTransform = iconObject.transform;
-        entry.LockOnSpriteRenderer = iconObject.GetComponentInChildren<SpriteRenderer>(true);
-        if (entry.LockOnSpriteRenderer != null)
+        GameObject iconObject;
+        SpriteRenderer spriteRenderer;
+        if (lockOnIconPrefab != null)
         {
-            entry.LockOnSpriteRenderer.sortingOrder = 30000;
-            entry.LockOnSpriteRenderer.color = lockOnIconColor;
+            iconObject = Instantiate(lockOnIconPrefab);
+            iconObject.name = "MonsterLockOnIcon";
+            spriteRenderer = iconObject.GetComponentInChildren<SpriteRenderer>(true);
+            if (spriteRenderer == null)
+            {
+                spriteRenderer = iconObject.AddComponent<SpriteRenderer>();
+            }
+        }
+        else
+        {
+            iconObject = new GameObject("MonsterLockOnIcon");
+            spriteRenderer = iconObject.AddComponent<SpriteRenderer>();
         }
 
+        if (spriteRenderer == null)
+        {
+            Destroy(iconObject);
+            return;
+        }
+
+        if (iconObject.GetComponent<MonsterTargetRingMarker>() == null)
+        {
+            iconObject.AddComponent<MonsterTargetRingMarker>();
+        }
+        if (spriteRenderer.sprite == null)
+        {
+            spriteRenderer.sprite = lockOnIconSprite != null ? lockOnIconSprite : GetFallbackLockOnSprite();
+        }
+        spriteRenderer.sortingOrder = 30000;
+        spriteRenderer.color = lockOnIconColor;
+
+        entry.SpawnedLockOnByVisualizer = true;
+        entry.LockOnTransform = iconObject.transform;
+        entry.LockOnSpriteRenderer = spriteRenderer;
         iconObject.SetActive(false);
         UpdateMonsterLockOnTransform(entry);
     }
@@ -138,18 +158,16 @@ public partial class TargetingLineVisualizer
         EnsureMonsterLockOnIcon(entry);
         if (entry.LockOnTransform == null) return;
 
-        var delta = Time.unscaledDeltaTime > 0f ? Time.unscaledDeltaTime : Time.deltaTime;
-        var safeDelta = Mathf.Max(0f, delta);
+        var safeDelta = Mathf.Max(0f, GetTargetingDeltaTime());
         var targetVisible = visible ? 1f : 0f;
         var appearSpeed = Mathf.Max(0.01f, lockOnIconAppearSpeed);
         entry.LockOnVisibleLerp = Mathf.MoveTowards(entry.LockOnVisibleLerp, targetVisible, safeDelta * appearSpeed);
-        var active = entry.LockOnVisibleLerp > 0.001f;
 
+        var active = entry.LockOnVisibleLerp > 0.001f;
         if (entry.LockOnTransform.gameObject.activeSelf != active)
         {
             entry.LockOnTransform.gameObject.SetActive(active);
         }
-
         if (!active) return;
 
         if (lockOnIconSpinSpeed > 0f)
@@ -170,7 +188,6 @@ public partial class TargetingLineVisualizer
         var clampedScale = Mathf.Min(LockOnIconMaxRuntimeScale, rawScale);
         entry.LockOnTransform.localScale = Vector3.one * clampedScale;
         UpdateMonsterLockOnTransform(entry);
-
         if (entry.LockOnSpriteRenderer == null) return;
 
         var mixed = Color.Lerp(lockOnIconColor, color, Mathf.Clamp01(lockOnIconColorBlend));
