@@ -14,6 +14,7 @@ public class AddressableManager : Singleton<AddressableManager>
     #region field
     private List<AsyncOperationHandle> loadedAssets = new List<AsyncOperationHandle>();
     public Dictionary<string, StageConfigSO> _stageSO = new Dictionary<string, StageConfigSO>();
+    public Dictionary<string, StageDatabase> _database = new Dictionary<string, StageDatabase>();
     public Dictionary<string, SceneInstance> _stageScene = new Dictionary<string, SceneInstance>();
     public Dictionary<string, WaveRule> _ruleSO = new Dictionary<string, WaveRule>();
     public Dictionary<string, GameObject> _uI = new Dictionary<string, GameObject>();
@@ -79,6 +80,7 @@ public class AddressableManager : Singleton<AddressableManager>
         await DownloadWithCapacityUI("Preload", progress);
 
         //호출 리스트
+        Task databaseTask = LoadDatabase();
         Task stageSOTask = LoadAllStageSO();
         Task ruleSOTask = LoadAllRule();
         Task uITask = LoadAllUI();
@@ -90,7 +92,7 @@ public class AddressableManager : Singleton<AddressableManager>
         //SFX
 
         List<Task> tasks = new List<Task> 
-        { stageSOTask, ruleSOTask, uITask, monsterSOTask, monsterPfTask, vFXTask };
+        { databaseTask, stageSOTask, ruleSOTask, uITask, monsterSOTask, monsterPfTask, vFXTask };
 
         //로딩
 
@@ -208,6 +210,60 @@ public class AddressableManager : Singleton<AddressableManager>
         }
 
         Debug.Log("LoadAllStageSO : Completed");
+    }
+
+    private async Task LoadDatabase()
+    {
+        AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationsHandle
+            = Addressables.LoadResourceLocationsAsync("Database" , typeof(StageDatabase));
+
+        await loadResourceLocationsHandle.Task;
+
+        if (IsSucceeded(loadResourceLocationsHandle))
+            Debug.LogError("loadResourceLocationhandle : failed");
+
+        List<AsyncOperationHandle> opList = new List<AsyncOperationHandle>();
+
+        foreach (IResourceLocation location in loadResourceLocationsHandle.Result)
+        {
+            AsyncOperationHandle<StageDatabase> loadAssetHandle
+                = Addressables.LoadAssetAsync<StageDatabase>(location);
+
+            loadAssetHandle.Completed += op => 
+            { 
+                if (IsSucceeded(op))
+                {
+                    if (!_database.ContainsKey(location.PrimaryKey))
+                    {
+                        _database.Add(location.PrimaryKey, op.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"database 중복 : {location.PrimaryKey}");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("LoadDatabase : Failed");
+                }
+            };
+
+            opList.Add(loadResourceLocationsHandle);
+
+            AsyncOperationHandle<IList<AsyncOperationHandle>> opGroup
+                = Addressables.ResourceManager.CreateGenericGroupOperation(opList);
+
+            await opGroup.Task;
+            loadedAssets.Add(opGroup);
+
+            Addressables.Release(loadResourceLocationsHandle);
+
+            foreach (KeyValuePair<string, StageDatabase> item in _database)
+            {
+                Debug.LogFormat($"StageDatabase key : {0}, value : {1}", item.Key, item.Value);
+            }
+        }
+
     }
 
     //SceneInstance
@@ -413,6 +469,8 @@ public class AddressableManager : Singleton<AddressableManager>
         await MonsterSOGroupOp.Task;
         loadedAssets.Add(MonsterSOGroupOp);
 
+        Addressables.Release(loadResourceLocationHandle);
+
         foreach (KeyValuePair<string, EnemyConfigSO> item in _enemySO)
         {
             Debug.Log($"MonsterSO Key : {item.Key} value : {item.Value.name}");
@@ -554,11 +612,28 @@ public class AddressableManager : Singleton<AddressableManager>
     #endregion
 
     #region Get
+    public StageDatabase GetDatabase(string addressableName)
+    {
+        if (_database.TryGetValue(addressableName, out StageDatabase data))
+        {
+            return data;
+        }
+        else
+        {
+            Debug.LogWarning("AddressableManager에 존재하지 않는 데이터");
+        }
+        return null;
+    }
+
     public StageConfigSO GetStageData(string addressableName)
     {
         if (_stageSO.TryGetValue(addressableName, out StageConfigSO data))
         {
             return data;
+        }
+        else
+        {
+            Debug.LogWarning("AddressableManager에 존재하지 않는 데이터");
         }
         return null;
     }
@@ -569,6 +644,10 @@ public class AddressableManager : Singleton<AddressableManager>
         {
             return rule;
         }
+        else
+        {
+            Debug.LogWarning("AddressableManager에 존재하지 않는 데이터");
+        }
         return null;
     }
 
@@ -577,6 +656,10 @@ public class AddressableManager : Singleton<AddressableManager>
         if (_uI.TryGetValue(addressableName, out GameObject ui))
         {
             return ui;
+        }
+        else
+        {
+            Debug.LogWarning("AddressableManager에 존재하지 않는 데이터");
         }
         return null;
     }
@@ -587,6 +670,10 @@ public class AddressableManager : Singleton<AddressableManager>
         {
             return data;
         }
+        else
+        {
+            Debug.LogWarning("AddressableManager에 존재하지 않는 데이터");
+        }
         return null;
     }
 
@@ -596,6 +683,10 @@ public class AddressableManager : Singleton<AddressableManager>
         {
             return data;
         }
+        else
+        {
+            Debug.LogWarning("AddressableManager에 존재하지 않는 데이터");
+        }
         return null;
     }
 
@@ -604,6 +695,10 @@ public class AddressableManager : Singleton<AddressableManager>
         if (_vFX.TryGetValue(addressableName, out GameObject data))
         {
             return data;
+        }
+        else
+        {
+            Debug.LogWarning("AddressableManager에 존재하지 않는 데이터");
         }
         return null;
     }
