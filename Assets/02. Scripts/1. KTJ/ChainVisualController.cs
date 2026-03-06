@@ -104,7 +104,6 @@ public partial class ChainVisualController : MonoBehaviour
     private bool isChainActive;
     private Vector3 darkenBaseScale = Vector3.one;
     private int pendingTextRefreshFrames;
-    private bool isChainTimerBarConfigured;
     private Color chainTextBaseColor = Color.white;
     private Tween chainTextColorTween;
     private Tween chainTimerBarColorTween;

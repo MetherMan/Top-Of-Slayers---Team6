@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84076ae80929cd34c8cd06d37e51ffc9, type: 3}
   m_Name: Player
   m_EditorClassIdentifier: 
+  maxHp: 100
+  moveSpeed: 4.5
+  criticalChance: 0
+  healOnHit: 0
   baseDamage: 10
   criticalMultiplier: 1.5
   dashSpeed: 10
@@ -21,3 +25,4 @@ MonoBehaviour:
   goodMin: 0.3
   goodMax: 0.7
   cooldown: 0.5
+  attackCost: 1

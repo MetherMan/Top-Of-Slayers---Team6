@@ -97,7 +97,7 @@ public partial class TargetingLineVisualizer
             var target = monsterRingTargets[i];
             if (target == null) continue;
             if (!EnsureMonsterRingEntry(target, out var entry)) continue;
-            EnsureEntryUsesSafeRingRenderer(entry);
+            EnsureLineRingRenderer(entry);
 
             UpdateMonsterRingTransform(entry);
             if (!skipIdleVisual && target != focusedTarget)
