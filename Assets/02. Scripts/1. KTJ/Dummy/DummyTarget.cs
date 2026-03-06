@@ -42,7 +42,7 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
         currentHp = maxHp;
 
         hpBarCreated = false;
-        TryCreateHpBar();
+        //TryCreateHpBar();
         OnHPChanged?.Invoke(currentHp, maxHp);
     }
 

@@ -659,9 +659,9 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 603c4061ca3516d4687cfdd099487f97, type: 3}
---- !u!224 &1409670582 stripped
+--- !u!224 &1202372858 stripped
 RectTransform:
-  m_CorrespondingSourceObject: {fileID: 7428552185590995194, guid: b731fa8274c05c04eb8157109388d4a0,
+  m_CorrespondingSourceObject: {fileID: 7904688977460917804, guid: b731fa8274c05c04eb8157109388d4a0,
     type: 3}
   m_PrefabInstance: {fileID: 1948940856}
   m_PrefabAsset: {fileID: 0}
@@ -961,6 +961,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 331490262900166667, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 740869562267299149, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 872723113358623121, guid: b731fa8274c05c04eb8157109388d4a0,
         type: 3}
       propertyPath: m_Name
@@ -970,13 +980,23 @@ PrefabInstance:
         type: 3}
       propertyPath: canvas
       value: 
-      objectReference: {fileID: 1409670582}
+      objectReference: {fileID: 1202372858}
     - target: {fileID: 2583104841813690308, guid: b731fa8274c05c04eb8157109388d4a0,
         type: 3}
       propertyPath: playerHP
       value: 
       objectReference: {fileID: 1591573798}
     - target: {fileID: 2583104841813690308, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: playerTransform
+      value: 
+      objectReference: {fileID: 1591573814}
+    - target: {fileID: 4386486318859936053, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: playerHP
+      value: 
+      objectReference: {fileID: 1591573798}
+    - target: {fileID: 4386486318859936053, guid: b731fa8274c05c04eb8157109388d4a0,
         type: 3}
       propertyPath: playerTransform
       value: 

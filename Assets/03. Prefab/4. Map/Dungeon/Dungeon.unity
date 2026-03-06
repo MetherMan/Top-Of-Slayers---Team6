@@ -231,11 +231,36 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 331490262900166667, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 740869562267299149, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 872723113358623121, guid: b731fa8274c05c04eb8157109388d4a0,
         type: 3}
       propertyPath: m_Name
       value: GameObjectZip
       objectReference: {fileID: 0}
+    - target: {fileID: 1290166511329813788, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: canvas
+      value: 
+      objectReference: {fileID: 1817952301}
+    - target: {fileID: 4386486318859936053, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: playerHP
+      value: 
+      objectReference: {fileID: 1597267448}
+    - target: {fileID: 4386486318859936053, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: playerTransform
+      value: 
+      objectReference: {fileID: 1597267466}
     - target: {fileID: 4809681814500864338, guid: b731fa8274c05c04eb8157109388d4a0,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -601,6 +626,30 @@ MonoBehaviour:
   useBoundsClamp: 1
   maxXDistance: 10
   maxZDistance: 0
+--- !u!114 &1597267448 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3633349198474297088, guid: b731fa8274c05c04eb8157109388d4a0,
+    type: 3}
+  m_PrefabInstance: {fileID: 307638879}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7eb8213819a0d34f984371fa48598e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1597267466 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6337819778507379299, guid: b731fa8274c05c04eb8157109388d4a0,
+    type: 3}
+  m_PrefabInstance: {fileID: 307638879}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &1817952301 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 7904688977460917804, guid: b731fa8274c05c04eb8157109388d4a0,
+    type: 3}
+  m_PrefabInstance: {fileID: 307638879}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2009619178
 GameObject:
   m_ObjectHideFlags: 0
