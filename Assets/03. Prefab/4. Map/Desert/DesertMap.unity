@@ -186,6 +186,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeText: {fileID: 0}
+--- !u!224 &160396004 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 7428552185590995194, guid: b731fa8274c05c04eb8157109388d4a0,
+    type: 3}
+  m_PrefabInstance: {fileID: 1582058206}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &507956491
 GameObject:
   m_ObjectHideFlags: 0
@@ -829,6 +835,36 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: GameObjectZip
+      objectReference: {fileID: 0}
+    - target: {fileID: 1290166511329813788, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: canvas
+      value: 
+      objectReference: {fileID: 160396004}
+    - target: {fileID: 1404135158170099217, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2583104841813690308, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: playerHP
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2583104841813690308, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: playerTransform
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3679916914130520537, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: playerHP
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3679916914130520537, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: playerTransform
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4809681814500864338, guid: b731fa8274c05c04eb8157109388d4a0,
         type: 3}

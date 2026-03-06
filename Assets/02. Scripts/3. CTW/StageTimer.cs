@@ -26,5 +26,10 @@ public class StageTimer : MonoBehaviour
         int min = time / 60;
         int sec = time % 60;
         timeText.text = $"{min:D1}:{sec:D2}";
+
+        if (time <= 10)
+        {
+            timeText.color = Color.red;
+        }
     }
 }
