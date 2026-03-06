@@ -49,9 +49,16 @@ public class EnemyAttack : IEnemyState
         var playerTransform = enemy.ResolvePlayer();
         if (playerTransform != null)
         {
-            var lookDir = playerTransform.position;
-            lookDir.y = enemy.transform.position.y;
-            enemy.transform.LookAt(lookDir);
+            var lookDir = playerTransform.position - enemy.transform.position;
+            lookDir.y = 0f;
+            if (lookDir.sqrMagnitude > 0.0001f)
+            {
+                var targetRotation = Quaternion.LookRotation(lookDir.normalized, Vector3.up);
+                enemy.transform.rotation = Quaternion.RotateTowards(
+                    enemy.transform.rotation,
+                    targetRotation,
+                    enemy.TurnSpeedDegrees * Time.deltaTime);
+            }
         }
 
         if (!hasAttackTiming || !isShoot)
@@ -207,13 +214,17 @@ public class EnemyAttack : IEnemyState
 
         if (dashTimer <= enemy.dashTime)
         {
+            var currentPosition = enemy.rb != null ? enemy.rb.position : enemy.transform.position;
+            var dashSpeedMultiplier = enemy.GetChaseSpeedMultiplier(currentPosition);
+            var finalDashSpeed = enemy.dashSpeed * dashSpeedMultiplier;
+
             if (enemy.rb != null)
             {
-                enemy.rb.velocity = dashDir * enemy.dashSpeed;
+                enemy.rb.velocity = dashDir * finalDashSpeed;
             }
             else
             {
-                enemy.transform.position += dashDir * enemy.dashSpeed * Time.deltaTime;
+                enemy.transform.position += dashDir * finalDashSpeed * Time.deltaTime;
             }
             return;
         }

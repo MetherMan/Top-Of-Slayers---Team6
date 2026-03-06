@@ -39,7 +39,9 @@ public class StageFlowManager : Singleton<StageFlowManager>
         if (StageManager.Instance.selectDB != null)
         {
             remainingTime = StageManager.Instance.selectDB.stageTime;
-            waveLength = StageManager.Instance.stageDB.roundDatas.Count;
+            waveLength = StageManager.Instance.selectDB.roundDatas != null
+                ? StageManager.Instance.selectDB.roundDatas.Count
+                : 0;
         }
     }
 
@@ -50,14 +52,21 @@ public class StageFlowManager : Singleton<StageFlowManager>
         {
             timer += Time.deltaTime;
 
-            if(timer >= 1f)
+            if (timer >= 1f)
             {
-                timer = 0f;
-                if(remainingTime > 0) remainingTime--;
+                timer -= 1f;
+
+                if (playTime < StageManager.Instance.selectDB.stageTime)
+                {
+                    playTime++;
+                }
+
+                if (remainingTime > 0)
+                {
+                    remainingTime--;
+                }
             }
-            if (remainingTime == 0) remainingTime = StageManager.Instance.selectDB.stageTime;
         }
-        playTime += (int)Time.deltaTime;
     }
 
     #region method

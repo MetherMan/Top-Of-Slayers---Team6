@@ -6,6 +6,7 @@ public class KtjCameraFollowController : MonoBehaviour
     [Header("참조")]
     [SerializeField] private Transform followTarget;
     [SerializeField] private SlashDashController dashController;
+    [SerializeField] private ChainCombatController chainCombat;
 
     [Header("기본 추적")]
     [SerializeField, Min(0f)] private float followLerpSpeed = 8f;
@@ -16,6 +17,7 @@ public class KtjCameraFollowController : MonoBehaviour
     [SerializeField] private bool useAttackPull = true;
     [SerializeField, Min(0f)] private float attackLookAhead = 1.4f;
     [SerializeField, Min(0f)] private float attackPullLerpSpeed = 3f;
+    [SerializeField] private bool useUnscaledFollowDuringChain = true;
 
     [Header("맵 경계(선택)")]
     [SerializeField] private bool useBoundsClamp = false;
@@ -62,7 +64,10 @@ public class KtjCameraFollowController : MonoBehaviour
             targetPosition.z = Mathf.Clamp(targetPosition.z, -maxZDistance, maxZDistance);
         }
 
-        var t = 1f - Mathf.Exp(-Mathf.Max(0f, lerpSpeed) * Time.deltaTime);
+        var delta = useUnscaledFollowDuringChain && chainCombat != null && chainCombat.IsSlowActive
+            ? Time.unscaledDeltaTime
+            : Time.deltaTime;
+        var t = 1f - Mathf.Exp(-Mathf.Max(0f, lerpSpeed) * delta);
         transform.position = Vector3.Lerp(transform.position, targetPosition, t);
     }
 
@@ -83,6 +88,15 @@ public class KtjCameraFollowController : MonoBehaviour
             if (dashController == null)
             {
                 dashController = followTarget.GetComponentInChildren<SlashDashController>(true);
+            }
+        }
+
+        if (chainCombat == null && followTarget != null)
+        {
+            chainCombat = followTarget.GetComponent<ChainCombatController>();
+            if (chainCombat == null)
+            {
+                chainCombat = followTarget.GetComponentInChildren<ChainCombatController>(true);
             }
         }
     }

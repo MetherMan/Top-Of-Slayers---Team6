@@ -46,9 +46,10 @@ public partial class SlashDashController
         var spawnPosition = ResolveHitImpactVfxPosition(impactTarget);
         var instance = Instantiate(vfxPrefab, spawnPosition, vfxPrefab.transform.rotation);
         if (instance == null) return;
+        ConfigureSpawnedVfxTiming(instance);
 
         if (hitImpactAutoDestroyTime <= 0f) return;
-        Destroy(instance, hitImpactAutoDestroyTime);
+        StartCoroutine(DestroySpawnedVfxAfterDelay(instance, hitImpactAutoDestroyTime));
     }
 
     private GameObject SelectHitImpactVfxPrefab(Transform impactTarget)

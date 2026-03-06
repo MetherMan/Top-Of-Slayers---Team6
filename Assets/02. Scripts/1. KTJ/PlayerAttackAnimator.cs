@@ -6,6 +6,7 @@ public class PlayerAttackAnimator : MonoBehaviour
     [SerializeField] private SlashDashController dashController;
     [SerializeField] private AutoSlashController autoSlash;
     [SerializeField] private Animator animator;
+    [SerializeField] private ChainCombatController chainCombat;
 
     [Header("파라미터")]
     [SerializeField] private string readyTrigger = "Attack";
@@ -111,6 +112,10 @@ public class PlayerAttackAnimator : MonoBehaviour
         if (animator == null) animator = GetComponent<Animator>();
         if (animator == null) animator = GetComponentInChildren<Animator>(true);
         if (animator == null) animator = GetComponentInParent<Animator>();
+
+        if (chainCombat == null) chainCombat = GetComponent<ChainCombatController>();
+        if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
+        if (chainCombat == null) chainCombat = FindObjectOfType<ChainCombatController>();
     }
 
     private void FireReadyTrigger()
@@ -155,6 +160,8 @@ public class PlayerAttackAnimator : MonoBehaviour
         var instance = Instantiate(hitVfxPrefab, position, rotation);
         if (instance == null) return;
 
+        ConfigureHitVfxTiming(instance);
+
         if (hitVfxFollowSpawnPoint)
         {
             instance.transform.SetParent(anchor, true);
@@ -162,7 +169,47 @@ public class PlayerAttackAnimator : MonoBehaviour
 
         if (!hitVfxFollowSpawnPoint && hitVfxAutoDestroyTime > 0f)
         {
-            Destroy(instance, hitVfxAutoDestroyTime);
+            StartCoroutine(DestroyHitVfxAfterDelay(instance, hitVfxAutoDestroyTime));
+        }
+    }
+
+    private void ConfigureHitVfxTiming(GameObject instance)
+    {
+        if (instance == null) return;
+        if (chainCombat == null || !chainCombat.IsSlowActive) return;
+
+        var particleSystems = instance.GetComponentsInChildren<ParticleSystem>(true);
+        for (int i = 0; i < particleSystems.Length; i++)
+        {
+            var particleSystem = particleSystems[i];
+            if (particleSystem == null) continue;
+
+            var main = particleSystem.main;
+            main.useUnscaledTime = true;
+        }
+
+        var animators = instance.GetComponentsInChildren<Animator>(true);
+        for (int i = 0; i < animators.Length; i++)
+        {
+            var effectAnimator = animators[i];
+            if (effectAnimator == null) continue;
+            effectAnimator.updateMode = AnimatorUpdateMode.UnscaledTime;
+        }
+    }
+
+    private System.Collections.IEnumerator DestroyHitVfxAfterDelay(GameObject instance, float delay)
+    {
+        if (instance == null) yield break;
+        if (delay <= 0f)
+        {
+            Destroy(instance);
+            yield break;
+        }
+
+        yield return new WaitForSecondsRealtime(delay);
+        if (instance != null)
+        {
+            Destroy(instance);
         }
     }
 

@@ -24,7 +24,7 @@ public class StageRule : WaveRule
 
     public override void RoundClear(RuleDataContainer data, WaveDirectorSystem context)
     {
-        if ()
+        if (data.waveCount > 0 && data.waveIndex > data.waveCount)
         {
             context.RoundClear();
         }
