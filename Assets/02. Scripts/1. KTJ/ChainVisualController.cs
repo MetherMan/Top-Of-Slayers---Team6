@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -145,6 +145,7 @@ public partial class ChainVisualController : MonoBehaviour
         }
 
         if (darkenRoot != null) darkenBaseScale = darkenRoot.localScale;
+
         ForceResetVisualState();
     }
 
@@ -267,7 +268,11 @@ public partial class ChainVisualController : MonoBehaviour
         if (darkenGroup == null && darkenRoot != null) darkenGroup = darkenRoot.GetComponent<CanvasGroup>();
         if (darkenGraphic == null && darkenRoot != null) darkenGraphic = darkenRoot.GetComponent<Graphic>();
         if (darkenSprite == null && darkenRoot != null) darkenSprite = darkenRoot.GetComponent<SpriteRenderer>();
-        if (darkenRoot != null) darkenBaseScale = darkenRoot.localScale;
+
+        if (darkenRoot != null)
+        {
+            darkenBaseScale = darkenRoot.localScale;
+        }
     }
 
     private void UpdateChainText()

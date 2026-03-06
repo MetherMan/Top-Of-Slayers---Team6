@@ -6095,6 +6095,7 @@ GameObject:
   - component: {fileID: 5235778052283311294}
   - component: {fileID: 8183997392503413366}
   - component: {fileID: -5712205007895140337}
+  - component: {fileID: 7354921584430063210}
   m_Layer: 0
   m_Name: 1.Main Char
   m_TagString: Untagged
@@ -6690,10 +6691,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c7eb8213819a0d34f984371fa48598e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name: ''
+  m_EditorClassIdentifier: ''
   maxHP: 100
   currentHP: 0
+--- !u!114 &7354921584430063210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8084851860919373225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6edc3d57f0ecd824593eaa242adb4f76, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: ''
+  chainCombat: {fileID: 0}
+  playerStateMachine: {fileID: 0}
+  maxHp: 3
+  startHp: 3
+  maxAttackCost: 10
+  startAttackCost: 10
 --- !u!1 &8104052154759113481
 GameObject:
   m_ObjectHideFlags: 0

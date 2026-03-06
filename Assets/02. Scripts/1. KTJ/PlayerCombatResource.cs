@@ -17,6 +17,8 @@ public class PlayerCombatResource : MonoBehaviour
 
     private int currentHp;
     private int currentAttackCost;
+    private bool hasExternalHpConfiguration;
+    private bool hasAwakened;
 
     public int CurrentHp => currentHp;
     public int MaxHp => maxHp;
@@ -34,6 +36,12 @@ public class PlayerCombatResource : MonoBehaviour
     {
         ResolveRefs();
         InitializeValues();
+        hasAwakened = true;
+
+        if (playerStateMachine != null && currentHp <= 0)
+        {
+            playerStateMachine.SetDead(true);
+        }
     }
 
     private void OnValidate()
@@ -57,7 +65,14 @@ public class PlayerCombatResource : MonoBehaviour
 
     private void InitializeValues()
     {
-        currentHp = Mathf.Clamp(startHp, 1, maxHp);
+        maxHp = Mathf.Max(1, maxHp);
+        startHp = Mathf.Clamp(startHp, 1, maxHp);
+        maxAttackCost = Mathf.Max(0, maxAttackCost);
+        startAttackCost = Mathf.Clamp(startAttackCost, 0, maxAttackCost);
+
+        currentHp = hasExternalHpConfiguration
+            ? Mathf.Clamp(currentHp, 0, maxHp)
+            : Mathf.Clamp(startHp, 1, maxHp);
         currentAttackCost = Mathf.Clamp(startAttackCost, 0, maxAttackCost);
         OnHpChanged?.Invoke(currentHp, maxHp);
         OnAttackCostChanged?.Invoke(currentAttackCost, maxAttackCost);
@@ -97,18 +112,16 @@ public class PlayerCombatResource : MonoBehaviour
             return false;
         }
 
-        currentHp = Mathf.Max(0, currentHp - amount);
-        OnHpChanged?.Invoke(currentHp, maxHp);
-
-        if (currentHp > 0) return true;
-
-        if (playerStateMachine != null)
-        {
-            playerStateMachine.SetDead(true);
-        }
-
-        OnDead?.Invoke();
+        ApplyHpState(currentHp - amount, maxHp);
         return true;
+    }
+
+    public void RestoreHp(int amount)
+    {
+        if (amount <= 0) return;
+        if (IsDead) return;
+
+        ApplyHpState(currentHp + amount, maxHp);
     }
 
     public void RestoreAttackCost(int amount)
@@ -133,19 +146,52 @@ public class PlayerCombatResource : MonoBehaviour
 
     public void SetHp(int amount)
     {
-        var nextHp = Mathf.Clamp(amount, 0, maxHp);
-        if (nextHp == currentHp) return;
+        hasExternalHpConfiguration = true;
+        ApplyHpState(amount, maxHp);
+    }
 
+    public void ConfigureHp(int nextMaxHp, int nextCurrentHp)
+    {
+        hasExternalHpConfiguration = true;
+        ApplyHpState(nextCurrentHp, nextMaxHp);
+    }
+
+    private void ApplyHpState(int nextHp, int nextMaxHp, bool notifyWhenUnchanged = false)
+    {
+        ResolveRefs();
+
+        nextMaxHp = Mathf.Max(1, nextMaxHp);
+        nextHp = Mathf.Clamp(nextHp, 0, nextMaxHp);
+
+        var previousHp = currentHp;
+        var previousMaxHp = maxHp;
+        var wasDead = previousHp <= 0;
+
+        maxHp = nextMaxHp;
+        startHp = Mathf.Clamp(startHp, 1, maxHp);
         currentHp = nextHp;
-        OnHpChanged?.Invoke(currentHp, maxHp);
 
-        if (currentHp > 0) return;
-
-        if (playerStateMachine != null)
+        if (notifyWhenUnchanged || previousHp != currentHp || previousMaxHp != maxHp)
         {
-            playerStateMachine.SetDead(true);
+            OnHpChanged?.Invoke(currentHp, maxHp);
         }
 
-        OnDead?.Invoke();
+        var isDeadNow = currentHp <= 0;
+        if (playerStateMachine != null)
+        {
+            if (isDeadNow && !wasDead)
+            {
+                playerStateMachine.SetDead(true);
+            }
+            else if (hasAwakened && !isDeadNow && wasDead)
+            {
+                playerStateMachine.SetDead(false);
+            }
+        }
+
+        if (!wasDead && isDeadNow)
+        {
+            OnDead?.Invoke();
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public partial class AutoSlashController
 {
@@ -7,7 +7,7 @@ public partial class AutoSlashController
         if (dashController == null || targetingSystem == null) return;
         if (Mathf.Approximately(Time.timeScale, 0f)) return;
 
-        var isChainActive = chainCombat != null && chainCombat.IsSlowActive;
+        var isChainActive = IsChainActive();
         var delta = isChainActive ? Time.unscaledDeltaTime : Time.deltaTime;
 
         if (!isChainActive)
@@ -28,6 +28,7 @@ public partial class AutoSlashController
             {
                 readyDirection = transform.forward;
             }
+
             UpdateAimPreview(readyOrigin, readyDirection);
             UpdateReadyDelay(delta);
             return;
@@ -43,6 +44,7 @@ public partial class AutoSlashController
         {
             rawAimDirection = rawAimDirection.normalized;
         }
+
         UpdateInitialAimStability(rawAimDirection, delta, isChainActive);
         UpdateSameTargetRelease(rawAimDirection);
 
@@ -54,9 +56,9 @@ public partial class AutoSlashController
         lastAttackRange = searchRange;
 
         var aimOrigin = GetAimOrigin(isChainActive);
-        var previewIgnoreTarget = GetIgnoreTarget(isChainActive, rawAimDirection);
+        var ignoreTarget = GetIgnoreTarget(isChainActive, rawAimDirection);
         var previewDirection = rawAimDirection;
-        if (TryGetAimAssistDirection(isChainActive, aimOrigin, rawAimDirection, searchRange, previewIgnoreTarget, out var previewAdjustedDirection, out _))
+        if (TryGetAimAssistDirection(isChainActive, aimOrigin, rawAimDirection, searchRange, ignoreTarget, out var previewAdjustedDirection, out _))
         {
             previewDirection = previewAdjustedDirection;
         }
@@ -72,13 +74,10 @@ public partial class AutoSlashController
             }
         }
 
-        if (isReadyWaiting)
+        if (!isChainActive && cooldownTimer > 0f)
         {
-            UpdateReadyDelay(delta);
-            return;
+            cooldownTimer -= delta;
         }
-
-        if (!isChainActive && cooldownTimer > 0f) cooldownTimer -= delta;
 
         if (!isChainActive && detectInterval > 0f)
         {
@@ -90,32 +89,25 @@ public partial class AutoSlashController
         if (!isChainActive && cooldownTimer > 0f) return;
         if (dashController.IsDashing) return;
 
-        var baseAimDirection = GetStableAimDirection(isChainActive, delta);
+        var aimDirection = GetStableAimDirection(isChainActive, delta);
         if (isChainActive && useChainAimConfirm && blockAttackWhileAimChanging)
         {
-            var angle = Vector3.Angle(rawAimDirection, baseAimDirection);
+            var angle = Vector3.Angle(rawAimDirection, aimDirection);
             if (angle > blockAttackAngle)
             {
                 return;
             }
         }
 
-        var ignoreTarget = GetIgnoreTarget(isChainActive, rawAimDirection);
-        var aimDirection = baseAimDirection;
         Transform target = null;
-
-        if (isChainActive && targetingSystem != null)
+        if (isChainActive)
         {
-            if (TryGetChainPriorityTarget(aimOrigin, rawAimDirection, searchRange, ignoreTarget, out var chainTarget, out var chainDirection))
+            if (!TryGetChainPriorityTarget(aimOrigin, rawAimDirection, searchRange, ignoreTarget, out var chainTarget, out var chainDirection))
             {
-                if (!TryConfirmChainTarget(chainTarget, chainDirection, rawAimDirection, delta, out var confirmedTarget, out var confirmedDirection))
-                {
-                    return;
-                }
-                target = confirmedTarget;
-                aimDirection = confirmedDirection;
+                return;
             }
-            else
+
+            if (!TryConfirmChainTarget(chainTarget, chainDirection, rawAimDirection, delta, out target, out aimDirection))
             {
                 return;
             }
@@ -124,7 +116,7 @@ public partial class AutoSlashController
         if (target == null)
         {
             Transform assistTarget = null;
-            if (TryGetAimAssistDirection(isChainActive, aimOrigin, baseAimDirection, searchRange, ignoreTarget, out var adjustedDirection, out var resolvedAssistTarget))
+            if (TryGetAimAssistDirection(isChainActive, aimOrigin, aimDirection, searchRange, ignoreTarget, out var adjustedDirection, out var resolvedAssistTarget))
             {
                 aimDirection = adjustedDirection;
                 assistTarget = resolvedAssistTarget;
@@ -140,16 +132,19 @@ public partial class AutoSlashController
             }
             return;
         }
+
         if (!isChainActive)
         {
             if (!TryConfirmInitialTarget(target, aimDirection, rawAimDirection, delta, out var confirmedTarget, out var confirmedDirection))
             {
                 return;
             }
+
             target = confirmedTarget;
             aimDirection = confirmedDirection;
             ResetInitialTargetConfirm();
         }
+
         if (isChainActive && useSameTargetRelease && !sameTargetReleased && target == lastAttackTarget)
         {
             return;
@@ -158,37 +153,15 @@ public partial class AutoSlashController
         var aimDistance = searchRange > 0f ? searchRange : 0f;
         var damageMultiplier = chainCombat != null ? chainCombat.GetDamageMultiplier(target) : 1f;
         var pierceTargets = GetPierceTargets(isChainActive, aimOrigin, aimDirection, searchRange, ignoreTarget, target);
-
-        if (pierceTargets != null && pierceTargets.Count > 1)
-        {
-            if (ShouldUseReadyDelay(isChainActive))
-            {
-                BeginReadyDelay(new PendingAttack(target, aimDirection, aimDistance, autoGrade, damageMultiplier, rawAimDirection, pierceTargets, true));
-                return;
-            }
-
-            if (!CanStartAttackByCost()) return;
-            if (dashController.TryStartAutoSlashPierce(target, aimDirection, aimDistance, autoGrade, damageMultiplier, pierceTargets))
-            {
-                ConsumeAttackCost();
-                RegisterAttackTarget(target, rawAimDirection);
-                cooldownTimer = GetCooldown();
-            }
-            return;
-        }
+        var usePierce = pierceTargets != null && pierceTargets.Count > 1;
+        var attack = new PendingAttack(target, aimDirection, aimDistance, autoGrade, damageMultiplier, rawAimDirection, pierceTargets, usePierce);
 
         if (ShouldUseReadyDelay(isChainActive))
         {
-            BeginReadyDelay(new PendingAttack(target, aimDirection, aimDistance, autoGrade, damageMultiplier, rawAimDirection, null, false));
+            BeginReadyDelay(attack);
             return;
         }
 
-        if (!CanStartAttackByCost()) return;
-        if (dashController.TryStartAutoSlash(target, aimDirection, aimDistance, autoGrade, damageMultiplier))
-        {
-            ConsumeAttackCost();
-            RegisterAttackTarget(target, rawAimDirection);
-            cooldownTimer = GetCooldown();
-        }
+        TryStartAttack(attack);
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public partial class TargetingLineVisualizer
@@ -7,7 +8,7 @@ public partial class TargetingLineVisualizer
         if (root == null) return null;
 
         var candidates = root.GetComponentsInChildren<Renderer>(true);
-        var best = default(Renderer);
+        Renderer best = null;
         var bestScore = float.NegativeInfinity;
         var referenceY = root.position.y;
 
@@ -42,8 +43,7 @@ public partial class TargetingLineVisualizer
         if (maxHorizontal <= 0f) return false;
 
         var flatness = size.y / maxHorizontal;
-        if (flatness > 0.45f) return false;
-        return true;
+        return flatness <= 0.45f;
     }
 
     private float EvaluateMonsterRingScore(Renderer renderer, float referenceY)
@@ -71,10 +71,14 @@ public partial class TargetingLineVisualizer
     {
         if (string.IsNullOrEmpty(nameText)) return false;
 
-        var lowerName = nameText.ToLowerInvariant();
         for (int i = 0; i < MonsterRingNameHints.Length; i++)
         {
-            if (lowerName.Contains(MonsterRingNameHints[i])) return true;
+            var hint = MonsterRingNameHints[i];
+            if (string.IsNullOrEmpty(hint)) continue;
+            if (nameText.IndexOf(hint, StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
         }
 
         return false;

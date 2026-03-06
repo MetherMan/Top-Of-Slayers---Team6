@@ -1,23 +1,22 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class EnemyAttack : IEnemyState
 {
-    private EnemyBase enemy;
-    private EnemyStateMachine enemyStateMachine;
+    private readonly EnemyBase enemy;
+    private readonly EnemyStateMachine enemyStateMachine;
 
     private float attackDuration;
     private float timer;
     private bool isAttackEnded;
     private bool isShoot;
-
-    private bool isStateChaged = false;
-
+    private bool isStateChaged;
     private float coolTimer;
     private bool isCooldown;
-
     private bool isDashed;
     private Vector3 dashDir;
     private float dashTimer;
+    private Animator cachedAnimator;
+    private bool hasAttackTiming;
 
     public EnemyAttack(EnemyBase enemy, EnemyStateMachine enemyStateMachine)
     {
@@ -30,77 +29,76 @@ public class EnemyAttack : IEnemyState
         isAttackEnded = false;
         isShoot = false;
         timer = 0f;
-
         coolTimer = 0f;
         isCooldown = false;
-
         isDashed = false;
         dashTimer = 0f;
 
         enemy.enemyAnim.EnemyRunning(false);
         enemy.enemyAnim.EnemyAttack(true);
+        enemy.EndDashAttack();
 
-        //재생중인 애니메이션 길이 가져오기
-        attackDuration = enemy.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length;
-
+        cachedAnimator = enemy.GetComponent<Animator>();
+        attackDuration = ResolveAttackDuration();
+        hasAttackTiming = attackDuration > 0f;
         isStateChaged = false;
     }
 
     public void Update()
     {
         var playerTransform = enemy.ResolvePlayer();
-        if (playerTransform == null) return;
-
-        var lookDir = playerTransform.position;
-        lookDir.y = enemy.transform.position.y;
-        enemy.transform.LookAt(lookDir);
-
-        if (enemy.attackType == AttackType.Ranged && !isShoot)
+        if (playerTransform != null)
         {
-            //애니메이션길이 절반에 총알 발사
-            if (timer >= attackDuration * 0.5f)
-            {
-                SpawnBullet();
-                isShoot = true;
-            }
-        }
-        else if(enemy.attackType == AttackType.Melee || enemy.attackType == AttackType.Corn)
-        {
-            //애니메이션 끝에 공격
-            if(timer >= attackDuration * 0.9f && !isShoot)
-            {
-                MeleeAttack();
-                isShoot = true;
-            }
+            var lookDir = playerTransform.position;
+            lookDir.y = enemy.transform.position.y;
+            enemy.transform.LookAt(lookDir);
         }
 
-        else if(enemy.attackType == AttackType.Dash)
+        if (!hasAttackTiming || !isShoot)
         {
-            if (timer >= attackDuration * 0.5f && !isShoot)
-            {
-                isShoot = true;
-                isDashed = true;
-                enemy.IsDash = true;
+            TryRefreshAttackTiming();
+        }
 
-                if (playerTransform != null)
+        if (enemy.attackType == AttackType.Dash && isDashed)
+        {
+            UpdateDashAttack();
+        }
+
+        timer += Time.deltaTime;
+
+        if (!isShoot)
+        {
+            if (enemy.attackType == AttackType.Ranged)
+            {
+                if (timer >= attackDuration * 0.5f)
                 {
-                    dashDir = (playerTransform.position - enemy.transform.position).normalized;
+                    SpawnBullet();
+                    isShoot = true;
                 }
             }
-
-            if (isDashed)
+            else if (enemy.attackType == AttackType.Melee || enemy.attackType == AttackType.Corn)
             {
-                DashAttack();
+                if (timer >= attackDuration * 0.9f)
+                {
+                    MeleeAttack();
+                    isShoot = true;
+                }
+            }
+            else if (enemy.attackType == AttackType.Dash && timer >= attackDuration * 0.5f)
+            {
+                BeginDashAttack(playerTransform);
+                isShoot = true;
             }
         }
 
+        var dashFinished = enemy.attackType != AttackType.Dash || !isDashed;
         if (!isAttackEnded)
         {
-            timer += Time.deltaTime;
-            if (timer >= attackDuration)
+            if (timer >= attackDuration && dashFinished)
             {
                 isAttackEnded = true;
                 isCooldown = true;
+                coolTimer = 0f;
             }
             return;
         }
@@ -109,13 +107,14 @@ public class EnemyAttack : IEnemyState
         {
             coolTimer += Time.deltaTime;
 
-            //어택쿨타임 동안 가만히 있기
-            if(coolTimer < enemy.attackCooldown)
+            if (coolTimer < enemy.attackCooldown)
             {
                 return;
             }
             isCooldown = false;
         }
+
+        if (playerTransform == null) return;
 
         float distance = Vector3.Distance(enemy.transform.position, playerTransform.position);
 
@@ -128,43 +127,46 @@ public class EnemyAttack : IEnemyState
         {
             Enter();
         }
-
-        
     }
 
     public void Exit()
     {
         enemy.enemyAnim.EnemyAttack(false);
+        if (isDashed || enemy.IsDash)
+        {
+            isDashed = false;
+            enemy.EndDashAttack();
+        }
     }
 
     private void SpawnBullet()
     {
         var playerTransform = enemy.ResolvePlayer();
         if (playerTransform == null) return;
-        if(enemy.bulletPrefab == null) return;
+        if (enemy.bulletPrefab == null) return;
 
         Vector3 spawnPos = enemy.transform.position + Vector3.up * 1.5f + enemy.transform.forward * 0.5f;
 
-        GameObject bulletObj = ObjectPoolManager.Instance.SpawnPool
-            (enemy.bulletPrefab, spawnPos, Quaternion.identity);  
+        GameObject bulletObj = ObjectPoolManager.Instance.SpawnPool(
+            enemy.bulletPrefab,
+            spawnPos,
+            Quaternion.identity);
 
-        if(bulletObj != null)
-        {
-            Bullet bullet = bulletObj.GetComponent<Bullet>();
-            if(bullet != null)
-            {
-                Vector3 target = playerTransform.position + Vector3.up * 1.5f;
-                Vector3 shootDir = (target - spawnPos).normalized;
+        if (bulletObj == null) return;
 
-                bullet.Init(enemy.bulletPrefab, enemy.bulletSpeed, shootDir, enemy.attackDamage);
-            }
-        }
+        Bullet bullet = bulletObj.GetComponent<Bullet>();
+        if (bullet == null) return;
+
+        Vector3 target = playerTransform.position + Vector3.up * 1.5f;
+        Vector3 shootDir = (target - spawnPos).normalized;
+
+        bullet.Init(enemy.bulletPrefab, enemy.bulletSpeed, shootDir, enemy.attackDamage);
     }
 
     private void MeleeAttack()
     {
         var playerTransform = enemy.ResolvePlayer();
-        if(playerTransform == null) return;
+        if (playerTransform == null) return;
 
         Vector3 enemyPos = enemy.transform.position;
         Vector3 playerPos = playerTransform.position;
@@ -173,40 +175,99 @@ public class EnemyAttack : IEnemyState
         playerPos.y = 0f;
 
         float distance = Vector3.Distance(enemyPos, playerPos);
-
-        if(distance <= enemy.attackRange + 0.2f)
+        if (distance <= enemy.attackRange + 0.2f)
         {
-            PlayerHP playerHP = playerTransform.GetComponent<PlayerHP>();
-            if(playerHP != null)
-            {
-                playerHP.TakeDamage(enemy.attackDamage);
-                Debug.Log($"{enemy.name}이 때림({enemy.attackDamage})");
-            }
-        }
-        else
-        {
-             Debug.Log($"{enemy.name}의 공격이 빗나감");
+            EnemyBase.TryApplyPlayerDamage(playerTransform.gameObject, enemy.attackDamage);
         }
     }
 
-    private void DashAttack()
+    private void BeginDashAttack(Transform playerTransform)
     {
+        if (playerTransform == null) return;
+
+        var direction = playerTransform.position - enemy.transform.position;
+        direction.y = 0f;
+        if (direction.sqrMagnitude <= 0f)
+        {
+            direction = enemy.transform.forward;
+        }
+
+        if (direction.sqrMagnitude <= 0f) return;
+
+        dashDir = direction.normalized;
+        dashTimer = 0f;
+        isDashed = true;
+        enemy.BeginDashAttack();
+    }
+
+    private void UpdateDashAttack()
+    {
+        if (!isDashed) return;
         dashTimer += Time.deltaTime;
 
         if (dashTimer <= enemy.dashTime)
         {
-            enemy.rb.velocity = dashDir * enemy.dashSpeed;
+            if (enemy.rb != null)
+            {
+                enemy.rb.velocity = dashDir * enemy.dashSpeed;
+            }
+            else
+            {
+                enemy.transform.position += dashDir * enemy.dashSpeed * Time.deltaTime;
+            }
+            return;
         }
-        else
-        {
-            enemy.rb.velocity = Vector3.zero;
-            isDashed = false;
-            enemy.IsDash = false;
-        }
+
+        isDashed = false;
+        enemy.EndDashAttack();
     }
 
     public void FixedUpdate()
     {
+    }
 
+    private void TryRefreshAttackTiming()
+    {
+        attackDuration = ResolveAttackDuration();
+        hasAttackTiming = attackDuration > 0f;
+    }
+
+    private float ResolveAttackDuration()
+    {
+        if (cachedAnimator == null)
+        {
+            return 0.5f;
+        }
+
+        var clipLength = GetClipLength(cachedAnimator.GetNextAnimatorClipInfo(0));
+        if (clipLength <= 0f)
+        {
+            clipLength = GetClipLength(cachedAnimator.GetCurrentAnimatorClipInfo(0));
+        }
+
+        if (clipLength <= 0f)
+        {
+            var stateInfo = cachedAnimator.IsInTransition(0)
+                ? cachedAnimator.GetNextAnimatorStateInfo(0)
+                : cachedAnimator.GetCurrentAnimatorStateInfo(0);
+            clipLength = stateInfo.length;
+        }
+
+        return Mathf.Max(0.1f, clipLength);
+    }
+
+    private static float GetClipLength(AnimatorClipInfo[] clipInfos)
+    {
+        if (clipInfos == null || clipInfos.Length == 0) return 0f;
+
+        for (int i = 0; i < clipInfos.Length; i++)
+        {
+            if (clipInfos[i].clip != null)
+            {
+                return clipInfos[i].clip.length;
+            }
+        }
+
+        return 0f;
     }
 }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public partial class TargetingLineVisualizer
 {
@@ -66,10 +66,11 @@ public partial class TargetingLineVisualizer
             if (ringRenderer == null)
             {
                 Destroy(ringObject);
-                return false;
             }
-
-            spawnedByVisualizer = true;
+            else
+            {
+                spawnedByVisualizer = true;
+            }
         }
 
         if (ringRenderer == null)
@@ -216,5 +217,4 @@ public partial class TargetingLineVisualizer
         radius = Mathf.Max(0.2f, radius);
         return radius * Mathf.Max(0f, monsterRingScaleByTargetRadius);
     }
-
 }

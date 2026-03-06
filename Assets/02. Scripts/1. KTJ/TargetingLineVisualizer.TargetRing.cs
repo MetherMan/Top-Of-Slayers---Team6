@@ -52,8 +52,7 @@ public partial class TargetingLineVisualizer
         if (!useMonsterExistingRingFx || targetingSystem == null)
         {
             ClearMonsterRingEntries(false);
-            lastRawConfirmTarget = null;
-            lastRawConfirmProgress = 0f;
+            ResetForcedRingVisualState();
             wasChainForcedRingColor = false;
             lastFocusedRingTarget = null;
             return;
@@ -64,14 +63,8 @@ public partial class TargetingLineVisualizer
         {
             if (!useChainForcedColor)
             {
-                // 체인 종료 직후에는 타겟 컬러링 상태를 초기화해 다음 겨냥 연출을 다시 시작한다.
-                lastVisualTarget = null;
-                targetColorFillTimer = 0f;
-                lastRawConfirmTarget = null;
-                lastRawConfirmProgress = 0f;
-                confirmProgressVisual = 0f;
-                confirmStage = -1;
-                confirmStageKickTimer = 0f;
+                // 체인 종료 직후에는 타겟 컬러링 상태를 비워 다음 겨냥 연출을 다시 시작한다.
+                ResetForcedRingVisualState();
             }
 
             wasChainForcedRingColor = useChainForcedColor;
@@ -97,18 +90,7 @@ public partial class TargetingLineVisualizer
 
     private void SyncMonsterRingEntries(Transform focusedTarget, bool skipIdleVisual)
     {
-        monsterRingTargets.Clear();
-
-        if (showMonsterRingForAllTargets)
-        {
-            targetingSystem.GetTargetsSnapshot(monsterRingTargets);
-        }
-
-        // 스냅샷 누락을 대비해 포커스 타겟은 항상 보강한다.
-        if (focusedTarget != null && !monsterRingTargets.Contains(focusedTarget))
-        {
-            monsterRingTargets.Add(focusedTarget);
-        }
+        CollectMonsterRingTargets(focusedTarget);
 
         for (int i = 0; i < monsterRingTargets.Count; i++)
         {
@@ -124,6 +106,27 @@ public partial class TargetingLineVisualizer
             }
         }
 
+        CleanupStaleMonsterRingEntries();
+    }
+
+    private void CollectMonsterRingTargets(Transform focusedTarget)
+    {
+        monsterRingTargets.Clear();
+
+        if (showMonsterRingForAllTargets)
+        {
+            targetingSystem.GetTargetsSnapshot(monsterRingTargets);
+        }
+
+        // 스냅샷 누락을 대비해 포커스 타겟은 항상 보강한다.
+        if (focusedTarget != null && !monsterRingTargets.Contains(focusedTarget))
+        {
+            monsterRingTargets.Add(focusedTarget);
+        }
+    }
+
+    private void CleanupStaleMonsterRingEntries()
+    {
         foreach (var pair in monsterRingEntries)
         {
             var target = pair.Key;
@@ -147,6 +150,17 @@ public partial class TargetingLineVisualizer
         }
 
         monsterRingCleanupTargets.Clear();
+    }
+
+    private void ResetForcedRingVisualState()
+    {
+        lastVisualTarget = null;
+        targetColorFillTimer = 0f;
+        lastRawConfirmTarget = null;
+        lastRawConfirmProgress = 0f;
+        confirmProgressVisual = 0f;
+        confirmStage = -1;
+        confirmStageKickTimer = 0f;
     }
 
     private bool IsChainRingForcedColorActive()
@@ -195,18 +209,7 @@ public partial class TargetingLineVisualizer
         if (nextTargetPreviewOnlyDuringChain && !isChainForcedColor) return null;
 
         var origin = ringAimOrigin;
-        var direction = ringAimDirection;
-        direction.y = 0f;
-        if (direction.sqrMagnitude <= 0f)
-        {
-            direction = followTarget != null ? followTarget.forward : transform.forward;
-            direction.y = 0f;
-            if (direction.sqrMagnitude <= 0f)
-            {
-                direction = Vector3.forward;
-            }
-        }
-
+        var direction = GetPreviewSearchDirection();
         var range = ringAimRange > 0f ? ringAimRange : GetLineLength();
         var normalized = direction.normalized;
         var preview = targetingSystem.GetTarget(origin, normalized, range, focusedTarget);
@@ -217,6 +220,25 @@ public partial class TargetingLineVisualizer
 
         if (preview == focusedTarget) return null;
         return preview;
+    }
+
+    private Vector3 GetPreviewSearchDirection()
+    {
+        var direction = ringAimDirection;
+        direction.y = 0f;
+        if (direction.sqrMagnitude > 0f)
+        {
+            return direction;
+        }
+
+        direction = followTarget != null ? followTarget.forward : transform.forward;
+        direction.y = 0f;
+        if (direction.sqrMagnitude <= 0f)
+        {
+            direction = Vector3.forward;
+        }
+
+        return direction;
     }
 
     private void TryApplyPreviewRingVisual(Color focusedColor)

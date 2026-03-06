@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
 {
@@ -8,10 +9,12 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
     [SerializeField] private EnemyBase enemyBase;
     [SerializeField] private EnemyConfigSO enemySO;
 
+    [FormerlySerializedAs("hp")]
     public int maxHp;
     public int currentHp;
 
     public event Action<int, int> OnHPChanged;
+    private bool hpBarCreated;
 
     private void OnEnable()
     {
@@ -35,22 +38,22 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
             enemySO = enemyBase.GetEnemySO();
         }
 
-        if(enemySO != null)
-        {
-            maxHp = enemySO.maxHp;
-            currentHp = maxHp;
-        }
+        maxHp = ResolveSpawnHp();
+        currentHp = maxHp;
 
+        hpBarCreated = false;
+        TryCreateHpBar();
         OnHPChanged?.Invoke(currentHp, maxHp);
     }
 
     private void Start()
     {
-        EnemyHPUIManager.Instance.CreateHPBar(this);
+        TryCreateHpBar();
     }
 
     private void OnDisable()
     {
+        hpBarCreated = false;
         if (targeting != null)
         {
             targeting.UnregisterTarget(transform);
@@ -60,15 +63,15 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
     public void ApplyDamage(int amount)
     {
         if (amount <= 0) return;
+        if (IsDead) return;
 
-        currentHp -= amount;
+        currentHp = Mathf.Max(0, currentHp - amount);
+        OnHPChanged?.Invoke(currentHp, maxHp);
 
-        if (currentHp <= 0)
+        if (currentHp == 0)
         {
             Die();
         }
-
-        OnHPChanged?.Invoke(currentHp, maxHp);
     }
 
     private void Die()
@@ -83,4 +86,24 @@ public class DummyTarget : MonoBehaviour, DamageSystem.IDamageable
         }
     }
     public bool IsDead => currentHp <= 0;
+
+    private void TryCreateHpBar()
+    {
+        if (hpBarCreated) return;
+        if (!EnemyHPUIManager.HasInstance) return;
+
+        EnemyHPUIManager.Instance.CreateHPBar(this);
+        hpBarCreated = true;
+    }
+
+    private int ResolveSpawnHp()
+    {
+        if (enemySO != null)
+        {
+            if (enemySO.maxHp > 0) return enemySO.maxHp;
+            if (enemySO.hp > 0) return enemySO.hp;
+        }
+
+        return Mathf.Max(1, maxHp);
+    }
 }

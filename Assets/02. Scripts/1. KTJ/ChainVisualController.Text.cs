@@ -14,14 +14,13 @@ public partial class ChainVisualController
             chainUI.UpdateChainUI(chain);
             return;
         }
-        if (chainPanel != null && !chainPanel.activeSelf)
-        {
-            chainPanel.SetActive(true);
-        }
+
+        SetChainPanelVisible(true);
         if (chainText != null)
         {
             chainText.text = string.Format(chainTextFormat, chain);
         }
+
         EnsureChainTimerBar();
         PlayChainText();
     }
@@ -33,22 +32,21 @@ public partial class ChainVisualController
             chainUI.HideChainUI(lastChain);
             return;
         }
-        if (chainPanel == null)
-        {
-            return;
-        }
+
+        if (chainPanel == null) return;
         if (chainTextGroup == null)
         {
-            chainPanel.SetActive(false);
+            SetChainPanelVisible(false);
             return;
         }
+
         chainTextGroup.DOKill();
         chainTextGroup.alpha = 1f;
         chainTextGroup
             .DOFade(0f, chainTextFadeOut)
             .SetEase(Ease.OutQuad)
             .SetUpdate(useUnscaledTime)
-            .OnComplete(() => chainPanel.SetActive(false));
+            .OnComplete(() => SetChainPanelVisible(false));
     }
 
     private bool IsChainVisible()
@@ -73,7 +71,7 @@ public partial class ChainVisualController
 
         if (chainPanel != null)
         {
-            chainPanel.SetActive(false);
+            SetChainPanelVisible(false);
         }
     }
 
@@ -220,17 +218,11 @@ public partial class ChainVisualController
         var isTimerActive = isChainActive && chainCombat != null && chainCombat.IsSlowActive;
         if (!isTimerActive)
         {
-            if (timerRoot.activeSelf)
-            {
-                timerRoot.SetActive(false);
-            }
+            SetChainTimerBarVisible(false);
             return;
         }
 
-        if (!timerRoot.activeSelf)
-        {
-            timerRoot.SetActive(true);
-        }
+        SetChainTimerBarVisible(true);
 
         var fillAmount = chainCombat.SlowRemainingNormalized;
         chainTimerBarFillImage.fillAmount = fillAmount;
@@ -253,80 +245,29 @@ public partial class ChainVisualController
         }
 
         var timerRoot = ResolveChainTimerBarRoot();
-        if (timerRoot != null)
-        {
-            timerRoot.SetActive(false);
-        }
+        if (timerRoot != null) SetChainTimerBarVisible(false);
     }
 
     private void EnsureChainTimerBar()
     {
         if (chainTimerBarFillImage != null)
         {
-            if (!isChainTimerBarConfigured)
-            {
-                ConfigureChainTimerBar();
-                isChainTimerBarConfigured = true;
-            }
+            EnsureChainTimerBarConfigured();
             return;
         }
 
         var parentRect = ResolveChainTimerBarParent();
         if (parentRect == null) return;
-
-        var existingRoot = parentRect.Find("Chain Timer Bar");
-        if (existingRoot != null)
+        if (TryBindExistingChainTimerBar(parentRect))
         {
-            chainTimerBarBackgroundImage = existingRoot.GetComponent<Image>();
-            var existingFill = existingRoot.Find("Fill");
-            if (existingFill != null)
-            {
-                chainTimerBarFillImage = existingFill.GetComponent<Image>();
-            }
-
-            if (chainTimerBarFillImage == null)
-            {
-                var images = existingRoot.GetComponentsInChildren<Image>(true);
-                for (int i = 0; i < images.Length; i++)
-                {
-                    if (images[i] == null || images[i] == chainTimerBarBackgroundImage) continue;
-                    chainTimerBarFillImage = images[i];
-                    break;
-                }
-            }
-
-            ConfigureChainTimerBar();
-            isChainTimerBarConfigured = true;
+            EnsureChainTimerBarConfigured();
             return;
         }
 
         if (!autoCreateChainTimerBar) return;
-
-        var barRoot = new GameObject("Chain Timer Bar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        var barRect = barRoot.GetComponent<RectTransform>();
-        barRect.SetParent(parentRect, false);
-        barRect.anchorMin = new Vector2(0f, 1f);
-        barRect.anchorMax = new Vector2(1f, 1f);
-        barRect.pivot = new Vector2(0.5f, 1f);
-        barRect.offsetMin = new Vector2(chainTimerBarSidePadding, -(chainTimerBarTopMargin + chainTimerBarHeight));
-        barRect.offsetMax = new Vector2(-chainTimerBarSidePadding, -chainTimerBarTopMargin);
-        barRect.SetAsLastSibling();
-
-        var fillObject = new GameObject("Fill", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        var fillRect = fillObject.GetComponent<RectTransform>();
-        fillRect.SetParent(barRect, false);
-        fillRect.anchorMin = new Vector2(0f, 0f);
-        fillRect.anchorMax = new Vector2(1f, 1f);
-        fillRect.pivot = new Vector2(0.5f, 0.5f);
-        fillRect.offsetMin = Vector2.zero;
-        fillRect.offsetMax = Vector2.zero;
-
-        chainTimerBarBackgroundImage = barRoot.GetComponent<Image>();
-        chainTimerBarFillImage = fillObject.GetComponent<Image>();
-
-        ConfigureChainTimerBar();
-        isChainTimerBarConfigured = true;
-        barRoot.SetActive(false);
+        CreateChainTimerBar(parentRect);
+        EnsureChainTimerBarConfigured();
+        SetChainTimerBarVisible(false);
     }
 
     private RectTransform ResolveChainTimerBarParent()
@@ -363,6 +304,90 @@ public partial class ChainVisualController
         }
 
         return chainTimerBarFillImage.gameObject;
+    }
+
+    private void SetChainPanelVisible(bool visible)
+    {
+        if (chainPanel == null) return;
+        if (chainPanel.activeSelf == visible) return;
+        chainPanel.SetActive(visible);
+    }
+
+    private void EnsureChainTimerBarConfigured()
+    {
+        if (isChainTimerBarConfigured) return;
+
+        ConfigureChainTimerBar();
+        isChainTimerBarConfigured = true;
+    }
+
+    private bool TryBindExistingChainTimerBar(RectTransform parentRect)
+    {
+        var existingRoot = parentRect.Find("Chain Timer Bar");
+        if (existingRoot == null)
+        {
+            return false;
+        }
+
+        chainTimerBarBackgroundImage = existingRoot.GetComponent<Image>();
+        var existingFill = existingRoot.Find("Fill");
+        if (existingFill != null)
+        {
+            chainTimerBarFillImage = existingFill.GetComponent<Image>();
+        }
+
+        if (chainTimerBarFillImage == null)
+        {
+            chainTimerBarFillImage = FindChainTimerBarFillImage(existingRoot, chainTimerBarBackgroundImage);
+        }
+
+        return chainTimerBarFillImage != null;
+    }
+
+    private void CreateChainTimerBar(RectTransform parentRect)
+    {
+        var barRoot = new GameObject("Chain Timer Bar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        var barRect = barRoot.GetComponent<RectTransform>();
+        barRect.SetParent(parentRect, false);
+        barRect.anchorMin = new Vector2(0f, 1f);
+        barRect.anchorMax = new Vector2(1f, 1f);
+        barRect.pivot = new Vector2(0.5f, 1f);
+        barRect.offsetMin = new Vector2(chainTimerBarSidePadding, -(chainTimerBarTopMargin + chainTimerBarHeight));
+        barRect.offsetMax = new Vector2(-chainTimerBarSidePadding, -chainTimerBarTopMargin);
+        barRect.SetAsLastSibling();
+
+        var fillObject = new GameObject("Fill", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        var fillRect = fillObject.GetComponent<RectTransform>();
+        fillRect.SetParent(barRect, false);
+        fillRect.anchorMin = new Vector2(0f, 0f);
+        fillRect.anchorMax = new Vector2(1f, 1f);
+        fillRect.pivot = new Vector2(0.5f, 0.5f);
+        fillRect.offsetMin = Vector2.zero;
+        fillRect.offsetMax = Vector2.zero;
+
+        chainTimerBarBackgroundImage = barRoot.GetComponent<Image>();
+        chainTimerBarFillImage = fillObject.GetComponent<Image>();
+    }
+
+    private static Image FindChainTimerBarFillImage(Transform root, Image backgroundImage)
+    {
+        var images = root.GetComponentsInChildren<Image>(true);
+        for (int i = 0; i < images.Length; i++)
+        {
+            var image = images[i];
+            if (image == null || image == backgroundImage) continue;
+            return image;
+        }
+
+        return null;
+    }
+
+    private void SetChainTimerBarVisible(bool visible)
+    {
+        var timerRoot = ResolveChainTimerBarRoot();
+        if (timerRoot == null) return;
+        if (timerRoot.activeSelf == visible) return;
+        timerRoot.SetActive(visible);
     }
 
     private void ConfigureChainTimerBar()
