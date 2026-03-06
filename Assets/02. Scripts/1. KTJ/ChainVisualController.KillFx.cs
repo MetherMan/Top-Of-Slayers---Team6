@@ -25,11 +25,12 @@ public partial class ChainVisualController
         var instance = Instantiate(chainKillPrefab, position, chainKillPrefab.transform.rotation);
         if (instance == null) return;
 
+        ConfigureEffectTiming(instance);
         UpdateChainKillText(instance);
 
         if (chainKillPrefabAutoDestroyTime <= 0f) return;
 
-        Destroy(instance, chainKillPrefabAutoDestroyTime);
+        StartCoroutine(DestroyEffectAfterDelay(instance, chainKillPrefabAutoDestroyTime));
     }
 
     private Vector3 GetChainKillSpawnPosition(Transform target)
@@ -306,5 +307,45 @@ public partial class ChainVisualController
         if (damageTextFontAsset != null) return damageTextFontAsset;
         if (chainText != null && chainText.font != null) return chainText.font;
         return TMP_Settings.defaultFontAsset;
+    }
+
+    private void ConfigureEffectTiming(GameObject instance)
+    {
+        if (instance == null) return;
+        if (!useUnscaledTime) return;
+
+        var particleSystems = instance.GetComponentsInChildren<ParticleSystem>(true);
+        for (int i = 0; i < particleSystems.Length; i++)
+        {
+            var particleSystem = particleSystems[i];
+            if (particleSystem == null) continue;
+
+            var main = particleSystem.main;
+            main.useUnscaledTime = true;
+        }
+
+        var animators = instance.GetComponentsInChildren<Animator>(true);
+        for (int i = 0; i < animators.Length; i++)
+        {
+            var effectAnimator = animators[i];
+            if (effectAnimator == null) continue;
+            effectAnimator.updateMode = AnimatorUpdateMode.UnscaledTime;
+        }
+    }
+
+    private System.Collections.IEnumerator DestroyEffectAfterDelay(GameObject instance, float delay)
+    {
+        if (instance == null) yield break;
+        if (delay <= 0f)
+        {
+            Destroy(instance);
+            yield break;
+        }
+
+        yield return new WaitForSecondsRealtime(delay);
+        if (instance != null)
+        {
+            Destroy(instance);
+        }
     }
 }

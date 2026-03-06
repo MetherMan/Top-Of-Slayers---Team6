@@ -26,6 +26,9 @@ public class EnemyBase : MonoBehaviour
     [SerializeField, Range(0.1f, 1f)] private float chainReactionAnimSpeed = 0.72f;
     [SerializeField, Min(0f)] private float chainReactionBlendSpeed = 8f;
 
+    [Header("회전")]
+    [SerializeField, Min(0f)] private float turnSpeedDegrees = 720f;
+
     public EnemyIdleState IdleState { get; private set; }
     public EnemyFollow FollowState { get; private set; }
     public EnemyAttack AttackState { get; private set; }
@@ -41,6 +44,7 @@ public class EnemyBase : MonoBehaviour
     public float attackCooldown => enemySO.attackCooldown;
     public float dashTime => enemySO.dashTime;
     public float dashSpeed => enemySO.dashSpeed;
+    public float TurnSpeedDegrees => Mathf.Max(0f, turnSpeedDegrees);
 
     private float chainReactionWeight;
     private bool dashHitConsumed;
@@ -174,12 +178,19 @@ public class EnemyBase : MonoBehaviour
         if (targetObject == null) return false;
         if (damage <= 0) return false;
 
+        var chainCombat = targetObject.GetComponent<ChainCombatController>();
+        if (chainCombat == null) chainCombat = targetObject.GetComponentInParent<ChainCombatController>();
+        if (chainCombat == null) chainCombat = FindObjectOfType<ChainCombatController>();
+        if (chainCombat != null && chainCombat.IsSlowActive)
+        {
+            return false;
+        }
+
         var combatResource = targetObject.GetComponent<PlayerCombatResource>();
         if (combatResource == null) combatResource = targetObject.GetComponentInParent<PlayerCombatResource>();
         if (combatResource != null)
         {
-            combatResource.TakeEnemyHit(damage);
-            return true;
+            return combatResource.TakeEnemyHit(damage);
         }
 
         var playerHP = targetObject.GetComponent<PlayerHP>();

@@ -53,16 +53,21 @@ public class EnemyFollow : IEnemyState
 
         var nextPosition = currentPosition + moveDirection * moveStep;
         var targetRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+        var currentRotation = enemy.rb != null ? enemy.rb.rotation : enemy.transform.rotation;
+        var nextRotation = Quaternion.RotateTowards(
+            currentRotation,
+            targetRotation,
+            enemy.TurnSpeedDegrees * Time.fixedDeltaTime);
 
         if (enemy.rb != null)
         {
             enemy.rb.MovePosition(nextPosition);
-            enemy.rb.MoveRotation(targetRotation);
+            enemy.rb.MoveRotation(nextRotation);
             return;
         }
 
         enemy.transform.position = nextPosition;
-        enemy.transform.rotation = targetRotation;
+        enemy.transform.rotation = nextRotation;
     }
 
     public void Exit()
