@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 /*
     스테이지 씬에 생성
@@ -23,6 +24,9 @@ public class StageFlowManager : Singleton<StageFlowManager>
     public int monsterCount;
     public int waveIndex; //EnemySpawnManager에서 값 변경
     #endregion
+    //(우영)
+    //스테이지 클리어 여부 확인
+    //public static Action<bool> OnStageClear;
 
     protected override void Awake()
     {
@@ -69,6 +73,20 @@ public class StageFlowManager : Singleton<StageFlowManager>
     public void RoundClear()
     {
         //상태전환 : 씬 이동
+
+        //우영
+        //스테이지 클리어 보상
+        //bool isFirstClear = true;
+
+        //if (첫클리어)
+        //{
+        //    OnStageClear?.Invoke(isFirstClear);
+        //}
+        //else if(반복 클리어)
+        //{
+        //    OnStageClear?.Invoke(!isFirstClear);
+        //}
+
     }
     #endregion
 }
