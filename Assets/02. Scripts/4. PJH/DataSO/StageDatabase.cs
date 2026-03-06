@@ -21,6 +21,7 @@ public class StageDatabase : ScriptableObject
                 if (instance == null)
                 {
                     Debug.LogWarning("데이터베이스 파일을 찾을 수 없음");
+                    Debug.LogWarning("데이터베이스 파일을 찾을 수 없음");
                 }
             }
             return instance;
