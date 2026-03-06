@@ -3,49 +3,65 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using TMPro;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceProviders;
 
 public class LoadingSceneController : MonoBehaviour
 {
-    static string nextScene;
+    static string targetKey;
+    static bool isStageLoading;
 
     [SerializeField] Slider slider;
     [SerializeField] TextMeshProUGUI loadingText;
 
     void Start()
     {
-        StartCoroutine(LoadSceneProcess());
+        StartCoroutine(LoadAddressableSceneProcess());
     }
-
-    public static void LoadScene(string sceneName)
+    
+    public static void LoadStage(string key)
     {
-        nextScene = sceneName;
+        targetKey = key;
+        isStageLoading = true;
         SceneManager.LoadScene("LoadingScene");
     }
 
-    IEnumerator LoadSceneProcess()
+    public static void LoadScene(string key)
     {
-        AsyncOperation op = SceneManager.LoadSceneAsync(nextScene);
-        op.allowSceneActivation = false;
+        targetKey = key;
+        isStageLoading = false;
+        SceneManager.LoadScene("LoadingScene");
+    }
 
-        float timer = 0f;
-        while (op.isDone == false)
+    //스테이지 이동용 LoadScene 메서드 코드작성
+
+    IEnumerator LoadAddressableSceneProcess()
+    {
+        AsyncOperationHandle<SceneInstance> op = isStageLoading
+            ? AddressableManager.Instance.RequestStageScene(targetKey)
+            : AddressableManager.Instance.RequestScene(targetKey);
+
+        while (op.IsValid() && !op.IsDone)
         {
-            slider.value = op.progress;
-            if (op.progress < 0.9f) loadingText.text = $"{Mathf.RoundToInt(op.progress * 100)}%";
-
-            if (op.progress >= 0.9f)
-            {
-                timer += Time.unscaledDeltaTime;
-                slider.value = Mathf.Lerp(0.9f, 1f, timer);
-                loadingText.text = $"{Mathf.RoundToInt(slider.value * 100)}%";
-                if (slider.value >= 1f)
-                {
-                    op.allowSceneActivation = true;
-                    yield break;
-                }
-            }
+            float progress = op.PercentComplete;
+            UpdateUI(progress);
             yield return null;
         }
-        yield break;
+
+        if (op.Status == AsyncOperationStatus.Succeeded)
+        {
+            UpdateUI(1f);
+            yield return new WaitForSeconds(0.5f);
+        }
+        else
+        {
+            loadingText.text = "loading failed";
+        }
+    }
+
+    void UpdateUI(float progress)
+    {
+        slider.value = progress;
+        loadingText.text = $"{Mathf.RoundToInt(progress * 100)}%";
     }
 }
