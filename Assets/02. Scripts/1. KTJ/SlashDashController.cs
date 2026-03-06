@@ -69,6 +69,8 @@ public partial class SlashDashController : MonoBehaviour
     private int equipmentAttackBonus;
     private float equipmentCriticalChanceBonus;
     private int equipmentHealOnHit;
+    private float playerCriticalChance;
+    private int playerHealOnHit;
     private PlayerHP cachedPlayerHp;
 
     public bool IsDashing => state == DashState.Dashing;
@@ -77,6 +79,12 @@ public partial class SlashDashController : MonoBehaviour
     public event System.Action OnDashStarted;
     public event System.Action OnDashImpact;
     public event System.Action<Transform> OnDashImpactTarget;
+
+    public void SetPlayerCombatStats(float criticalChance, int healOnHit)
+    {
+        playerCriticalChance = Mathf.Max(0f, criticalChance);
+        playerHealOnHit = Mathf.Max(0, healOnHit);
+    }
 
     public void SetEquipmentCombatBonus(int attackBonus, float criticalChanceBonus, int healOnHit)
     {

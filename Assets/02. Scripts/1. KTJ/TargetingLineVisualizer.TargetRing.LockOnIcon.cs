@@ -10,21 +10,16 @@ public partial class TargetingLineVisualizer
         if (entry == null || entry.Target == null) return;
         if (entry.LockOnTransform != null) return;
 
-        GameObject iconObject;
-        SpriteRenderer spriteRenderer;
-        if (lockOnIconPrefab != null)
+        var iconObject = lockOnIconPrefab != null
+            ? Instantiate(lockOnIconPrefab)
+            : new GameObject("MonsterLockOnIcon");
+        if (iconObject == null) return;
+
+        iconObject.name = "MonsterLockOnIcon";
+
+        var spriteRenderer = iconObject.GetComponentInChildren<SpriteRenderer>(true);
+        if (spriteRenderer == null)
         {
-            iconObject = Instantiate(lockOnIconPrefab);
-            iconObject.name = "MonsterLockOnIcon";
-            spriteRenderer = iconObject.GetComponentInChildren<SpriteRenderer>(true);
-            if (spriteRenderer == null)
-            {
-                spriteRenderer = iconObject.AddComponent<SpriteRenderer>();
-            }
-        }
-        else
-        {
-            iconObject = new GameObject("MonsterLockOnIcon");
             spriteRenderer = iconObject.AddComponent<SpriteRenderer>();
         }
 
@@ -38,10 +33,12 @@ public partial class TargetingLineVisualizer
         {
             iconObject.AddComponent<MonsterTargetRingMarker>();
         }
+
         if (spriteRenderer.sprite == null)
         {
-            spriteRenderer.sprite = lockOnIconSprite != null ? lockOnIconSprite : GetFallbackLockOnSprite();
+            spriteRenderer.sprite = ResolveLockOnIconSprite();
         }
+
         spriteRenderer.sortingOrder = 30000;
         spriteRenderer.color = lockOnIconColor;
 
@@ -52,10 +49,15 @@ public partial class TargetingLineVisualizer
         UpdateMonsterLockOnTransform(entry);
     }
 
-    private Sprite GetFallbackLockOnSprite()
+    private Sprite ResolveLockOnIconSprite()
     {
+        if (lockOnIconSprite != null) return lockOnIconSprite;
         if (fallbackLockOnSprite != null) return fallbackLockOnSprite;
+        return CreateDefaultLockOnSprite();
+    }
 
+    private Sprite CreateDefaultLockOnSprite()
+    {
         const int size = 128;
         var texture = new Texture2D(size, size, TextureFormat.RGBA32, false, true)
         {

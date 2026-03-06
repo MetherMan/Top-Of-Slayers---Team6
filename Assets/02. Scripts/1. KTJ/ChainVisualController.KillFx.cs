@@ -21,37 +21,40 @@ public partial class ChainVisualController
         if (chainKillPrefab == null) return;
         if (target == null) return;
 
-        var position = ResolveChainKillPrefabPosition(target);
+        var position = GetChainKillSpawnPosition(target);
         var instance = Instantiate(chainKillPrefab, position, chainKillPrefab.transform.rotation);
         if (instance == null) return;
 
-        TryUpdateChainKillText(instance);
+        UpdateChainKillText(instance);
 
         if (chainKillPrefabAutoDestroyTime <= 0f) return;
 
         Destroy(instance, chainKillPrefabAutoDestroyTime);
     }
 
-    private Vector3 ResolveChainKillPrefabPosition(Transform target)
+    private Vector3 GetChainKillSpawnPosition(Transform target)
     {
-        var position = target.position;
-        if (TryGetTargetTopPoint(target, out var topPoint))
-        {
-            position = topPoint;
-        }
-
+        var position = GetTargetTopPoint(target);
         position.y += chainKillPrefabHeightOffset;
         return position;
     }
 
-    private bool TryGetTargetTopPoint(Transform target, out Vector3 topPoint)
+    private Vector3 GetTargetTopPoint(Transform target)
+    {
+        if (target == null) return transform.position;
+        if (TryGetTopPointFromColliders(target, out var topPoint)) return topPoint;
+        if (TryGetTopPointFromRenderers(target, out topPoint)) return topPoint;
+        return target.position;
+    }
+
+    private bool TryGetTopPointFromColliders(Transform target, out Vector3 topPoint)
     {
         topPoint = target.position;
-
         var colliders = target.GetComponentsInChildren<Collider>(true);
         var hasCollider = false;
-        var highestColliderY = float.MinValue;
-        var highestColliderCenter = target.position;
+        var highestY = float.MinValue;
+        var highestCenter = target.position;
+
         for (int i = 0; i < colliders.Length; i++)
         {
             var collider = colliders[i];
@@ -59,25 +62,29 @@ public partial class ChainVisualController
             if (!collider.enabled) continue;
             if (!collider.gameObject.activeInHierarchy) continue;
 
-            var colliderBounds = collider.bounds;
-            if (colliderBounds.size.sqrMagnitude <= 0f) continue;
-            if (hasCollider && colliderBounds.max.y <= highestColliderY) continue;
+            var bounds = collider.bounds;
+            if (bounds.size.sqrMagnitude <= 0f) continue;
+            if (hasCollider && bounds.max.y <= highestY) continue;
 
             hasCollider = true;
-            highestColliderY = colliderBounds.max.y;
-            highestColliderCenter = colliderBounds.center;
+            highestY = bounds.max.y;
+            highestCenter = bounds.center;
         }
 
-        if (hasCollider)
-        {
-            topPoint = new Vector3(highestColliderCenter.x, highestColliderY, highestColliderCenter.z);
-            return true;
-        }
+        if (!hasCollider) return false;
 
+        topPoint = new Vector3(highestCenter.x, highestY, highestCenter.z);
+        return true;
+    }
+
+    private bool TryGetTopPointFromRenderers(Transform target, out Vector3 topPoint)
+    {
+        topPoint = target.position;
         var targetRenderers = target.GetComponentsInChildren<Renderer>(true);
         var hasRenderer = false;
         var highestY = float.MinValue;
         var highestCenter = target.position;
+
         for (int i = 0; i < targetRenderers.Length; i++)
         {
             var renderer = targetRenderers[i];
@@ -95,12 +102,11 @@ public partial class ChainVisualController
         }
 
         if (!hasRenderer) return false;
-
         topPoint = new Vector3(highestCenter.x, highestY, highestCenter.z);
         return true;
     }
 
-    private void TryUpdateChainKillText(GameObject instance)
+    private void UpdateChainKillText(GameObject instance)
     {
         if (instance == null) return;
 
@@ -121,7 +127,7 @@ public partial class ChainVisualController
         {
             updateTextMethod.Invoke(particleText, new object[] { ChainKillText, null, null, null, null, null });
         }
-        catch
+        catch (System.Exception)
         {
         }
     }
@@ -140,53 +146,53 @@ public partial class ChainVisualController
         float amountCurve = Mathf.SmoothStep(0f, 1f, amountNormalized);
         bool isBigHit = result.Amount >= damageTextBigHitThreshold;
 
-        float safeScale = Mathf.Clamp(damageTextScale, DamageTextMinScale, DamageTextMaxScale);
-        safeScale *= 1f + amountCurve * Mathf.Clamp01(damageTextAmountScaleWeight);
+        float scale = Mathf.Clamp(damageTextScale, DamageTextMinScale, DamageTextMaxScale);
+        scale *= 1f + amountCurve * Mathf.Clamp01(damageTextAmountScaleWeight);
         if (isBigHit)
         {
-            safeScale += Mathf.Max(0f, damageTextBigHitExtraScale) * Mathf.Lerp(0.65f, 1f, amountCurve);
+            scale += Mathf.Max(0f, damageTextBigHitExtraScale) * Mathf.Lerp(0.65f, 1f, amountCurve);
         }
         if (result.IsDead)
         {
-            safeScale *= 1.32f;
+            scale *= 1.32f;
         }
-        safeScale = Mathf.Clamp(safeScale, DamageTextMinScale, DamageTextMaxScale);
+        scale = Mathf.Clamp(scale, DamageTextMinScale, DamageTextMaxScale);
 
-        float safeFontSize = Mathf.Clamp(damageTextFontSize, DamageTextMinFontSize, DamageTextMaxFontSize);
-        safeFontSize *= Mathf.Lerp(1f, 1.24f, amountCurve);
-        if (isBigHit) safeFontSize *= Mathf.Lerp(1.04f, 1.1f, amountCurve);
-        if (result.IsDead) safeFontSize *= 1.22f;
-        safeFontSize = Mathf.Clamp(safeFontSize, DamageTextMinFontSize, DamageTextMaxFontSize);
+        float fontSize = Mathf.Clamp(damageTextFontSize, DamageTextMinFontSize, DamageTextMaxFontSize);
+        fontSize *= Mathf.Lerp(1f, 1.24f, amountCurve);
+        if (isBigHit) fontSize *= Mathf.Lerp(1.04f, 1.1f, amountCurve);
+        if (result.IsDead) fontSize *= 1.22f;
+        fontSize = Mathf.Clamp(fontSize, DamageTextMinFontSize, DamageTextMaxFontSize);
 
-        float safeDuration = Mathf.Clamp(damageTextDuration, DamageTextMinDuration, DamageTextMaxDuration);
-        float safeRiseDistance = Mathf.Clamp(damageTextRiseDistance, 0f, DamageTextMaxRiseDistance);
+        float duration = Mathf.Clamp(damageTextDuration, DamageTextMinDuration, DamageTextMaxDuration);
+        float riseDistance = Mathf.Clamp(damageTextRiseDistance, 0f, DamageTextMaxRiseDistance);
         if (result.IsDead)
         {
-            safeDuration = Mathf.Clamp(safeDuration * 1.08f, DamageTextMinDuration, DamageTextMaxDuration);
-            safeRiseDistance = Mathf.Clamp(safeRiseDistance * 1.16f, 0f, DamageTextMaxRiseDistance);
+            duration = Mathf.Clamp(duration * 1.08f, DamageTextMinDuration, DamageTextMaxDuration);
+            riseDistance = Mathf.Clamp(riseDistance * 1.16f, 0f, DamageTextMaxRiseDistance);
         }
-        float safePopDuration = Mathf.Clamp(damageTextPopDuration, 0f, safeDuration * 0.5f);
-        float safePopScaleMultiplier = Mathf.Clamp(damageTextPopScaleMultiplier, 1f, 3f);
-        float safeDriftDistance = Mathf.Clamp(damageTextDriftDistance, 0f, DamageTextMaxDriftDistance);
-        if (result.IsDead) safeDriftDistance *= 0.55f;
+        float popDuration = Mathf.Clamp(damageTextPopDuration, 0f, duration * 0.5f);
+        float popScaleMultiplier = Mathf.Clamp(damageTextPopScaleMultiplier, 1f, 3f);
+        float driftDistance = Mathf.Clamp(damageTextDriftDistance, 0f, DamageTextMaxDriftDistance);
+        if (result.IsDead) driftDistance *= 0.55f;
 
-        var spawnPosition = ResolveDamageTextPosition(result.Target);
+        var spawnPosition = GetDamageTextPosition(result.Target);
         var textObject = new GameObject($"DamageText_{result.Amount}", typeof(TextMeshPro));
         textObject.transform.position = spawnPosition;
-        textObject.transform.localScale = Vector3.one * (safeScale * 0.55f);
+        textObject.transform.localScale = Vector3.one * (scale * 0.55f);
 
         var tmp = textObject.GetComponent<TextMeshPro>();
-        var fontAsset = ResolveDamageTextFontAsset();
+        var fontAsset = GetDamageTextFontAsset();
         if (fontAsset != null)
         {
             tmp.font = fontAsset;
         }
         tmp.text = result.Amount.ToString();
-        tmp.fontSize = safeFontSize;
+        tmp.fontSize = fontSize;
         tmp.fontStyle = FontStyles.Bold;
         tmp.enableWordWrapping = false;
         tmp.alignment = TextAlignmentOptions.Center;
-        var targetColor = ResolveDamageTextColor(result.IsDead, isBigHit, amountCurve);
+        var targetColor = GetDamageTextColor(result.IsDead, isBigHit, amountCurve);
         tmp.color = Color.white;
         tmp.outlineWidth = 0.32f;
         tmp.outlineColor = new Color(0f, 0f, 0f, 0.9f);
@@ -205,28 +211,27 @@ public partial class ChainVisualController
         float tilt = result.IsDead ? Random.Range(-20f, 20f) : Random.Range(-12f, 12f);
         AlignDamageTextToCamera(textObject.transform, tilt);
 
-        float popScaleMultiplier = safePopScaleMultiplier;
         if (isBigHit) popScaleMultiplier += 0.18f;
         if (result.IsDead) popScaleMultiplier += 0.36f;
-        var popScale = Vector3.one * (safeScale * popScaleMultiplier);
-        var targetScale = Vector3.one * (result.IsDead ? safeScale * 1.2f : safeScale);
+        var popScale = Vector3.one * (scale * popScaleMultiplier);
+        var targetScale = Vector3.one * (result.IsDead ? scale * 1.2f : scale);
         var drift = new Vector3(
-            Random.Range(-safeDriftDistance, safeDriftDistance),
+            Random.Range(-driftDistance, driftDistance),
             0f,
-            Random.Range(-safeDriftDistance, safeDriftDistance));
-        var targetPosition = spawnPosition + drift + Vector3.up * safeRiseDistance;
+            Random.Range(-driftDistance, driftDistance));
+        var targetPosition = spawnPosition + drift + Vector3.up * riseDistance;
 
         var sequence = DOTween.Sequence();
         sequence.SetUpdate(useUnscaledTime);
-        if (safePopDuration > 0f)
+        if (popDuration > 0f)
         {
-            sequence.Append(textObject.transform.DOScale(popScale, safePopDuration).SetEase(Ease.OutBack));
+            sequence.Append(textObject.transform.DOScale(popScale, popDuration).SetEase(Ease.OutBack));
         }
-        sequence.Join(DOTween.To(() => tmp.color, x => tmp.color = x, targetColor, Mathf.Max(0.05f, safePopDuration)).SetEase(Ease.OutQuad));
-        sequence.Append(textObject.transform.DOScale(targetScale, safeDuration).SetEase(Ease.OutQuad));
-        sequence.Join(textObject.transform.DOMove(targetPosition, safeDuration).SetEase(Ease.OutCubic));
-        sequence.Join(tmp.DOFade(0f, safeDuration * 0.85f).SetDelay(safeDuration * 0.15f).SetEase(Ease.InQuad));
-        sequence.Join(DOTween.To(() => tilt, x => tilt = x, 0f, safeDuration).SetEase(Ease.OutCubic));
+        sequence.Join(DOTween.To(() => tmp.color, x => tmp.color = x, targetColor, Mathf.Max(0.05f, popDuration)).SetEase(Ease.OutQuad));
+        sequence.Append(textObject.transform.DOScale(targetScale, duration).SetEase(Ease.OutQuad));
+        sequence.Join(textObject.transform.DOMove(targetPosition, duration).SetEase(Ease.OutCubic));
+        sequence.Join(tmp.DOFade(0f, duration * 0.85f).SetDelay(duration * 0.15f).SetEase(Ease.InQuad));
+        sequence.Join(DOTween.To(() => tilt, x => tilt = x, 0f, duration).SetEase(Ease.OutCubic));
         sequence.OnUpdate(() => AlignDamageTextToCamera(textObject.transform, tilt));
         sequence.OnComplete(() =>
         {
@@ -237,20 +242,15 @@ public partial class ChainVisualController
         });
     }
 
-    private Vector3 ResolveDamageTextPosition(Transform target)
+    private Vector3 GetDamageTextPosition(Transform target)
     {
-        var position = target.position;
-        if (TryGetTargetTopPoint(target, out var topPoint))
-        {
-            position = topPoint;
-        }
-
+        var position = GetTargetTopPoint(target);
         position += damageTextOffset;
-        float safeHorizontal = Mathf.Clamp(damageTextRandomHorizontal, 0f, DamageTextMaxHorizontalJitter);
-        if (safeHorizontal > 0f)
+        float horizontalJitter = Mathf.Clamp(damageTextRandomHorizontal, 0f, DamageTextMaxHorizontalJitter);
+        if (horizontalJitter > 0f)
         {
-            position.x += Random.Range(-safeHorizontal, safeHorizontal);
-            position.z += Random.Range(-safeHorizontal, safeHorizontal);
+            position.x += Random.Range(-horizontalJitter, horizontalJitter);
+            position.z += Random.Range(-horizontalJitter, horizontalJitter);
         }
 
         return position;
@@ -265,14 +265,14 @@ public partial class ChainVisualController
     {
         if (textTransform == null) return;
 
-        var camera = ResolveDamageTextCamera();
+        var camera = GetDamageTextCamera();
         if (camera == null) return;
 
         textTransform.rotation = Quaternion.LookRotation(camera.transform.forward, camera.transform.up)
             * Quaternion.Euler(0f, 0f, tilt);
     }
 
-    private Camera ResolveDamageTextCamera()
+    private Camera GetDamageTextCamera()
     {
         if (damageTextCamera != null) return damageTextCamera;
 
@@ -283,16 +283,16 @@ public partial class ChainVisualController
         return damageTextCamera;
     }
 
-    private Color ResolveDamageTextColor(bool isDead, bool isBigHit, float amountNormalized)
+    private Color GetDamageTextColor(bool isDead, bool isBigHit, float amountNormalized)
     {
         if (isDead) return killDamageTextColor;
-        var safeAmount = Mathf.Clamp01(amountNormalized);
+        var amount01 = Mathf.Clamp01(amountNormalized);
         if (!isBigHit)
         {
-            return Color.Lerp(damageTextColor, damageTextBigHitColor, safeAmount * 0.35f);
+            return Color.Lerp(damageTextColor, damageTextBigHitColor, amount01 * 0.35f);
         }
 
-        return Color.Lerp(damageTextColor, damageTextBigHitColor, Mathf.Lerp(0.45f, 1f, safeAmount));
+        return Color.Lerp(damageTextColor, damageTextBigHitColor, Mathf.Lerp(0.45f, 1f, amount01));
     }
 
     private VertexGradient BuildDamageTextGradient(Color baseColor)
@@ -301,7 +301,7 @@ public partial class ChainVisualController
         return new VertexGradient(topColor, topColor, baseColor, baseColor);
     }
 
-    private TMP_FontAsset ResolveDamageTextFontAsset()
+    private TMP_FontAsset GetDamageTextFontAsset()
     {
         if (damageTextFontAsset != null) return damageTextFontAsset;
         if (chainText != null && chainText.font != null) return chainText.font;

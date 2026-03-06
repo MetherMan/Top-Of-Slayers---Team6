@@ -6,16 +6,17 @@ public partial class SlashDashController
     private int CalculateDamage(TimingGrade grade, AttackSpecSO spec)
     {
         if (spec == null) return 0;
-        var baseDamage = Mathf.Max(0, spec.baseDamage + equipmentAttackBonus);
+        var baseDamage = Mathf.Max(0, spec.GetAttack() + equipmentAttackBonus);
         switch (grade)
         {
             case TimingGrade.Perfect:
                 return Mathf.RoundToInt(baseDamage * spec.criticalMultiplier);
             case TimingGrade.Good:
-                if (equipmentCriticalChanceBonus > 0f)
+                var criticalChance = GetTotalCriticalChance();
+                if (criticalChance > 0f)
                 {
-                    var criticalChance = Mathf.Clamp01(equipmentCriticalChanceBonus * 0.01f);
-                    if (Random.value <= criticalChance)
+                    var chance01 = Mathf.Clamp01(criticalChance * 0.01f);
+                    if (Random.value <= chance01)
                     {
                         return Mathf.RoundToInt(baseDamage * spec.criticalMultiplier);
                     }
@@ -52,7 +53,7 @@ public partial class SlashDashController
             hitCount++;
         }
 
-        ApplyEquipmentHeal(hitCount);
+        ApplyHitHeal(hitCount);
         ClearPendingDamage();
     }
 
@@ -125,15 +126,26 @@ public partial class SlashDashController
         return true;
     }
 
-    private void ApplyEquipmentHeal(int hitCount)
+    private void ApplyHitHeal(int hitCount)
     {
-        if (equipmentHealOnHit <= 0 || hitCount <= 0) return;
+        var healOnHit = GetTotalHealOnHit();
+        if (healOnHit <= 0 || hitCount <= 0) return;
 
         var playerHp = ResolvePlayerHp();
         if (playerHp == null) return;
 
-        var healAmount = equipmentHealOnHit * hitCount;
+        var healAmount = healOnHit * hitCount;
         playerHp.RestoreHp(healAmount);
+    }
+
+    private float GetTotalCriticalChance()
+    {
+        return Mathf.Max(0f, playerCriticalChance + equipmentCriticalChanceBonus);
+    }
+
+    private int GetTotalHealOnHit()
+    {
+        return Mathf.Max(0, playerHealOnHit + equipmentHealOnHit);
     }
 
     private PlayerHP ResolvePlayerHp()
