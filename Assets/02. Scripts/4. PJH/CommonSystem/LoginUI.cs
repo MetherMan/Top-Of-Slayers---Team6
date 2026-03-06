@@ -80,6 +80,7 @@ public class LoginUI : Singleton<LoginUI>
                 //if ()
                 //{
                 //    //사용자 데이터 확인 후 로비 씬으로 이동
+                LoginSceneManager.Instance.CheckIn();
                 //}
             }
         });

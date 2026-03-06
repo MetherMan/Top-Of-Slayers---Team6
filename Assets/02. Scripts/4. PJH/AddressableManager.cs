@@ -123,7 +123,7 @@ public class AddressableManager : Singleton<AddressableManager>
             {
                 float currentMB = totalMB * downloadHandle.PercentComplete;
 
-                loadingText.text = $"다운로드 중 ... {Math.Ceiling(currentMB * 100) / 100}" +
+                loadingText.text = $"{Math.Ceiling(currentMB * 100) / 100}" +
                     $" / {Math.Ceiling(totalMB * 100) / 100} MB";
 
                 await Task.Delay(100); // 무한 루프 방지 (Yield보다 cpu 점유율이 낮다)
@@ -161,7 +161,7 @@ public class AddressableManager : Singleton<AddressableManager>
 
     #region Load
     //StageConfigSO : 게임을 종료할 때까지 가지고 있는다.
-    public async Task LoadAllStageSO()
+    private async Task LoadAllStageSO()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("StageSO", typeof(StageConfigSO));
@@ -213,47 +213,41 @@ public class AddressableManager : Singleton<AddressableManager>
     //SceneInstance
     //LoadAssetsAsync<T> 사용할 경우 메모리 부담 / 데이터 파일로 취급
     //스테이지 씬 이동 : SO의 키값을 입력하면 해당되는 씬을 불러와 실행한다.
-    public void RequestStageScene(string key)
+    public AsyncOperationHandle<SceneInstance> RequestStageScene(string addressableName)
     {
-        StageConfigSO data = GetStageData(key);
-        if (data == null) return;
+        StageConfigSO data = GetStageData(addressableName);
+        if (data == null) return default;
 
-        //AsyncOperationHandle<T> 타입을 명시하지 않으면 handle.Result는 object 타입으로 반환한다.
-        AsyncOperationHandle<SceneInstance> sceneLoadHandle
-            = Addressables.LoadSceneAsync(data.sceneReference);
+        return LoadSceneInternal(data.sceneReference);
+    }
 
-        /*
-            씬인스턴스 핸들은 별도로 관리하지 않는다.
-            - single로만 전환하기 때문에 자동으로 sceneLoadHandle(핸들)을 Relases 해준다.
-            - InValid()로 검사를 해서 오류가 발생하지 않지만 불필요한 행동이다.
-            - 클라이언트가 정리될 경우 시스템에서 메모리를 전부 해제하므로 로딩중 클라이언트가
-                + 강제 종료되는 상황은 상정하지 않아도 된다.
+    public AsyncOperationHandle<SceneInstance> RequestScene(string addressableName)
+    {
+        return LoadSceneInternal(addressableName);
+    }
 
-            람다식으로 이벤트를 구독하기에 매개변수명으로 사용한 handle은 추가하는 순간 메모리에서 삭제된다.
-            즉 -= 구독해제 구문을 작성할 필요가 없다 할 수도 없고
-        */ //리스트에 따로 .Add 하지 않는 이유
-        /*
-            Completed 이벤트는 매개변수 1개만 사용한다.
-            작업이 끝나면 해당 작업의 결과정보(handle)를 통째로 넘겨주자 라고 정의되어 있기 때문이다.
-        */ //.Completed
-        sceneLoadHandle.Completed += (handle) =>
+    private AsyncOperationHandle<SceneInstance> LoadSceneInternal(object runtimeKey)
+    {
+        AsyncOperationHandle<SceneInstance> handle
+            = Addressables.LoadSceneAsync(runtimeKey);
+
+        handle.Completed += (h) =>
         {
-            if (IsSucceeded(handle))
+            if (h.Status == AsyncOperationStatus.Succeeded)
             {
-                //RuntimeKey를 제외할 경우 엉뚱한 값이 나올 수 있다
-                string address = data.sceneReference.RuntimeKey.ToString();
-                AddSceneSafely(address, handle.Result);
+                AddSceneSafely(runtimeKey.ToString(), h.Result);
             }
-            else if (IsFailed(handle))
+            else
             {
-                Debug.LogError("RequestScene : Failed");
-                return;
+                Debug.LogError($"Scene Load Failed : {runtimeKey}");
             }
         };
+
+        return handle;
     }
 
     //중복방지 메서드
-    public void AddSceneSafely(string address, SceneInstance instance)
+    private void AddSceneSafely(string address, SceneInstance instance)
     {
         if (_stageScene.ContainsKey(address))
         {
@@ -264,7 +258,7 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //RuleSO
-    public async Task LoadAllRule()
+    private async Task LoadAllRule()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("RuleSO", typeof(WaveRule));
@@ -319,7 +313,7 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //UI
-    public async Task LoadAllUI()
+    private async Task LoadAllUI()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("UI", typeof(GameObject));
@@ -374,7 +368,7 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //MonsterSO
-    public async Task LoadAllMonsterSO()
+    private async Task LoadAllMonsterSO()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("MonsterSO", typeof(EnemyConfigSO));
@@ -428,7 +422,7 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //MonsterPrefab
-    public async Task LoadAllMonsterPf()
+    private async Task LoadAllMonsterPf()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("MonsterPrefab", typeof(GameObject));
@@ -498,7 +492,7 @@ public class AddressableManager : Singleton<AddressableManager>
     //}
 
     //VFX
-    public async Task LoadAllVFX()
+    private async Task LoadAllVFX()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("VFX", typeof(GameObject));
@@ -560,54 +554,54 @@ public class AddressableManager : Singleton<AddressableManager>
     #endregion
 
     #region Get
-    public StageConfigSO GetStageData(string stageKey)
+    public StageConfigSO GetStageData(string addressableName)
     {
-        if (_stageSO.TryGetValue(stageKey, out StageConfigSO data))
+        if (_stageSO.TryGetValue(addressableName, out StageConfigSO data))
         {
             return data;
         }
         return null;
     }
 
-    public WaveRule GetRuleData(string ruleType)
+    public WaveRule GetRuleData(string addressableName)
     {
-        if (_ruleSO.TryGetValue(ruleType, out WaveRule rule))
+        if (_ruleSO.TryGetValue(addressableName, out WaveRule rule))
         {
             return rule;
         }
         return null;
     }
 
-    public GameObject GetUI(string uIname)
+    public GameObject GetUI(string addressableName)
     {
-        if (_uI.TryGetValue(uIname, out GameObject ui))
+        if (_uI.TryGetValue(addressableName, out GameObject ui))
         {
             return ui;
         }
         return null;
     }
 
-    public EnemyConfigSO GetEnemyData(string monsterName)
+    public EnemyConfigSO GetEnemyData(string addressableName)
     {
-        if (_enemySO.TryGetValue(monsterName, out EnemyConfigSO data))
+        if (_enemySO.TryGetValue(addressableName, out EnemyConfigSO data))
         {
             return data;
         }
         return null;
     }
 
-    public GameObject GetEnemyPf(string monsterName)
+    public GameObject GetEnemyPf(string addressableName)
     {
-        if (_monsterPf.TryGetValue(monsterName, out GameObject data))
+        if (_monsterPf.TryGetValue(addressableName, out GameObject data))
         {
             return data;
         }
         return null;
     }
 
-    public GameObject GetVFX(string vFXName)
+    public GameObject GetVFX(string addressableName)
     {
-        if (_vFX.TryGetValue(vFXName, out GameObject data))
+        if (_vFX.TryGetValue(addressableName, out GameObject data))
         {
             return data;
         }
