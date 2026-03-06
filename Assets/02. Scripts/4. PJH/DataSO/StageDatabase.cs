@@ -27,11 +27,11 @@ public class StageDatabase : ScriptableObject
         }
     }
 
-    public StageConfigSO selectStage;
+    private StageConfigSO selectStage;
 
     //스테이지 라운드(웨이브) 데이터
     public List<StageConfigSO.RoundData> roundDatas;
-    public StageConfigSO.RoundData roundData;
+    public StageConfigSO.RoundData roundData; //어딘가 사용되고 있는 코드?
 
     #endregion
 
@@ -68,42 +68,44 @@ public class StageDatabase : ScriptableObject
         return selectStage;
     }
 
-    //private bool TryResolveStageKey(StageConfigSO data, out string stageKey)
-    //{
-    //    stageKey = null;
-    //    if (!string.IsNullOrWhiteSpace(data.stageKey))
-    //    {
-    //        stageKey = data.stageKey.Trim();
-    //        return true;
-    //    }
+    /*
+    private bool TryResolveStageKey(StageConfigSO data, out string stageKey)
+    {
+        stageKey = null;
+        if (!string.IsNullOrWhiteSpace(data.stageKey))
+        {
+            stageKey = data.stageKey.Trim();
+            return true;
+        }
 
-    //    string name = data.name;
-    //    if (string.IsNullOrWhiteSpace(name))
-    //    {
-    //        return false;
-    //    }
+        string name = data.name;
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return false;
+        }
 
-    //    int start = -1;
-    //    int end = -1;
-    //    for (int i = 0; i < name.Length; i++)
-    //    {
-    //        if (char.IsDigit(name[i]))
-    //        {
-    //            if (start < 0) start = i;
-    //            end = i;
-    //            continue;
-    //        }
+        int start = -1;
+        int end = -1;
+        for (int i = 0; i < name.Length; i++)
+        {
+            if (char.IsDigit(name[i]))
+            {
+                if (start < 0) start = i;
+                end = i;
+                continue;
+            }
 
-    //        if (start >= 0) break;
-    //    }
+            if (start >= 0) break;
+        }
 
-    //    if (start < 0 || end < start)
-    //    {
-    //        return false;
-    //    }
+        if (start < 0 || end < start)
+        {
+            return false;
+        }
 
-    //    stageKey = name.Substring(start, end - start + 1);
-    //    return !string.IsNullOrWhiteSpace(stageKey);
-    //}
+        stageKey = name.Substring(start, end - start + 1);
+        return !string.IsNullOrWhiteSpace(stageKey);
+    }
+    */
     #endregion
 }

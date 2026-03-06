@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class RuleDataContainer
 {
@@ -48,18 +49,19 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
             return;
         }
 
-        SetData();
+        Init();
     }
 
     void Update()
     {
         ConnectData();
         if (ruleType != null) ruleType.OnUpdate(ruleDataContainer, this);
+        StartCoroutine(Delay()); //프레임 딜레이
 
     }
 
     #region method
-    private void SetData()
+    private void Init()
     {
         SetRule();
 
@@ -126,7 +128,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 
         isRoundClearResolved = true;
 
-        var stageManager = StageManager.Instance;
+        StageManager stageManager = StageManager.Instance;
         if (stageManager != null && stageManager.selectDB != null)
         {
             stageManager.selectDB.clearResult = (ClearResult)1;
@@ -136,16 +138,21 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
             Debug.LogWarning("RoundClear 호출 시 StageManager.selectDB가 null입니다.");
         }
 
-        var gameFlow = GameFlowManager.Instance;
-        if (gameFlow == null)
+        StageFlowManager stageFlow = StageFlowManager.Instance;
+        if (stageFlow == null)
         {
-            Debug.LogWarning("RoundClear 호출 시 GameFlowManager가 null입니다.");
+            Debug.LogWarning("RoundClear 호출 시 StageFlowManager가 null입니다.");
             return;
         }
 
-        gameFlow.RoundClear();
+        stageFlow.RoundClear();
 
         ruleType.OnExit(ruleDataContainer, this);
+    }
+
+    IEnumerator Delay()
+    {
+        yield return new WaitForSeconds(1f);
     }
     #endregion
 }

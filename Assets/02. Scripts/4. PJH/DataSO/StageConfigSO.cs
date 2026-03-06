@@ -46,7 +46,7 @@ public class StageConfigSO : ScriptableObject
     public int stageTime;
 
     [Header("스테이지 초회차 여부")]
-    public bool isCleared;
+    public bool isCleared = false;
 
     //데이터 중심 설계 : 각 스테이지 데이터에서 웨이브 값 설정
     //웨이브 : 각 웨이브 별 스폰될 몬스터 수, 타입

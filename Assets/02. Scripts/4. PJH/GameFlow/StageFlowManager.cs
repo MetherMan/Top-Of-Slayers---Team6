@@ -23,10 +23,11 @@ public class StageFlowManager : Singleton<StageFlowManager>
     public int waveLength;
     public int monsterCount;
     public int waveIndex; //EnemySpawnManager에서 값 변경
-    #endregion
+
     //(우영)
     //스테이지 클리어 여부 확인
-    //public static Action<bool> OnStageClear;
+    public static Action<bool> OnStageClear;
+    #endregion
 
     protected override void Awake()
     {
@@ -72,21 +73,24 @@ public class StageFlowManager : Singleton<StageFlowManager>
 
     public void RoundClear()
     {
-        //상태전환 : 씬 이동
-
         //우영
-        //스테이지 클리어 보상
-        //bool isFirstClear = true;
+        //스테이지 클리어 보상 : false 미클리어 :: true 클리어
+        bool check = StageManager.Instance.selectDB.isCleared;
 
-        //if (첫클리어)
-        //{
-        //    OnStageClear?.Invoke(isFirstClear);
-        //}
-        //else if(반복 클리어)
-        //{
-        //    OnStageClear?.Invoke(!isFirstClear);
-        //}
+        if (!check)
+        {
+            //(첫클리어)
+            OnStageClear?.Invoke(check);
+        }
+        else
+        {
+            //(반복)
+            OnStageClear?.Invoke(check);
+        }
 
+        GameFlowManager.Instance.RoundClear();
+
+        //상태전환 : 씬 이동
     }
     #endregion
 }

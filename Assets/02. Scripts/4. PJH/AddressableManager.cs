@@ -219,7 +219,7 @@ public class AddressableManager : Singleton<AddressableManager>
 
         await loadResourceLocationsHandle.Task;
 
-        if (IsSucceeded(loadResourceLocationsHandle))
+        if (IsFailed(loadResourceLocationsHandle))
             Debug.LogError("loadResourceLocationhandle : failed");
 
         List<AsyncOperationHandle> opList = new List<AsyncOperationHandle>();
@@ -248,22 +248,23 @@ public class AddressableManager : Singleton<AddressableManager>
                 }
             };
 
-            opList.Add(loadResourceLocationsHandle);
-
-            AsyncOperationHandle<IList<AsyncOperationHandle>> opGroup
-                = Addressables.ResourceManager.CreateGenericGroupOperation(opList);
-
-            await opGroup.Task;
-            loadedAssets.Add(opGroup);
-
-            Addressables.Release(loadResourceLocationsHandle);
-
-            foreach (KeyValuePair<string, StageDatabase> item in _database)
-            {
-                Debug.LogFormat($"StageDatabase key : {0}, value : {1}", item.Key, item.Value);
-            }
+            opList.Add(loadAssetHandle);
         }
 
+        AsyncOperationHandle<IList<AsyncOperationHandle>> opGroup
+            = Addressables.ResourceManager.CreateGenericGroupOperation(opList);
+
+        await opGroup.Task;
+        loadedAssets.Add(opGroup);
+
+        Addressables.Release(loadResourceLocationsHandle);
+
+        foreach (KeyValuePair<string, StageDatabase> item in _database)
+        {
+            Debug.LogFormat($"StageDatabase key : {0}, value : {1}", item.Key, item.Value);
+        }
+
+        Debug.Log("LoadDatabase : Completed");
     }
 
     //SceneInstance

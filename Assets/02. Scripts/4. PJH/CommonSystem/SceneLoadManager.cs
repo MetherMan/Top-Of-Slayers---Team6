@@ -26,7 +26,6 @@ public class SceneLoadManager : Singleton<SceneLoadManager>
     #region field
     [Header("고정 씬 설정")]
     public AssetReference loginScene;
-    public AssetReference lobbyScene;
 
     private State _state;
     
@@ -48,11 +47,6 @@ public class SceneLoadManager : Singleton<SceneLoadManager>
         LoadScene(loginScene);
     }
 
-    public void LoadLobbyScene()
-    {
-        LoadScene(lobbyScene);
-    }
-
     //고정 씬 메서드
     private void LoadScene(AssetReference sceneRef)
     {
@@ -60,28 +54,23 @@ public class SceneLoadManager : Singleton<SceneLoadManager>
     }
 
     //GameFlowManager에서 GameStateMachine 상태머신을 이용해 씬 전환
-    public void ActiveScene(SceneSlot slot)
+    public void ActiveScene(string addressableName)
     {
         switch (_state)
         {
-            case State.Loding:
-                {
-                    LoadingSceneController.LoadScene("asdf");
-                }
-                break;
             case State.Login:
                 {
-                    LoadLoginScene();
+                    LoadingSceneController.LoadScene(addressableName);
                 }
                 break;
             case State.Lobby:
                 {
-                    LoadLobbyScene();
+                    LoadingSceneController.LoadScene(addressableName);
                 }
                 break;
             case State.Play:
                 {
-                    AddressableManager.Instance.RequestStageScene(slot.stageKey);
+                    LoadingSceneController.LoadStage(addressableName);
                 }
                 break;
         }
