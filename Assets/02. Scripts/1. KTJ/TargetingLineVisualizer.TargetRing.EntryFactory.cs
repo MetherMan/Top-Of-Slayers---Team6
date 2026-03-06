@@ -4,18 +4,21 @@ public partial class TargetingLineVisualizer
 {
     private bool EnsureMonsterRingEntry(Transform target, out MonsterRingEntry entry)
     {
+        entry = null;
+        if (target == null) return false;
+
         if (monsterRingEntries.TryGetValue(target, out entry))
         {
             if (entry != null && entry.RingRenderer != null)
             {
-                EnsureEntryUsesSafeRingRenderer(entry);
+                EnsureLineRingRenderer(entry);
                 return true;
             }
 
             monsterRingEntries.Remove(target);
         }
 
-        if (!TryCreateMonsterRingEntry(target, out entry))
+        if (!CreateMonsterRingEntry(target, out entry))
         {
             return false;
         }
@@ -24,13 +27,13 @@ public partial class TargetingLineVisualizer
         return true;
     }
 
-    private void EnsureEntryUsesSafeRingRenderer(MonsterRingEntry entry)
+    private void EnsureLineRingRenderer(MonsterRingEntry entry)
     {
         if (entry == null || entry.RingRenderer == null) return;
         if (entry.RingRenderer is LineRenderer) return;
 
-        var fallbackRingRenderer = CreateFallbackRingRenderer();
-        if (fallbackRingRenderer == null) return;
+        var lineRing = CreateLineRingRenderer();
+        if (lineRing == null) return;
 
         if (entry.HiddenOriginalRenderer == null)
         {
@@ -39,8 +42,8 @@ public partial class TargetingLineVisualizer
         }
 
         entry.RingRenderer.enabled = false;
-        entry.RingRenderer = fallbackRingRenderer;
-        entry.RingTransform = fallbackRingRenderer.transform;
+        entry.RingRenderer = lineRing;
+        entry.RingTransform = lineRing.transform;
         entry.SpawnedByVisualizer = true;
         entry.BaseScale = ClampMonsterRingLocalScale(entry.BaseScale);
         entry.RingTransform.localScale = entry.BaseScale;
@@ -48,67 +51,44 @@ public partial class TargetingLineVisualizer
         ApplyMonsterRingColor(entry, entry.IdleColor);
     }
 
-    private bool TryCreateMonsterRingEntry(Transform target, out MonsterRingEntry entry)
+    private bool CreateMonsterRingEntry(Transform target, out MonsterRingEntry entry)
     {
         entry = null;
-        if (target == null) return false;
 
         var searchRoot = target.root != null ? target.root : target;
         var ringRenderer = FindMonsterRingRenderer(searchRoot);
-        var hasExistingRingRenderer = ringRenderer != null;
         var spawnedByVisualizer = false;
-
-        if (ringRenderer == null && monsterRingPrefab != null)
-        {
-            var ringObject = Instantiate(monsterRingPrefab);
-            ringObject.name = "MonsterTargetRing";
-            ringRenderer = ringObject.GetComponentInChildren<Renderer>(true);
-            if (ringRenderer == null)
-            {
-                Destroy(ringObject);
-            }
-            else
-            {
-                spawnedByVisualizer = true;
-            }
-        }
-
-        if (ringRenderer == null)
-        {
-            ringRenderer = CreateFallbackRingRenderer();
-            if (ringRenderer == null) return false;
-            spawnedByVisualizer = true;
-        }
-
         Renderer hiddenOriginalRenderer = null;
         var hiddenOriginalRendererWasEnabled = false;
 
-        // 메쉬 기반 링은 체인 컬러링 시 사각형 아티팩트가 잦아 라인 링으로 대체한다.
-        if (!(ringRenderer is LineRenderer))
+        if (ringRenderer == null)
         {
-            var fallbackRingRenderer = CreateFallbackRingRenderer();
-            if (fallbackRingRenderer != null)
-            {
-                if (!spawnedByVisualizer && hasExistingRingRenderer)
-                {
-                    hiddenOriginalRenderer = ringRenderer;
-                    hiddenOriginalRendererWasEnabled = ringRenderer.enabled;
-                    ringRenderer.enabled = false;
-                }
-                else if (spawnedByVisualizer && ringRenderer != null)
-                {
-                    Destroy(ringRenderer.gameObject);
-                }
+            ringRenderer = SpawnMonsterRingPrefab();
+            spawnedByVisualizer = ringRenderer != null;
+        }
 
-                ringRenderer = fallbackRingRenderer;
-                spawnedByVisualizer = true;
+        if (ringRenderer == null || !(ringRenderer is LineRenderer))
+        {
+            if (ringRenderer != null && !spawnedByVisualizer)
+            {
+                hiddenOriginalRenderer = ringRenderer;
+                hiddenOriginalRendererWasEnabled = ringRenderer.enabled;
+                ringRenderer.enabled = false;
             }
+            else if (ringRenderer != null)
+            {
+                Destroy(ringRenderer.gameObject);
+            }
+
+            ringRenderer = CreateLineRingRenderer();
+            if (ringRenderer == null) return false;
+            spawnedByVisualizer = true;
         }
 
         var ringTransform = ringRenderer.transform;
         EnsureMonsterRingMarker(ringTransform);
         var targetCollider = target.GetComponentInChildren<Collider>(true);
-        var targetBodyRenderer = ResolveTargetBodyRenderer(target, ringRenderer);
+        var targetBodyRenderer = FindTargetBodyRenderer(target, ringRenderer);
 
         entry = new MonsterRingEntry
         {
@@ -146,6 +126,23 @@ public partial class TargetingLineVisualizer
         return true;
     }
 
+    private Renderer SpawnMonsterRingPrefab()
+    {
+        if (monsterRingPrefab == null) return null;
+
+        var ringObject = Instantiate(monsterRingPrefab);
+        ringObject.name = "MonsterTargetRing";
+
+        var ringRenderer = ringObject.GetComponentInChildren<Renderer>(true);
+        if (ringRenderer != null)
+        {
+            return ringRenderer;
+        }
+
+        Destroy(ringObject);
+        return null;
+    }
+
     private void EnsureMonsterRingMarker(Transform ringTransform)
     {
         if (ringTransform == null) return;
@@ -153,10 +150,10 @@ public partial class TargetingLineVisualizer
         ringTransform.gameObject.AddComponent<MonsterTargetRingMarker>();
     }
 
-    private Renderer CreateFallbackRingRenderer()
+    private Renderer CreateLineRingRenderer()
     {
         const int segmentCount = 40;
-        var ringObject = new GameObject("MonsterTargetRing_Fallback");
+        var ringObject = new GameObject("MonsterTargetRing_Line");
         var lineRenderer = ringObject.AddComponent<LineRenderer>();
         lineRenderer.useWorldSpace = false;
         lineRenderer.loop = true;
@@ -182,7 +179,7 @@ public partial class TargetingLineVisualizer
         return lineRenderer;
     }
 
-    private Renderer ResolveTargetBodyRenderer(Transform target, Renderer ignoreRenderer)
+    private Renderer FindTargetBodyRenderer(Transform target, Renderer ignoreRenderer)
     {
         var renderers = target.GetComponentsInChildren<Renderer>(true);
         for (int i = 0; i < renderers.Length; i++)

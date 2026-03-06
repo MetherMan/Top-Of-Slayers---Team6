@@ -23,7 +23,9 @@ public partial class AutoSlashController
     private void EnsureCombatResource()
     {
         if (combatResource != null) return;
-        ResolveLocalRef(ref combatResource, true);
+        combatResource = GetComponent<PlayerCombatResource>();
+        if (combatResource == null) combatResource = GetComponentInParent<PlayerCombatResource>();
+        if (combatResource == null) combatResource = FindObjectOfType<PlayerCombatResource>();
     }
 
     private int GetAttackCostPerUse()

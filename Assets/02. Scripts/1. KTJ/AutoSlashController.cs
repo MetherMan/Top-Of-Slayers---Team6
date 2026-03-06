@@ -97,32 +97,32 @@ public partial class AutoSlashController : MonoBehaviour
 
     private void Awake()
     {
-        ResolveRuntimeRefs();
+        CacheLocalRefs();
+        CacheSceneRefs();
         if (spec == null && dashController != null) spec = dashController.Spec;
     }
 
-    private void ResolveRuntimeRefs()
+    private void CacheLocalRefs()
     {
-        ResolveLocalRef(ref dashController);
-        ResolveLocalRef(ref targetingSystem);
-        ResolveLocalRef(ref moveController);
-        ResolveLocalRef(ref chainCombat, true);
-        ResolveLocalRef(ref combatResource, true);
+        if (dashController == null) dashController = GetComponent<SlashDashController>();
+        if (dashController == null) dashController = GetComponentInParent<SlashDashController>();
+
+        if (targetingSystem == null) targetingSystem = GetComponent<TargetingSystem>();
+        if (targetingSystem == null) targetingSystem = GetComponentInParent<TargetingSystem>();
+
+        if (moveController == null) moveController = GetComponent<PlayerMoveController>();
+        if (moveController == null) moveController = GetComponentInParent<PlayerMoveController>();
+
+        if (chainCombat == null) chainCombat = GetComponent<ChainCombatController>();
+        if (chainCombat == null) chainCombat = GetComponentInParent<ChainCombatController>();
+
+        if (combatResource == null) combatResource = GetComponent<PlayerCombatResource>();
+        if (combatResource == null) combatResource = GetComponentInParent<PlayerCombatResource>();
     }
 
-    private void ResolveLocalRef<T>(ref T target, bool searchScene = false) where T : Component
+    private void CacheSceneRefs()
     {
-        if (target != null) return;
-
-        target = GetComponent<T>();
-        if (target != null) return;
-
-        target = GetComponentInParent<T>();
-        if (target != null) return;
-
-        if (searchScene)
-        {
-            target = FindObjectOfType<T>();
-        }
+        if (chainCombat == null) chainCombat = FindObjectOfType<ChainCombatController>();
+        if (combatResource == null) combatResource = FindObjectOfType<PlayerCombatResource>();
     }
 }

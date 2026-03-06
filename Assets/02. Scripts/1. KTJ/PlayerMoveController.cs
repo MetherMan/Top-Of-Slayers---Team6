@@ -39,6 +39,7 @@ public partial class PlayerMoveController : MonoBehaviour
     private int rotationLockCount;
     private float nextCameraResolveTime;
     private float equipmentMoveSpeedBonus;
+    private float specMoveSpeed;
 
     private void Awake()
     {
@@ -160,6 +161,11 @@ public partial class PlayerMoveController : MonoBehaviour
         if (animator == null) animator = GetComponentInChildren<Animator>(true);
     }
 
+    public void SetPlayerMoveSpeed(float speed)
+    {
+        specMoveSpeed = Mathf.Max(0f, speed);
+    }
+
     public void SetEquipmentMoveSpeedBonus(float bonus)
     {
         equipmentMoveSpeedBonus = Mathf.Max(0f, bonus);
@@ -167,7 +173,8 @@ public partial class PlayerMoveController : MonoBehaviour
 
     public float GetCurrentMoveSpeed()
     {
-        return Mathf.Max(0f, moveSpeed + equipmentMoveSpeedBonus);
+        var baseMoveSpeed = specMoveSpeed > 0f ? specMoveSpeed : Mathf.Max(0f, moveSpeed);
+        return Mathf.Max(0f, baseMoveSpeed + equipmentMoveSpeedBonus);
     }
 
     private bool IsMovementBlocked()

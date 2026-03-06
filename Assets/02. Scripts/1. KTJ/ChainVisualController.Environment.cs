@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public partial class ChainVisualController
 {
@@ -98,32 +99,51 @@ public partial class ChainVisualController
     {
         environmentDarkenEntries.Clear();
 
-        var renderers = FindObjectsOfType<Renderer>(true);
-        for (int i = 0; i < renderers.Length; i++)
+        var scene = gameObject.scene;
+        if (!scene.IsValid() || !scene.isLoaded) return;
+
+        var roots = scene.GetRootGameObjects();
+        for (int i = 0; i < roots.Length; i++)
         {
-            var renderer = renderers[i];
-            if (!IsEnvironmentDarkenTarget(renderer)) continue;
-
-            var sharedMaterials = renderer.sharedMaterials;
-            if (sharedMaterials == null || sharedMaterials.Length == 0) continue;
-
-            for (int materialIndex = 0; materialIndex < sharedMaterials.Length; materialIndex++)
-            {
-                var material = sharedMaterials[materialIndex];
-                if (!TryResolveColorProperty(material, out var colorPropertyId, out var baseColor)) continue;
-
-                environmentDarkenEntries.Add(new EnvironmentDarkenEntry
-                {
-                    Renderer = renderer,
-                    MaterialIndex = materialIndex,
-                    ColorPropertyId = colorPropertyId,
-                    BaseColor = baseColor
-                });
-            }
+            AddEnvironmentEntries(roots[i]);
         }
     }
 
-    private bool IsEnvironmentDarkenTarget(Renderer renderer)
+    private void AddEnvironmentEntries(GameObject root)
+    {
+        if (root == null) return;
+
+        var renderers = root.GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            AddEnvironmentEntry(renderers[i]);
+        }
+    }
+
+    private void AddEnvironmentEntry(Renderer renderer)
+    {
+        if (!CanDarkenRenderer(renderer)) return;
+
+        var sharedMaterials = renderer.sharedMaterials;
+        if (sharedMaterials == null || sharedMaterials.Length == 0) return;
+
+        for (int materialIndex = 0; materialIndex < sharedMaterials.Length; materialIndex++)
+        {
+            var material = sharedMaterials[materialIndex];
+            var colorPropertyId = GetColorPropertyId(material);
+            if (colorPropertyId < 0) continue;
+
+            environmentDarkenEntries.Add(new EnvironmentDarkenEntry
+            {
+                Renderer = renderer,
+                MaterialIndex = materialIndex,
+                ColorPropertyId = colorPropertyId,
+                BaseColor = material.GetColor(colorPropertyId)
+            });
+        }
+    }
+
+    private bool CanDarkenRenderer(Renderer renderer)
     {
         if (renderer == null) return false;
         if (!renderer.enabled) return false;
@@ -146,27 +166,21 @@ public partial class ChainVisualController
         return true;
     }
 
-    private bool TryResolveColorProperty(Material material, out int colorPropertyId, out Color baseColor)
+    private int GetColorPropertyId(Material material)
     {
-        colorPropertyId = 0;
-        baseColor = Color.white;
-        if (material == null) return false;
+        if (material == null) return -1;
 
         if (material.HasProperty(BaseColorId))
         {
-            colorPropertyId = BaseColorId;
-            baseColor = material.GetColor(BaseColorId);
-            return true;
+            return BaseColorId;
         }
 
         if (material.HasProperty(ColorId))
         {
-            colorPropertyId = ColorId;
-            baseColor = material.GetColor(ColorId);
-            return true;
+            return ColorId;
         }
 
-        return false;
+        return -1;
     }
 
     private void EnsureEnvironmentDarkenBlock()

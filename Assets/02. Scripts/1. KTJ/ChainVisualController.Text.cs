@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public partial class ChainVisualController
 {
-    private static Sprite chainTimerBarFallbackSprite;
+    private static Sprite chainTimerBarSprite;
 
     private void ShowChain(int chain)
     {
@@ -212,7 +212,7 @@ public partial class ChainVisualController
         EnsureChainTimerBar();
         if (chainTimerBarFillImage == null) return;
 
-        var timerRoot = ResolveChainTimerBarRoot();
+        var timerRoot = GetChainTimerBarRoot();
         if (timerRoot == null) return;
 
         var isTimerActive = isChainActive && chainCombat != null && chainCombat.IsSlowActive;
@@ -244,33 +244,27 @@ public partial class ChainVisualController
             chainTimerBarFillImage.fillAmount = 0f;
         }
 
-        var timerRoot = ResolveChainTimerBarRoot();
+        var timerRoot = GetChainTimerBarRoot();
         if (timerRoot != null) SetChainTimerBarVisible(false);
     }
 
     private void EnsureChainTimerBar()
     {
-        if (chainTimerBarFillImage != null)
+        if (chainTimerBarFillImage == null && !TryBindChainTimerBar())
         {
-            EnsureChainTimerBarConfigured();
-            return;
+            if (!autoCreateChainTimerBar) return;
+
+            var parentRect = GetChainTimerBarParent();
+            if (parentRect == null) return;
+
+            CreateChainTimerBar(parentRect);
+            SetChainTimerBarVisible(false);
         }
 
-        var parentRect = ResolveChainTimerBarParent();
-        if (parentRect == null) return;
-        if (TryBindExistingChainTimerBar(parentRect))
-        {
-            EnsureChainTimerBarConfigured();
-            return;
-        }
-
-        if (!autoCreateChainTimerBar) return;
-        CreateChainTimerBar(parentRect);
-        EnsureChainTimerBarConfigured();
-        SetChainTimerBarVisible(false);
+        SetupChainTimerBar();
     }
 
-    private RectTransform ResolveChainTimerBarParent()
+    private RectTransform GetChainTimerBarParent()
     {
         if (chainPanel != null)
         {
@@ -290,7 +284,7 @@ public partial class ChainVisualController
         return transform as RectTransform;
     }
 
-    private GameObject ResolveChainTimerBarRoot()
+    private GameObject GetChainTimerBarRoot()
     {
         if (chainTimerBarBackgroundImage != null)
         {
@@ -313,34 +307,32 @@ public partial class ChainVisualController
         chainPanel.SetActive(visible);
     }
 
-    private void EnsureChainTimerBarConfigured()
+    private bool TryBindChainTimerBar()
     {
-        if (isChainTimerBarConfigured) return;
-
-        ConfigureChainTimerBar();
-        isChainTimerBarConfigured = true;
-    }
-
-    private bool TryBindExistingChainTimerBar(RectTransform parentRect)
-    {
-        var existingRoot = parentRect.Find("Chain Timer Bar");
-        if (existingRoot == null)
+        if (chainTimerBarFillImage != null)
         {
-            return false;
+            return true;
         }
 
-        chainTimerBarBackgroundImage = existingRoot.GetComponent<Image>();
-        var existingFill = existingRoot.Find("Fill");
-        if (existingFill != null)
+        Transform timerRoot = null;
+        if (chainTimerBarBackgroundImage != null)
         {
-            chainTimerBarFillImage = existingFill.GetComponent<Image>();
+            timerRoot = chainTimerBarBackgroundImage.transform;
+        }
+        else
+        {
+            var parentRect = GetChainTimerBarParent();
+            if (parentRect == null) return false;
+            timerRoot = parentRect.Find("Chain Timer Bar");
         }
 
-        if (chainTimerBarFillImage == null)
-        {
-            chainTimerBarFillImage = FindChainTimerBarFillImage(existingRoot, chainTimerBarBackgroundImage);
-        }
+        if (timerRoot == null) return false;
 
+        chainTimerBarBackgroundImage = timerRoot.GetComponent<Image>();
+        var fillTransform = timerRoot.Find("Fill");
+        if (fillTransform == null) return false;
+
+        chainTimerBarFillImage = fillTransform.GetComponent<Image>();
         return chainTimerBarFillImage != null;
     }
 
@@ -369,30 +361,17 @@ public partial class ChainVisualController
         chainTimerBarFillImage = fillObject.GetComponent<Image>();
     }
 
-    private static Image FindChainTimerBarFillImage(Transform root, Image backgroundImage)
-    {
-        var images = root.GetComponentsInChildren<Image>(true);
-        for (int i = 0; i < images.Length; i++)
-        {
-            var image = images[i];
-            if (image == null || image == backgroundImage) continue;
-            return image;
-        }
-
-        return null;
-    }
-
     private void SetChainTimerBarVisible(bool visible)
     {
-        var timerRoot = ResolveChainTimerBarRoot();
+        var timerRoot = GetChainTimerBarRoot();
         if (timerRoot == null) return;
         if (timerRoot.activeSelf == visible) return;
         timerRoot.SetActive(visible);
     }
 
-    private void ConfigureChainTimerBar()
+    private void SetupChainTimerBar()
     {
-        var sprite = GetChainTimerBarFallbackSprite();
+        var sprite = GetChainTimerBarSprite();
 
         if (chainTimerBarBackgroundImage != null)
         {
@@ -421,17 +400,17 @@ public partial class ChainVisualController
         chainTimerBarFillImage.color = chainTimerBarColor;
     }
 
-    private static Sprite GetChainTimerBarFallbackSprite()
+    private static Sprite GetChainTimerBarSprite()
     {
-        if (chainTimerBarFallbackSprite != null) return chainTimerBarFallbackSprite;
+        if (chainTimerBarSprite != null) return chainTimerBarSprite;
 
         var texture = Texture2D.whiteTexture;
-        chainTimerBarFallbackSprite = Sprite.Create(
+        chainTimerBarSprite = Sprite.Create(
             texture,
             new Rect(0f, 0f, texture.width, texture.height),
             new Vector2(0.5f, 0.5f),
             100f);
-        chainTimerBarFallbackSprite.name = "ChainTimerBarFallbackSprite";
-        return chainTimerBarFallbackSprite;
+        chainTimerBarSprite.name = "ChainTimerBarSprite";
+        return chainTimerBarSprite;
     }
 }

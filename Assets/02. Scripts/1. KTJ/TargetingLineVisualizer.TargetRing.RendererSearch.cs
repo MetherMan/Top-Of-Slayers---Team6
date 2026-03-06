@@ -7,27 +7,69 @@ public partial class TargetingLineVisualizer
     {
         if (root == null) return null;
 
-        var candidates = root.GetComponentsInChildren<Renderer>(true);
-        Renderer best = null;
-        var bestScore = float.NegativeInfinity;
-        var referenceY = root.position.y;
+        var renderers = root.GetComponentsInChildren<Renderer>(true);
 
-        for (int i = 0; i < candidates.Length; i++)
+        var namedRing = FindNamedMonsterRing(renderers);
+        if (namedRing != null)
         {
-            var renderer = candidates[i];
-            if (!IsValidMonsterRingRenderer(renderer)) continue;
-
-            var score = EvaluateMonsterRingScore(renderer, referenceY);
-            if (score <= bestScore) continue;
-
-            best = renderer;
-            bestScore = score;
+            return namedRing;
         }
 
-        return best;
+        return FindGroundMonsterRing(renderers, root.position.y);
     }
 
-    private bool IsValidMonsterRingRenderer(Renderer renderer)
+    private Renderer FindNamedMonsterRing(Renderer[] renderers)
+    {
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            var renderer = renderers[i];
+            if (!IsUsableMonsterRingRenderer(renderer)) continue;
+            if (!HasRingNameHint(renderer.name)) continue;
+            return renderer;
+        }
+
+        return null;
+    }
+
+    private Renderer FindGroundMonsterRing(Renderer[] renderers, float referenceY)
+    {
+        Renderer closest = null;
+        var bestHeightGap = float.PositiveInfinity;
+        var bestArea = 0f;
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            var renderer = renderers[i];
+            if (!IsUsableMonsterRingRenderer(renderer)) continue;
+
+            var bounds = renderer.bounds;
+            var heightGap = Mathf.Abs(bounds.center.y - referenceY);
+            var area = bounds.size.x * bounds.size.z;
+
+            if (closest == null)
+            {
+                closest = renderer;
+                bestHeightGap = heightGap;
+                bestArea = area;
+                continue;
+            }
+
+            var clearlyCloserToFeet = heightGap < bestHeightGap - 0.05f;
+            var sameHeightBand = Mathf.Abs(heightGap - bestHeightGap) <= 0.05f;
+            if (!clearlyCloserToFeet && !(sameHeightBand && area > bestArea))
+            {
+                continue;
+            }
+
+            closest = renderer;
+            bestHeightGap = heightGap;
+            bestArea = area;
+        }
+
+        return closest;
+    }
+
+    private bool IsUsableMonsterRingRenderer(Renderer renderer)
     {
         if (renderer == null) return false;
         if (renderer is ParticleSystemRenderer) return false;
@@ -44,27 +86,6 @@ public partial class TargetingLineVisualizer
 
         var flatness = size.y / maxHorizontal;
         return flatness <= 0.45f;
-    }
-
-    private float EvaluateMonsterRingScore(Renderer renderer, float referenceY)
-    {
-        var bounds = renderer.bounds;
-        var size = bounds.size;
-
-        var maxHorizontal = Mathf.Max(0.001f, Mathf.Max(size.x, size.z));
-        var flatness = size.y / maxHorizontal;
-        var area = size.x * size.z;
-        var heightPenalty = Mathf.Abs(bounds.center.y - referenceY);
-
-        var score = area * 0.4f;
-        score += (1f - Mathf.Clamp01(flatness)) * 2f;
-        score -= Mathf.Clamp(heightPenalty, 0f, 3f);
-        if (HasRingNameHint(renderer.name))
-        {
-            score += 3f;
-        }
-
-        return score;
     }
 
     private bool HasRingNameHint(string nameText)

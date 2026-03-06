@@ -1,4 +1,3 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -26,36 +25,31 @@ public class PlayerSceneBinder : MonoBehaviour
     [SerializeField, Min(1)] private int maxBindFrames = 30;
     [SerializeField] private bool applyEquipmentStats = true;
 
-    private Coroutine bindRoutine;
     private EquipmentManager equipmentManager;
     private bool isEquipmentSubscribed;
     private int basePlayerMaxHp;
     private bool hasBasePlayerMaxHp;
+    private int bindRetryCount;
+    private bool keepBindingSceneRefs;
 
     private void Awake()
     {
-        ResolveLocalRefs();
+        CachePlayerRefs();
+        CacheBasePlayerHp();
     }
 
     private void OnEnable()
     {
-        if (bindRoutine != null)
-        {
-            StopCoroutine(bindRoutine);
-        }
-
-        bindRoutine = StartCoroutine(BindRoutine());
+        keepBindingSceneRefs = true;
+        bindRetryCount = 0;
+        TryBindSceneRefs();
         TryBindEquipment();
         ApplyEquipmentStats();
     }
 
     private void OnDisable()
     {
-        if (bindRoutine != null)
-        {
-            StopCoroutine(bindRoutine);
-            bindRoutine = null;
-        }
+        keepBindingSceneRefs = false;
 
         if (isEquipmentSubscribed && equipmentManager != null)
         {
@@ -66,8 +60,12 @@ public class PlayerSceneBinder : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!applyEquipmentStats) return;
-        if (isEquipmentSubscribed) return;
+        if (keepBindingSceneRefs)
+        {
+            TryBindSceneRefs();
+        }
+
+        if (!applyEquipmentStats || isEquipmentSubscribed) return;
 
         TryBindEquipment();
         if (isEquipmentSubscribed)
@@ -76,32 +74,29 @@ public class PlayerSceneBinder : MonoBehaviour
         }
     }
 
-    private IEnumerator BindRoutine()
+    private void TryBindSceneRefs()
     {
-        for (int i = 0; i < maxBindFrames; i++)
+        CachePlayerRefs();
+        if (autoFindSceneRefs)
         {
-            ResolveLocalRefs();
-            if (autoFindSceneRefs)
-            {
-                ResolveSceneRefs();
-            }
-
-            ApplyBindings();
-            TryBindEquipment();
-            ApplyEquipmentStats();
-            if (IsBindReady())
-            {
-                bindRoutine = null;
-                yield break;
-            }
-
-            yield return null;
+            CacheSceneRefs();
         }
 
-        bindRoutine = null;
+        ApplyBindings();
+        if (IsBindReady())
+        {
+            keepBindingSceneRefs = false;
+            return;
+        }
+
+        bindRetryCount++;
+        if (bindRetryCount >= Mathf.Max(1, maxBindFrames))
+        {
+            keepBindingSceneRefs = false;
+        }
     }
 
-    private void ResolveLocalRefs()
+    private void CachePlayerRefs()
     {
         if (moveController == null) moveController = GetComponent<PlayerMoveController>();
         if (moveController == null) moveController = GetComponentInParent<PlayerMoveController>();
@@ -116,11 +111,7 @@ public class PlayerSceneBinder : MonoBehaviour
         if (chainVisual == null) chainVisual = GetComponent<ChainVisualController>();
         if (chainVisual == null) chainVisual = GetComponentInParent<ChainVisualController>();
         if (chainVisual == null) chainVisual = GetComponentInChildren<ChainVisualController>(true);
-        if (chainVisual == null)
-        {
-            var visuals = FindObjectsOfType<ChainVisualController>(true);
-            if (visuals != null && visuals.Length > 0) chainVisual = visuals[0];
-        }
+        if (chainVisual == null) chainVisual = FindSceneChainVisual();
 
         if (slashDashController == null) slashDashController = GetComponent<SlashDashController>();
         if (slashDashController == null) slashDashController = GetComponentInParent<SlashDashController>();
@@ -136,91 +127,185 @@ public class PlayerSceneBinder : MonoBehaviour
         if (playerHp == null) playerHp = GetComponentInParent<PlayerHP>();
         if (playerHp == null) playerHp = GetComponentInChildren<PlayerHP>(true);
         if (playerHp == null) playerHp = FindObjectOfType<PlayerHP>();
-        if (!hasBasePlayerMaxHp && playerHp != null)
-        {
-            basePlayerMaxHp = Mathf.Max(1, playerHp.maxHP);
-            hasBasePlayerMaxHp = true;
-        }
+        CacheBasePlayerHp();
     }
 
-    private void ResolveSceneRefs()
+    private void CacheBasePlayerHp()
+    {
+        if (hasBasePlayerMaxHp || playerHp == null) return;
+        basePlayerMaxHp = Mathf.Max(1, playerHp.maxHP);
+        hasBasePlayerMaxHp = true;
+    }
+
+    private void CacheSceneRefs()
     {
         if (joystick == null)
         {
             joystick = FindObjectOfType<VirtualJoystickController>();
         }
 
-        if (cameraTransform == null && Camera.main != null)
-        {
-            cameraTransform = Camera.main.transform;
-        }
         if (cameraTransform == null)
         {
-            var camera = FindObjectOfType<Camera>();
-            if (camera != null) cameraTransform = camera.transform;
+            CacheSceneCamera();
         }
 
         if (chainUI == null)
         {
-            var chainUIs = FindObjectsOfType<ChainUI>(true);
-            if (chainUIs != null && chainUIs.Length > 0)
-            {
-                chainUI = chainUIs[0];
-            }
+            chainUI = FindSceneChainUI();
         }
 
+        CacheChainUiObjects();
+        CacheDarkOverlay();
+    }
+
+    private void CacheSceneCamera()
+    {
+        if (Camera.main != null)
+        {
+            cameraTransform = Camera.main.transform;
+            return;
+        }
+
+        var camera = FindObjectOfType<Camera>();
+        if (camera != null)
+        {
+            cameraTransform = camera.transform;
+        }
+    }
+
+    private ChainVisualController FindSceneChainVisual()
+    {
+        var visuals = FindObjectsOfType<ChainVisualController>(true);
+        if (visuals == null || visuals.Length == 0) return null;
+        return visuals[0];
+    }
+
+    private ChainUI FindSceneChainUI()
+    {
+        var chainUis = FindObjectsOfType<ChainUI>(true);
+        if (chainUis == null || chainUis.Length == 0) return null;
+        return chainUis[0];
+    }
+
+    private void CacheChainUiObjects()
+    {
         if (chainPanel == null && chainUI != null)
         {
-            var chainPanels = chainUI.GetComponentsInChildren<RectTransform>(true);
-            for (int i = 0; i < chainPanels.Length; i++)
-            {
-                var candidate = chainPanels[i];
-                if (candidate == null) continue;
-                if (!candidate.name.ToLower().Contains("chain")) continue;
-                chainPanel = candidate.gameObject;
-                break;
-            }
+            chainPanel = FindChainPanel(chainUI.transform);
         }
         if (chainText == null && chainPanel != null)
         {
             chainText = chainPanel.GetComponentInChildren<TextMeshProUGUI>(true);
         }
+        if (chainText == null && chainUI != null)
+        {
+            chainText = FindChainText(chainUI.transform);
+        }
         if (chainText == null)
         {
-            var texts = FindObjectsOfType<TextMeshProUGUI>(true);
-            for (int i = 0; i < texts.Length; i++)
-            {
-                var candidate = texts[i];
-                if (candidate == null) continue;
-                var lowerName = candidate.name.ToLower();
-                if (!lowerName.Contains("chain")) continue;
-                chainText = candidate;
-                break;
-            }
+            chainText = FindSceneChainText();
         }
         if (chainPanel == null && chainText != null)
         {
             chainPanel = chainText.gameObject;
         }
+    }
 
-        if (darkenRoot == null)
+    private GameObject FindChainPanel(Transform root)
+    {
+        if (root == null) return null;
+
+        var panels = root.GetComponentsInChildren<RectTransform>(true);
+        for (int i = 0; i < panels.Length; i++)
         {
-            var sprites = FindObjectsOfType<SpriteRenderer>(true);
-            for (int i = 0; i < sprites.Length; i++)
-            {
-                var candidate = sprites[i];
-                if (candidate == null) continue;
-                var lowerName = candidate.name.ToLower();
-                if (!lowerName.Contains("chainblack") && !lowerName.Contains("chaindark")) continue;
-                darkenSprite = candidate;
-                darkenRoot = candidate.transform;
-                break;
-            }
+            var candidate = panels[i];
+            if (candidate == null) continue;
+            if (!IsChainUiName(candidate.name)) continue;
+            return candidate.gameObject;
+        }
+
+        return null;
+    }
+
+    private TextMeshProUGUI FindChainText(Transform root)
+    {
+        if (root == null) return null;
+
+        var texts = root.GetComponentsInChildren<TextMeshProUGUI>(true);
+        for (int i = 0; i < texts.Length; i++)
+        {
+            var candidate = texts[i];
+            if (candidate == null) continue;
+            if (!IsChainUiName(candidate.name)) continue;
+            return candidate;
+        }
+
+        return null;
+    }
+
+    private TextMeshProUGUI FindSceneChainText()
+    {
+        var texts = FindObjectsOfType<TextMeshProUGUI>(true);
+        for (int i = 0; i < texts.Length; i++)
+        {
+            var candidate = texts[i];
+            if (candidate == null) continue;
+            if (!IsChainUiName(candidate.name)) continue;
+            return candidate;
+        }
+
+        return null;
+    }
+
+    private void CacheDarkOverlay()
+    {
+        if (darkenSprite == null && chainVisual != null)
+        {
+            darkenSprite = FindDarkenSprite(chainVisual.transform);
+        }
+        if (darkenSprite == null)
+        {
+            darkenSprite = FindDarkenSprite(null);
+        }
+
+        if (darkenRoot == null && darkenSprite != null)
+        {
+            darkenRoot = darkenSprite.transform;
         }
         if (darkenSprite == null && darkenRoot != null)
         {
             darkenSprite = darkenRoot.GetComponent<SpriteRenderer>();
         }
+    }
+
+    private SpriteRenderer FindDarkenSprite(Transform root)
+    {
+        SpriteRenderer[] sprites = root != null
+            ? root.GetComponentsInChildren<SpriteRenderer>(true)
+            : FindObjectsOfType<SpriteRenderer>(true);
+
+        for (int i = 0; i < sprites.Length; i++)
+        {
+            var candidate = sprites[i];
+            if (candidate == null) continue;
+            if (!IsDarkenSpriteName(candidate.name)) continue;
+            return candidate;
+        }
+
+        return null;
+    }
+
+    private static bool IsChainUiName(string nameText)
+    {
+        if (string.IsNullOrEmpty(nameText)) return false;
+        return nameText.IndexOf("chain", System.StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    private static bool IsDarkenSpriteName(string nameText)
+    {
+        if (string.IsNullOrEmpty(nameText)) return false;
+        return nameText.IndexOf("chainblack", System.StringComparison.OrdinalIgnoreCase) >= 0
+            || nameText.IndexOf("chaindark", System.StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     private void ApplyBindings()
@@ -262,38 +347,45 @@ public class PlayerSceneBinder : MonoBehaviour
 
     private void ApplyEquipmentStats()
     {
-        if (!applyEquipmentStats) return;
-        if (equipmentManager == null)
-        {
-            if (!EquipmentManager.HasInstance) return;
-            equipmentManager = EquipmentManager.Instance;
-        }
-
-        if (equipmentManager == null) return;
-
+        var spec = ResolveAttackSpec();
         int bonusAttack = 0;
         int bonusSpeed = 0;
         int bonusHp = 0;
         float bonusCritical = 0f;
         int bonusHeal = 0;
 
-        AccumulateEquipmentStats(equipmentManager.weapon, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
-        AccumulateEquipmentStats(equipmentManager.shoes, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
-        AccumulateEquipmentStats(equipmentManager.gloves, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
-        AccumulateEquipmentStats(equipmentManager.armor, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
-        AccumulateEquipmentStats(equipmentManager.emblem, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
+        if (applyEquipmentStats && equipmentManager == null)
+        {
+            if (EquipmentManager.HasInstance)
+            {
+                equipmentManager = EquipmentManager.Instance;
+            }
+        }
+
+        if (applyEquipmentStats && equipmentManager != null)
+        {
+            AccumulateEquipmentStats(equipmentManager.weapon, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
+            AccumulateEquipmentStats(equipmentManager.shoes, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
+            AccumulateEquipmentStats(equipmentManager.gloves, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
+            AccumulateEquipmentStats(equipmentManager.armor, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
+            AccumulateEquipmentStats(equipmentManager.emblem, ref bonusAttack, ref bonusSpeed, ref bonusHp, ref bonusCritical, ref bonusHeal);
+        }
 
         if (moveController != null)
         {
+            moveController.SetPlayerMoveSpeed(spec != null ? spec.GetSpeed(0f) : 0f);
             moveController.SetEquipmentMoveSpeedBonus(bonusSpeed);
         }
 
         if (slashDashController != null)
         {
+            slashDashController.SetPlayerCombatStats(
+                spec != null ? spec.GetCritical() : 0f,
+                spec != null ? spec.GetHeal() : 0);
             slashDashController.SetEquipmentCombatBonus(bonusAttack, bonusCritical, bonusHeal);
         }
 
-        ApplyHpBonus(bonusHp);
+        ApplyHpBonus(spec, bonusHp);
     }
 
     private void AccumulateEquipmentStats(
@@ -315,7 +407,7 @@ public class PlayerSceneBinder : MonoBehaviour
         bonusHeal += Mathf.Max(0, equipment.GetHeal(level));
     }
 
-    private void ApplyHpBonus(int hpBonus)
+    private void ApplyHpBonus(AttackSpecSO spec, int hpBonus)
     {
         if (playerHp == null) return;
         if (!hasBasePlayerMaxHp)
@@ -324,8 +416,9 @@ public class PlayerSceneBinder : MonoBehaviour
             hasBasePlayerMaxHp = true;
         }
 
+        int configuredBaseHp = ResolveBasePlayerMaxHp(spec);
         int previousMaxHp = Mathf.Max(1, playerHp.maxHP);
-        int nextMaxHp = Mathf.Max(1, basePlayerMaxHp + Mathf.Max(0, hpBonus));
+        int nextMaxHp = Mathf.Max(1, configuredBaseHp + Mathf.Max(0, hpBonus));
         if (previousMaxHp == nextMaxHp)
         {
             playerHp.SetHpState(nextMaxHp, Mathf.Clamp(playerHp.currentHP, 0, nextMaxHp));
@@ -344,6 +437,22 @@ public class PlayerSceneBinder : MonoBehaviour
         }
 
         playerHp.SetHpState(nextMaxHp, nextHp);
+    }
+
+    private AttackSpecSO ResolveAttackSpec()
+    {
+        if (slashDashController == null) return null;
+        return slashDashController.Spec;
+    }
+
+    private int ResolveBasePlayerMaxHp(AttackSpecSO spec)
+    {
+        if (spec != null)
+        {
+            return spec.GetHP(basePlayerMaxHp);
+        }
+
+        return Mathf.Max(1, basePlayerMaxHp);
     }
 
     private bool IsBindReady()
