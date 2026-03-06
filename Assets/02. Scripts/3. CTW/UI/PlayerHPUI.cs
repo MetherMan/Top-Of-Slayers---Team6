@@ -7,6 +7,11 @@ public class PlayerHPUI : MonoBehaviour
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Slider hpSlider;
 
+    [SerializeField] private Slider effectSlider;
+    [SerializeField] private float damageSpeed = 2f;
+    [SerializeField] private float waitTime = 0.5f;
+    private float timer;
+
     private Camera mainCamera;
 
     private void Awake()
@@ -21,6 +26,9 @@ public class PlayerHPUI : MonoBehaviour
     {
         hpSlider.maxValue = playerHP.maxHP;
         hpSlider.value = playerHP.currentHP;
+
+        effectSlider.maxValue = playerHP.maxHP;
+        effectSlider.value = playerHP.currentHP;
     }
 
     private void OnEnable()
@@ -33,6 +41,18 @@ public class PlayerHPUI : MonoBehaviour
         if (playerHP != null) playerHP.OnHPChanged -= UpdateHPUI;
     }
 
+    private void Update()
+    {
+        if(effectSlider.value > hpSlider.value)
+        {
+            timer += Time.deltaTime;
+
+            if (timer > waitTime)
+            {
+                effectSlider.value = Mathf.Lerp(effectSlider.value, hpSlider.value, Time.deltaTime * damageSpeed);
+            }
+        }
+    }
     private void LateUpdate()
     {
         //플레이어 머리 위 월드 좌표
@@ -42,11 +62,19 @@ public class PlayerHPUI : MonoBehaviour
         Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPos);
 
         transform.position = screenPos;
+        effectSlider.transform.position = screenPos;
     }
 
     private void UpdateHPUI(int currentHp, int maxHp)
     {
         hpSlider.maxValue = maxHp;
         hpSlider.value = currentHp;
+
+        timer = 0f;
+
+        if (currentHp > effectSlider.value)
+        {
+            effectSlider.value = currentHp;
+        }
     }
 }

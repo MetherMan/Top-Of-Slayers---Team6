@@ -15,12 +15,15 @@ public class ScoreUI : MonoBehaviour
 
     private void OnEnable()
     {
-        ScoreManager.Instance.onScoreChanged += UpdateScoreUI;
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.onScoreChanged += UpdateScoreUI;
+        }
     }
 
     private void OnDisable()
     {
-        if (ScoreManager.HasInstance)
+        if (ScoreManager.Instance != null)
         {
             ScoreManager.Instance.onScoreChanged -= UpdateScoreUI;
         }
@@ -39,14 +42,5 @@ public class ScoreUI : MonoBehaviour
         scoreText.transform.DOKill(); //이전 트윈이 있으면 제거
         //커졌다가 돌아오기
         scoreText.transform.DOPunchScale(Vector3.one * punchScale, punchDuration, 1, 0.5f);
-    }
-    void Start()
-    {
-        
-    }
-
-    void Update()
-    {
-        
     }
 }

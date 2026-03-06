@@ -2178,6 +2178,12 @@ Transform:
   - {fileID: 1793436285}
   m_Father: {fileID: 968833603}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!224 &1349527830 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 7428552185590995194, guid: b731fa8274c05c04eb8157109388d4a0,
+    type: 3}
+  m_PrefabInstance: {fileID: 1821643935}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1373303675
 GameObject:
   m_ObjectHideFlags: 0
@@ -3044,6 +3050,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: GameObjectZip
+      objectReference: {fileID: 0}
+    - target: {fileID: 1290166511329813788, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: canvas
+      value: 
+      objectReference: {fileID: 1349527830}
+    - target: {fileID: 1404135158170099217, guid: b731fa8274c05c04eb8157109388d4a0,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2869785210186402672, guid: b731fa8274c05c04eb8157109388d4a0,
         type: 3}
