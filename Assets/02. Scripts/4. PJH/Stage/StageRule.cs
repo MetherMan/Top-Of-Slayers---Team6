@@ -24,10 +24,7 @@ public class StageRule : WaveRule
 
     public override void RoundClear(RuleDataContainer data, WaveDirectorSystem context)
     {
-        if ()
-        {
             context.RoundClear();
-        }
     }
     #endregion
 }

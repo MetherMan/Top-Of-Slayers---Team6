@@ -17,6 +17,7 @@ public class LoginSceneManager : Singleton<LoginSceneManager>
     public void CheckIn()
     {
         SceneLoadManager.Instance.ActiveScene("MainSceneVer2");
+        Debug.Log("씬이동");
     }
     #endregion
 }
