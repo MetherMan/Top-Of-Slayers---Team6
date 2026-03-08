@@ -27,6 +27,7 @@ public class StageRule : WaveRule
         if (data.waveCount > 0 && data.waveIndex > data.waveCount)
         {
             context.RoundClear();
+        }
     }
     #endregion
 }
