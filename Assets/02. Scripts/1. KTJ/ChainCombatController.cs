@@ -142,6 +142,7 @@ public class ChainCombatController : MonoBehaviour
     {
         var wasSlowActive = isSlowActive;
         isSlowActive = true;
+        SetTimeScale(Mathf.Clamp(slowTimeScale, 0.01f, 1f));
         if (!wasSlowActive)
         {
             OnSlowStateChanged?.Invoke(true);
@@ -154,6 +155,7 @@ public class ChainCombatController : MonoBehaviour
     {
         if (!isSlowActive) return;
         isSlowActive = false;
+        SetTimeScale(1f);
         OnSlowStateChanged?.Invoke(false);
         if (slowRoutine != null)
         {

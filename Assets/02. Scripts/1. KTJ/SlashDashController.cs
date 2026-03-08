@@ -208,6 +208,7 @@ public partial class SlashDashController : MonoBehaviour
 
         var anchor = dashPathVfxAnchor != null ? dashPathVfxAnchor : transform;
         activeDashPathVfx = Instantiate(dashPathVfxPrefab, anchor.position, anchor.rotation, anchor);
+        ConfigureSpawnedVfxTiming(activeDashPathVfx);
     }
 
     private void StopDashPathVfx(bool keepResidual)
@@ -236,10 +237,50 @@ public partial class SlashDashController : MonoBehaviour
 
         if (dashPathVfxDestroyDelay > 0f)
         {
-            Destroy(instance, dashPathVfxDestroyDelay);
+            StartCoroutine(DestroySpawnedVfxAfterDelay(instance, dashPathVfxDestroyDelay));
             return;
         }
 
         Destroy(instance);
+    }
+
+    private void ConfigureSpawnedVfxTiming(GameObject instance)
+    {
+        if (instance == null) return;
+        if (chainCombat == null || !chainCombat.IsSlowActive) return;
+
+        var particleSystems = instance.GetComponentsInChildren<ParticleSystem>(true);
+        for (int i = 0; i < particleSystems.Length; i++)
+        {
+            var particleSystem = particleSystems[i];
+            if (particleSystem == null) continue;
+
+            var main = particleSystem.main;
+            main.useUnscaledTime = true;
+        }
+
+        var animators = instance.GetComponentsInChildren<Animator>(true);
+        for (int i = 0; i < animators.Length; i++)
+        {
+            var effectAnimator = animators[i];
+            if (effectAnimator == null) continue;
+            effectAnimator.updateMode = AnimatorUpdateMode.UnscaledTime;
+        }
+    }
+
+    private System.Collections.IEnumerator DestroySpawnedVfxAfterDelay(GameObject instance, float delay)
+    {
+        if (instance == null) yield break;
+        if (delay <= 0f)
+        {
+            Destroy(instance);
+            yield break;
+        }
+
+        yield return new WaitForSecondsRealtime(delay);
+        if (instance != null)
+        {
+            Destroy(instance);
+        }
     }
 }

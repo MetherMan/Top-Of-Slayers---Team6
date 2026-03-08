@@ -6,7 +6,7 @@ public class RuleDataContainer
     public StageConfigSO stageData; //스테이지 남은 시간
     public int playTime; //스테이지 진행시간 -> 타임오버
 
-    public int currentPlayerHp; //플레이어 체력 -> RIP
+    public int currentPlayerHp = -1; //플레이어 체력 -> RIP
 
     public int waveCount; //해당 라운드 웨이브 수
     public int waveIndex; //웨이브 클리어 확인
@@ -36,6 +36,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
     [Header("스테이지 실시간 데이터 연동")]
     RuleDataContainer ruleDataContainer = new RuleDataContainer();
     private bool isRoundClearResolved;
+    private PlayerHP playerHp;
     #endregion
 
     protected override void Awake()
@@ -56,7 +57,6 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
     {
         ConnectData();
         if (ruleType != null) ruleType.OnUpdate(ruleDataContainer, this);
-        StartCoroutine(Delay()); //프레임 딜레이
 
     }
 
@@ -69,6 +69,9 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         if (stageManager == null) return;
 
         ruleDataContainer.stageData = stageManager.selectDB;
+        ruleDataContainer.waveCount = stageManager.selectDB.roundDatas != null
+            ? stageManager.selectDB.roundDatas.Count
+            : 0;
         isRoundClearResolved = false;
     }
 
@@ -92,7 +95,17 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 
         ruleDataContainer.playTime = stageFlow.playTime;
         ruleDataContainer.waveIndex = stageFlow.waveIndex;
-        //ruleDataContainer.currentPlayerHp = 플레이어 스텟 연동
+        ruleDataContainer.waveCount = stageFlow.waveLength;
+
+        if (playerHp == null)
+        {
+            playerHp = FindFirstObjectByType<PlayerHP>();
+        }
+
+        if (playerHp != null)
+        {
+            ruleDataContainer.currentPlayerHp = playerHp.currentHP;
+        }
     }
     #endregion
 
@@ -101,6 +114,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
     {
         var stageManager = StageManager.Instance;
         if (stageManager == null || stageManager.selectDB == null) return;
+        if (stageManager.selectDB.clearResult != ClearResult.None) return;
 
         stageManager.selectDB.clearResult = (ClearResult)2;
     }
@@ -109,6 +123,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
     {
         var stageManager = StageManager.Instance;
         if (stageManager == null || stageManager.selectDB == null) return;
+        if (stageManager.selectDB.clearResult != ClearResult.None) return;
 
         stageManager.selectDB.clearResult = (ClearResult)2;
     }
@@ -126,17 +141,17 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
     {
         if (isRoundClearResolved) return;
 
-        isRoundClearResolved = true;
-
         StageManager stageManager = StageManager.Instance;
-        if (stageManager != null && stageManager.selectDB != null)
-        {
-            stageManager.selectDB.clearResult = (ClearResult)1;
-        }
-        else
+        if (stageManager == null || stageManager.selectDB == null)
         {
             Debug.LogWarning("RoundClear 호출 시 StageManager.selectDB가 null입니다.");
+            return;
         }
+
+        if (stageManager.selectDB.clearResult != ClearResult.None) return;
+
+        isRoundClearResolved = true;
+        stageManager.selectDB.clearResult = (ClearResult)1;
 
         StageFlowManager stageFlow = StageFlowManager.Instance;
         if (stageFlow == null)
@@ -148,11 +163,6 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         stageFlow.RoundClear();
 
         ruleType.OnExit(ruleDataContainer, this);
-    }
-
-    IEnumerator Delay()
-    {
-        yield return new WaitForSeconds(1f);
     }
     #endregion
 }

@@ -41,6 +41,8 @@ public class HitSequenceController : MonoBehaviour
         if (hitStopRoutine != null)
         {
             StopCoroutine(hitStopRoutine);
+            ClearHitStop();
+            hitStopRoutine = null;
         }
         hitStopRoutine = StartCoroutine(HitStop(hitStopDuration));
     }
@@ -111,6 +113,7 @@ public class HitSequenceController : MonoBehaviour
         if (!hasCameraBaseValue) return;
 
         KillHitZoom();
+        RestoreCameraBaseValue();
 
         if (camera.orthographic)
         {

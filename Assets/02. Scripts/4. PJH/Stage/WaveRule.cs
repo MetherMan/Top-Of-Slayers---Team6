@@ -51,7 +51,10 @@ public abstract class WaveRule : ScriptableObject
     public void HpZero(RuleDataContainer data, WaveDirectorSystem context)
     {
         //플레이어 체력 '0' 이하 일 경우 게임 오버
-        //context.HpZero();
+        if (data.currentPlayerHp >= 0 && data.currentPlayerHp <= 0)
+        {
+            context.HpZero();
+        }
     }
     #endregion
 
