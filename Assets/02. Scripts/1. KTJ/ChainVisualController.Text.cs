@@ -69,6 +69,8 @@ public partial class ChainVisualController
             chainTextGroup.alpha = 0f;
         }
 
+        ResetChainTextTransformImmediate();
+
         if (chainPanel != null)
         {
             SetChainPanelVisible(false);
@@ -80,6 +82,7 @@ public partial class ChainVisualController
         if (chainTextRoot == null) return;
 
         chainTextRoot.DOKill();
+        ResetChainTextTransformImmediate();
         var needFadeIn = false;
         if (chainTextGroup != null)
         {
@@ -138,6 +141,7 @@ public partial class ChainVisualController
         if (punchScale <= 0f || punchDuration <= 0f) return;
 
         chainTextRoot.DOKill();
+        ResetChainTextTransformImmediate();
         var punch = Vector3.one * punchScale;
         chainTextRoot.DOPunchScale(punch, punchDuration, 9, 0.65f)
             .SetEase(Ease.OutBack)
@@ -200,6 +204,8 @@ public partial class ChainVisualController
         {
             chainText.color = chainTextBaseColor;
         }
+
+        ResetChainTextTransformImmediate();
 
         if (chainTimerBarFillImage != null)
         {
@@ -305,6 +311,12 @@ public partial class ChainVisualController
         if (chainPanel == null) return;
         if (chainPanel.activeSelf == visible) return;
         chainPanel.SetActive(visible);
+    }
+
+    private void ResetChainTextTransformImmediate()
+    {
+        if (chainTextRoot == null) return;
+        chainTextRoot.localScale = chainTextBaseScale;
     }
 
     private bool TryBindChainTimerBar()

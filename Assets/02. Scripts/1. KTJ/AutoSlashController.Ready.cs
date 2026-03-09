@@ -14,6 +14,8 @@ public partial class AutoSlashController
     private bool readyLockApplied;
     private bool readyRotationLockApplied;
 
+    public bool IsReadyWaiting => isReadyWaiting;
+
     private bool ShouldUseReadyDelay(bool isChainActive)
     {
         if (!useReadyDelay) return false;

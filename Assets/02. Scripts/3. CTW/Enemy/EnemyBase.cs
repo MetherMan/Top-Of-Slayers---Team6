@@ -128,6 +128,32 @@ public class EnemyBase : MonoBehaviour
         return player;
     }
 
+    public bool HasLineOfSightToPlayer(Transform target)
+    {
+        if (target == null) return false;
+
+        var origin = transform.position + Vector3.up * 1.5f;
+        var targetPoint = target.position + Vector3.up * 1.5f;
+        var direction = targetPoint - origin;
+        if (direction.sqrMagnitude <= 0.0001f) return true;
+
+        var distance = direction.magnitude;
+        var hits = Physics.RaycastAll(origin, direction.normalized, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+        if (hits == null || hits.Length == 0) return true;
+
+        Array.Sort(hits, (left, right) => left.distance.CompareTo(right.distance));
+        for (int i = 0; i < hits.Length; i++)
+        {
+            var hitTransform = hits[i].transform;
+            if (hitTransform == null) continue;
+            if (hitTransform == transform || hitTransform.IsChildOf(transform)) continue;
+
+            return hitTransform == target || hitTransform.IsChildOf(target);
+        }
+
+        return true;
+    }
+
     public float GetChaseSpeedMultiplier(Vector3 enemyPosition)
     {
         if (!useChainChaseSlow) return 1f;

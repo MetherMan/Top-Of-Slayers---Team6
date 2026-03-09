@@ -6,6 +6,11 @@ public partial class AutoSlashController
     {
         if (dashController == null || targetingSystem == null) return;
         if (Mathf.Approximately(Time.timeScale, 0f)) return;
+        if (IsPlayerDead())
+        {
+            CancelAttackFlowOnDeath();
+            return;
+        }
 
         var isChainActive = IsChainActive();
         var delta = isChainActive ? Time.unscaledDeltaTime : Time.deltaTime;
@@ -63,6 +68,20 @@ public partial class AutoSlashController
             previewDirection = previewAdjustedDirection;
         }
         UpdateAimPreview(aimOrigin, previewDirection);
+
+        if (!HasAttackAimInput(isChainActive))
+        {
+            if (isChainActive)
+            {
+                ResetChainTargetConfirm();
+                ResetSameTargetRelease();
+            }
+            else
+            {
+                ResetInitialTargetConfirm();
+            }
+            return;
+        }
 
         if (isChainActive && requireInputDuringChain && moveController != null)
         {
@@ -163,5 +182,37 @@ public partial class AutoSlashController
         }
 
         TryStartAttack(attack);
+    }
+
+    private bool IsPlayerDead()
+    {
+        EnsureCombatResource();
+        return combatResource != null && combatResource.IsDead;
+    }
+
+    private bool HasAttackAimInput(bool isChainActive)
+    {
+        if (moveController == null) return true;
+
+        var deadZone = chainInputDeadZone > 0f ? chainInputDeadZone : 0.1f;
+        if (isChainActive)
+        {
+            return moveController.HasAimInput(deadZone);
+        }
+
+        return moveController.HasAimInput(deadZone);
+    }
+
+    private void CancelAttackFlowOnDeath()
+    {
+        ClearReadyDelay();
+        ResetChainTargetConfirm();
+        ResetInitialTargetConfirm();
+        ResetSameTargetRelease();
+
+        if (dashController != null && dashController.IsDashing)
+        {
+            dashController.ForceStop();
+        }
     }
 }

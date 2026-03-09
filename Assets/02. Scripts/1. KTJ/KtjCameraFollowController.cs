@@ -18,6 +18,7 @@ public class KtjCameraFollowController : MonoBehaviour
     [SerializeField, Min(0f)] private float attackLookAhead = 1.4f;
     [SerializeField, Min(0f)] private float attackPullLerpSpeed = 3f;
     [SerializeField] private bool useUnscaledFollowDuringChain = true;
+    [SerializeField, Min(0f)] private float chainAttackPullLerpSpeed = 6f;
 
     [Header("맵 경계(선택)")]
     [SerializeField] private bool useBoundsClamp = false;
@@ -39,6 +40,7 @@ public class KtjCameraFollowController : MonoBehaviour
 
         var targetPosition = followTarget.position + followOffset;
         var lerpSpeed = followLerpSpeed;
+        var isChainActive = chainCombat != null && chainCombat.IsSlowActive;
 
         if (useAttackPull && dashController != null && dashController.IsDashing)
         {
@@ -56,6 +58,10 @@ public class KtjCameraFollowController : MonoBehaviour
             }
 
             lerpSpeed = attackPullLerpSpeed;
+            if (isChainActive)
+            {
+                lerpSpeed = Mathf.Max(lerpSpeed, chainAttackPullLerpSpeed);
+            }
         }
 
         if (useBoundsClamp)
@@ -64,7 +70,7 @@ public class KtjCameraFollowController : MonoBehaviour
             targetPosition.z = Mathf.Clamp(targetPosition.z, -maxZDistance, maxZDistance);
         }
 
-        var delta = useUnscaledFollowDuringChain && chainCombat != null && chainCombat.IsSlowActive
+        var delta = useUnscaledFollowDuringChain && isChainActive
             ? Time.unscaledDeltaTime
             : Time.deltaTime;
         var t = 1f - Mathf.Exp(-Mathf.Max(0f, lerpSpeed) * delta);
