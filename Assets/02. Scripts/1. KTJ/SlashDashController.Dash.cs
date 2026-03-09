@@ -4,6 +4,11 @@ public partial class SlashDashController
 {
     public bool TryStartDash(Transform target, Vector3 aimDirection, float aimDistance, AttackSpecSO spec)
     {
+        return TryStartDash(target, aimDirection, aimDistance, spec, Vector3.zero, false);
+    }
+
+    private bool TryStartDash(Transform target, Vector3 aimDirection, float aimDistance, AttackSpecSO spec, Vector3 dashEndPoint, bool useDashEndPoint)
+    {
         if (state != DashState.Idle) return false;
 
         aimDirection.y = 0f;
@@ -26,7 +31,17 @@ public partial class SlashDashController
             dashRemainingDistance = aimDistance;
         }
 
-        if (target != null)
+        if (useDashEndPoint)
+        {
+            var toEnd = dashEndPoint - transform.position;
+            toEnd.y = 0f;
+            if (toEnd.sqrMagnitude > 0f)
+            {
+                dashDirection = toEnd.normalized;
+                dashRemainingDistance = toEnd.magnitude;
+            }
+        }
+        else if (target != null)
         {
             var endPosition = GetBehindPosition(target);
             var toEnd = endPosition - transform.position;
@@ -42,7 +57,15 @@ public partial class SlashDashController
 
         if (useFixedDashTime)
         {
-            dashTimer = fixedDashTime;
+            var maxDashTime = fixedDashTime;
+            if (maxDashTime <= 0f) return false;
+
+            // 가까운 적은 기본 대시 속도로 더 빨리 끝내고, 먼 적만 최대 시간 안으로 압축한다.
+            var naturalDashTime = dashSpeed > 0f
+                ? dashRemainingDistance / dashSpeed
+                : maxDashTime;
+
+            dashTimer = Mathf.Min(maxDashTime, naturalDashTime);
             if (dashTimer <= 0f) return false;
             dashSpeed = dashRemainingDistance / dashTimer;
         }

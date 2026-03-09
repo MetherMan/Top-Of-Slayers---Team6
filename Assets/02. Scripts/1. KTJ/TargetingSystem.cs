@@ -10,6 +10,8 @@ public enum TargetingStrategyType
 
 public partial class TargetingSystem : MonoBehaviour
 {
+    private const float TargetCoincidentSqrThreshold = 0.0001f;
+
     [Header("타겟 설정")]
     [SerializeField] private float maxRange = 8f;
     [SerializeField] private float coneAngle = 60f;
@@ -79,11 +81,45 @@ public partial class TargetingSystem : MonoBehaviour
     {
         for (int i = targets.Count - 1; i >= 0; i--)
         {
-            if (targets[i] == null)
+            if (!IsTargetSelectable(targets[i]))
             {
                 targets.RemoveAt(i);
             }
         }
+    }
+
+    private bool IsTargetSelectable(Transform target)
+    {
+        if (target == null) return false;
+        if (!target.gameObject.activeInHierarchy) return false;
+
+        var damageable = ResolveDamageableTarget(target);
+        return damageable == null || !damageable.IsDead;
+    }
+
+    private DamageSystem.IDamageable ResolveDamageableTarget(Transform target)
+    {
+        if (target == null) return null;
+
+        var direct = target.GetComponent<DamageSystem.IDamageable>();
+        if (direct != null) return direct;
+
+        var parent = target.GetComponentInParent<DamageSystem.IDamageable>();
+        if (parent != null) return parent;
+
+        var root = target.root;
+        if (root == null) return null;
+
+        var components = root.GetComponentsInChildren<MonoBehaviour>(true);
+        for (int i = 0; i < components.Length; i++)
+        {
+            if (components[i] is DamageSystem.IDamageable damageable)
+            {
+                return damageable;
+            }
+        }
+
+        return null;
     }
 
     private ITargetingStrategy CreateStrategy(TargetingStrategyType type)

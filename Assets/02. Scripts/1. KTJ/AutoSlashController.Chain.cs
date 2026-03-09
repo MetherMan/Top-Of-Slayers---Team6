@@ -9,13 +9,58 @@ public partial class AutoSlashController
     private Vector3 GetAimOrigin(bool isChainActive)
     {
         if (!isChainActive || !useLastTargetAsAimOrigin) return transform.position;
-        if (chainCombat == null) return transform.position;
-        var lastTarget = chainCombat.LastTarget;
+        var lastTarget = GetValidLastChainTarget();
         if (lastTarget == null) return transform.position;
         return lastTarget.position;
     }
 
     private bool TryGetChainPriorityTarget(Vector3 origin, Vector3 rawDirection, float range, Transform ignoreTarget, out Transform target, out Vector3 aimDirection)
+    {
+        if (TryGetChainPriorityTargetInternal(origin, rawDirection, range, ignoreTarget, out target, out aimDirection))
+        {
+            return true;
+        }
+
+        var extendedRange = GetExtendedChainSearchRange(range);
+        if (extendedRange > range + 0.01f)
+        {
+            return TryGetChainPriorityTargetInternal(origin, rawDirection, extendedRange, ignoreTarget, out target, out aimDirection);
+        }
+
+        target = null;
+        aimDirection = rawDirection;
+        return false;
+    }
+
+    private bool TryResolveChainAttackTarget(Vector3 origin, Vector3 rawDirection, float range, Transform ignoreTarget, float deltaTime, out Transform target, out Vector3 aimDirection)
+    {
+        target = null;
+        aimDirection = rawDirection;
+
+        var sameTargetCandidate = GetSameTargetCandidate();
+        if (HasSameTargetReattackRequest() && sameTargetCandidate != null)
+        {
+            if (TryGetChainPriorityTarget(origin, rawDirection, range, sameTargetCandidate, out var redirectTarget, out var redirectDirection))
+            {
+                return TryConfirmChainTarget(redirectTarget, redirectDirection, rawDirection, deltaTime, out target, out aimDirection);
+            }
+        }
+
+        if (TryGetForcedSameTarget(rawDirection, out target, out aimDirection))
+        {
+            ResetChainTargetConfirm();
+            return target != null;
+        }
+
+        if (!TryGetChainPriorityTarget(origin, rawDirection, range, ignoreTarget, out var chainTarget, out var chainDirection))
+        {
+            return false;
+        }
+
+        return TryConfirmChainTarget(chainTarget, chainDirection, rawDirection, deltaTime, out target, out aimDirection);
+    }
+
+    private bool TryGetChainPriorityTargetInternal(Vector3 origin, Vector3 rawDirection, float range, Transform ignoreTarget, out Transform target, out Vector3 aimDirection)
     {
         target = null;
         aimDirection = rawDirection;
@@ -57,23 +102,30 @@ public partial class AutoSlashController
         return true;
     }
 
+    private float GetExtendedChainSearchRange(float baseRange)
+    {
+        var range = baseRange > 0f ? baseRange : (targetingSystem != null ? targetingSystem.MaxRange : 0f);
+        if (!useExtendedChainTargetSearch) return range;
+        return range + Mathf.Max(0f, chainExtendedSearchRangeBonus);
+    }
+
     private bool TryGetRetainedChainTarget(Vector3 origin, Vector3 rawDirection, float range, out Transform target, out Vector3 aimDirection)
     {
         target = null;
         aimDirection = rawDirection;
         if (!useChainTargetRetention) return false;
-        if (chainCombat == null) return false;
 
-        var lastTarget = chainCombat.LastTarget;
+        var lastTarget = GetValidLastChainTarget();
         if (lastTarget == null) return false;
-        if (useSameTargetRelease && !sameTargetReleased && lastAttackTarget == lastTarget)
+        if (AreSameAttackTargets(lastAttackTarget, lastTarget) && !HasSameTargetReattackRequest()) return false;
+        if (useSameTargetRelease && !sameTargetReleased && AreSameAttackTargets(lastAttackTarget, lastTarget))
         {
             return false;
         }
 
         var toTarget = lastTarget.position - origin;
         toTarget.y = 0f;
-        if (toTarget.sqrMagnitude <= 0f) return false;
+        if (toTarget.sqrMagnitude <= CoincidentTargetSqrThreshold) return false;
 
         var checkRange = range > 0f ? range : (targetingSystem != null ? targetingSystem.MaxRange : 0f);
         if (checkRange > 0f && toTarget.sqrMagnitude > checkRange * checkRange) return false;
@@ -148,15 +200,38 @@ public partial class AutoSlashController
         return angle <= chainAimMaxAngle;
     }
 
+    private float GetCurrentChainConfirmTime(Transform target)
+    {
+        var confirmTime = chainTargetConfirmTime;
+        if (chainCombat != null && AreSameAttackTargets(target, chainCombat.LastTarget) && chainSameTargetConfirmTime > 0f)
+        {
+            confirmTime = chainSameTargetConfirmTime;
+        }
+
+        if (!useAdaptiveChainConfirm) return confirmTime;
+        return confirmTime * Mathf.Clamp(chainConfirmTimeMultiplier, 0.1f, 1f);
+    }
+
+    private float GetCurrentChainInstantAngle()
+    {
+        if (!useAdaptiveChainConfirm) return chainTargetInstantAngle;
+        return chainTargetInstantAngle + Mathf.Max(0f, chainInstantAngleBonus);
+    }
+
+    private bool ShouldAllowInstantChainConfirm(Transform candidate)
+    {
+        if (candidate == null) return false;
+
+        // 새 적 전환은 짧게라도 한 번 더 확인해서 지나가는 적 스냅을 줄인다.
+        var lastTarget = GetValidLastChainTarget();
+        return AreSameAttackTargets(candidate, lastTarget);
+    }
+
     private bool TryConfirmChainTarget(Transform candidate, Vector3 candidateDirection, Vector3 rawDirection, float deltaTime, out Transform confirmedTarget, out Vector3 confirmedDirection)
     {
         confirmedTarget = candidate;
         confirmedDirection = candidateDirection;
-        var confirmTime = chainTargetConfirmTime;
-        if (chainCombat != null && candidate != null && candidate == chainCombat.LastTarget && chainSameTargetConfirmTime > 0f)
-        {
-            confirmTime = chainSameTargetConfirmTime;
-        }
+        var confirmTime = GetCurrentChainConfirmTime(candidate);
         if (!useChainTargetConfirm || confirmTime <= 0f) return candidate != null;
         if (candidate == null) return false;
 
@@ -165,7 +240,7 @@ public partial class AutoSlashController
         if (rawDirection.sqrMagnitude <= 0f || candidateDirection.sqrMagnitude <= 0f) return false;
 
         var angle = Vector3.Angle(rawDirection, candidateDirection);
-        if (angle <= chainTargetInstantAngle)
+        if (angle <= GetCurrentChainInstantAngle() && ShouldAllowInstantChainConfirm(candidate))
         {
             pendingChainTarget = candidate;
             pendingChainDirection = candidateDirection;

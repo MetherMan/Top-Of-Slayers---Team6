@@ -10,6 +10,7 @@ public partial class AutoSlashController
 
     private bool isReadyWaiting;
     private float readyTimer;
+    private float readyTotalDuration;
     private PendingAttack pendingAttack;
     private bool readyLockApplied;
     private bool readyRotationLockApplied;
@@ -20,14 +21,16 @@ public partial class AutoSlashController
     {
         if (!useReadyDelay) return false;
         if (readyDelay <= 0f) return false;
+        if (!isChainActive && HasPostChainAttackGrace()) return false;
         if (readyDelayOnlyWhenNotChain && isChainActive) return false;
         return true;
     }
 
-    private void BeginReadyDelay(PendingAttack attack)
+    private void BeginReadyDelay(PendingAttack attack, bool isChainActive)
     {
         pendingAttack = attack;
-        readyTimer = Mathf.Max(0f, readyDelay);
+        readyTotalDuration = Mathf.Max(0f, GetCurrentReadyDelay(isChainActive));
+        readyTimer = readyTotalDuration;
         isReadyWaiting = readyTimer > 0f;
         OnAttackReady?.Invoke();
         if (moveController != null)
@@ -53,7 +56,7 @@ public partial class AutoSlashController
             ClearReadyDelay();
             return;
         }
-        if (pendingAttack.Target == null || !pendingAttack.Target.gameObject.activeInHierarchy)
+        if (!IsAttackableTarget(pendingAttack.Target))
         {
             ClearReadyDelay();
             return;
@@ -75,25 +78,36 @@ public partial class AutoSlashController
     {
         isReadyWaiting = false;
         readyTimer = 0f;
+        readyTotalDuration = 0f;
         pendingAttack = default;
         ApplyReadyMovementLock(false);
         ApplyReadyRotationLock(false);
     }
 
+    private float GetCurrentReadyDelay(bool isChainActive)
+    {
+        if (isChainActive) return readyDelay;
+        if (!useAdaptiveInitialResponse) return readyDelay;
+
+        var multiplier = Mathf.Clamp(initialReadyDelayMultiplier, 0.1f, 1f);
+        multiplier = Mathf.Max(0.5f, multiplier);
+        return readyDelay * multiplier;
+    }
+
     private void TryStartAttack(PendingAttack attack)
     {
         if (dashController == null) return;
-        if (attack.Target == null) return;
+        if (!IsAttackableTarget(attack.Target)) return;
         if (!CanStartAttackByCost()) return;
 
         var usePierce = attack.UsePierce && attack.PierceTargets != null && attack.PierceTargets.Count > 1;
         if (usePierce)
         {
-            if (dashController.TryStartAutoSlashPierce(attack.Target, attack.AimDirection, attack.AimDistance, attack.Grade, attack.DamageMultiplier, attack.PierceTargets))
+            if (dashController.TryStartAutoSlashPierce(attack.Target, attack.AimDirection, attack.AimDistance, attack.Grade, attack.DamageMultiplier, attack.PierceTargets, attack.DashEndPoint, attack.UseDashEndPoint))
             {
                 ConsumeAttackCost();
-                RegisterAttackTarget(attack.Target, attack.RawAimDirection);
-                cooldownTimer = GetCooldown();
+                RegisterAttackTarget(attack.Target, attack.AimDirection);
+                cooldownTimer = IsChainActive() ? 0f : GetCooldown();
             }
             return;
         }
@@ -101,8 +115,8 @@ public partial class AutoSlashController
         if (dashController.TryStartAutoSlash(attack.Target, attack.AimDirection, attack.AimDistance, attack.Grade, attack.DamageMultiplier))
         {
             ConsumeAttackCost();
-            RegisterAttackTarget(attack.Target, attack.RawAimDirection);
-            cooldownTimer = GetCooldown();
+            RegisterAttackTarget(attack.Target, attack.AimDirection);
+            cooldownTimer = IsChainActive() ? 0f : GetCooldown();
         }
     }
 
@@ -148,8 +162,10 @@ public partial class AutoSlashController
         public readonly Vector3 RawAimDirection;
         public readonly List<Transform> PierceTargets;
         public readonly bool UsePierce;
+        public readonly Vector3 DashEndPoint;
+        public readonly bool UseDashEndPoint;
 
-        public PendingAttack(Transform target, Vector3 aimDirection, float aimDistance, TimingGrade grade, float damageMultiplier, Vector3 rawAimDirection, List<Transform> pierceTargets, bool usePierce)
+        public PendingAttack(Transform target, Vector3 aimDirection, float aimDistance, TimingGrade grade, float damageMultiplier, Vector3 rawAimDirection, List<Transform> pierceTargets, bool usePierce, Vector3 dashEndPoint, bool useDashEndPoint)
         {
             Target = target;
             AimDirection = aimDirection;
@@ -159,6 +175,8 @@ public partial class AutoSlashController
             RawAimDirection = rawAimDirection;
             PierceTargets = pierceTargets;
             UsePierce = usePierce;
+            DashEndPoint = dashEndPoint;
+            UseDashEndPoint = useDashEndPoint;
         }
     }
 }
