@@ -16,19 +16,23 @@ public class LoginUI : Singleton<LoginUI>
 
     public System.Action<Tuple<string, string>> onClickLogin;
 
-    [Header("InputField")]
+    [Header("로그인 입력란")]
     //TMP_InputField : console.Readline(); 같이 사용자가 입력한 값 받아오는 타입
     [SerializeField] TMP_InputField inputID;
     [SerializeField] TMP_InputField inputPW;
 
-    [Header("feature Btn")]
+    [Header("로그인 버튼")]
     [SerializeField] Button loginBtn;
     [SerializeField] Button findBtn;
     [SerializeField] Button signupBtn;
     [SerializeField] Button googleBtn;
 
-    //회원가입 가입하기 버튼
+    [Header("회원가입 입력란")]
+    [SerializeField] TMP_InputField upInputID;
+    [SerializeField] TMP_InputField upInputPW;
+    [SerializeField] TMP_InputField upInputRePW;
     [SerializeField] Button signupCheckBtn;
+    [SerializeField] Button cancleBtn;
 
     [Header("panel")]
     [SerializeField] GameObject panel;
@@ -68,7 +72,7 @@ public class LoginUI : Singleton<LoginUI>
                 confirmText.text = "아이디 / 비밀번호를 입력하시오";
                 ConfirmUIOpen();
             }
-            else if (inputID.text.Trim().Length < 5 || inputPW.text.Trim().Length < 8)
+            else if (id.Trim().Length < 5 || pw.Trim().Length < 8)
             {
                 confirmText.text = "아이디 최소 5자 / 비밀번호 최소 8자";
                 ConfirmUIOpen();
@@ -94,8 +98,35 @@ public class LoginUI : Singleton<LoginUI>
         signupCheckBtn.onClick.AddListener(() =>
         {
             //아이디, 패스워드 확인 후
-            SignupUIClose();
+            string upId = upInputID.text;
+            string upPw = upInputPW.text;
+            string upRePw = upInputRePW.text;
+
+            if (string.IsNullOrEmpty(upId) || 
+                string.IsNullOrEmpty(upPw) || 
+                string.IsNullOrEmpty(upRePw)) //서버에서 아이디 중복 체크 추가해야 됨
+            {
+                confirmText.text = "아이디, 비밀번호, 확인란이 비어있습니다";
+                ConfirmUIOpen();
+            }
+            else if (upId.Trim().Length < 5 || upPw.Trim().Length < 8)
+            {
+                confirmText.text = "아이디 최소 5자, 비밀번호 최소 8자";
+                ConfirmUIOpen();
+            }
+            else if (upPw.CompareTo(upRePw) != 0)
+            {
+                //문자열 비교 : https://developer-talk.tistory.com/223
+                confirmText.text = "비밀번호가 확인란과 동일하지 않습니다.";
+                ConfirmUIOpen();
+            }
+            else
+            {
+                SignupUIClose();
+            }
         });
+
+        cancleBtn.onClick.AddListener(SignupUIClose);
 
         //구글회원가입 || 로그인
         googleBtn.onClick.AddListener(() =>
