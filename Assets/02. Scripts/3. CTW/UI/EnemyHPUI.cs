@@ -18,6 +18,18 @@ public class EnemyHPUI : MonoBehaviour
         mainCamera = Camera.main;
     }
 
+    private void OnDisable()
+    {
+        if (target != null)
+        {
+            target.OnHPChanged -= UpdateHPUI;
+        }
+
+        target = null;
+        prefab = null;
+        timer = 0f;
+    }
+
     public void Init(DummyTarget target, GameObject prefab)
     {
         if (this.target != null)
@@ -35,6 +47,8 @@ public class EnemyHPUI : MonoBehaviour
         effectSlider.value = target.currentHp;
 
         target.OnHPChanged += UpdateHPUI;
+        timer = 0f;
+        UpdateWorldPosition();
     }
 
     private void Update()
@@ -57,8 +71,20 @@ public class EnemyHPUI : MonoBehaviour
             return;
         }
 
-        Vector3 screenPos = mainCamera.WorldToScreenPoint(target.transform.position + Vector3.right * 1.5f);
+        UpdateWorldPosition();
+    }
 
+    private void UpdateWorldPosition()
+    {
+        if (target == null) return;
+
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null) return;
+        }
+
+        Vector3 screenPos = mainCamera.WorldToScreenPoint(target.transform.position + Vector3.right * 1.5f);
         transform.position = screenPos;
     }
 

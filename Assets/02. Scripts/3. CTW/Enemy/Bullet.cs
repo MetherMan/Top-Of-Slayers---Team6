@@ -30,11 +30,66 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("Player"))
+        if (other == null) return;
+        if (!TryResolvePlayerRoot(other, out var playerRoot)) return;
+
+        if (EnemyBase.TryApplyPlayerDamage(playerRoot, attackDamage))
         {
-            EnemyBase.TryApplyPlayerDamage(other.gameObject, attackDamage);
             ReturnPool();
         }
+    }
+
+    private static bool TryResolvePlayerRoot(Collider other, out GameObject playerRoot)
+    {
+        playerRoot = null;
+
+        if (TryResolvePlayerRoot(other.gameObject, out playerRoot))
+        {
+            return true;
+        }
+
+        if (other.attachedRigidbody != null && TryResolvePlayerRoot(other.attachedRigidbody.gameObject, out playerRoot))
+        {
+            return true;
+        }
+
+        var combatResource = other.GetComponentInParent<PlayerCombatResource>();
+        if (combatResource != null)
+        {
+            playerRoot = combatResource.gameObject;
+            return true;
+        }
+
+        var playerHp = other.GetComponentInParent<PlayerHP>();
+        if (playerHp != null)
+        {
+            playerRoot = playerHp.gameObject;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryResolvePlayerRoot(GameObject candidate, out GameObject playerRoot)
+    {
+        playerRoot = null;
+        if (candidate == null) return false;
+
+        var combatResource = candidate.GetComponent<PlayerCombatResource>();
+        if (combatResource != null)
+        {
+            playerRoot = combatResource.gameObject;
+            return true;
+        }
+
+        var playerHp = candidate.GetComponent<PlayerHP>();
+        if (playerHp != null)
+        {
+            playerRoot = playerHp.gameObject;
+            return true;
+        }
+
+        return false;
     }
 
     private void ReturnPool()

@@ -55,10 +55,20 @@ public class EnemyAttack : IEnemyState
             {
                 var targetRotation = Quaternion.LookRotation(lookDir.normalized, Vector3.up);
                 enemy.transform.rotation = Quaternion.RotateTowards(
-                    enemy.transform.rotation,
-                    targetRotation,
-                    enemy.TurnSpeedDegrees * Time.deltaTime);
+                enemy.transform.rotation,
+                targetRotation,
+                enemy.TurnSpeedDegrees * Time.deltaTime);
             }
+        }
+
+        if (enemy.attackType == AttackType.Ranged && playerTransform != null && !enemy.HasLineOfSightToPlayer(playerTransform))
+        {
+            if (!isStateChaged)
+            {
+                isStateChaged = true;
+                enemyStateMachine.ChangeState(enemy.FollowState);
+            }
+            return;
         }
 
         if (!hasAttackTiming || !isShoot)

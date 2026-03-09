@@ -28,6 +28,11 @@ public class EnemyFollow : IEnemyState
         var toTarget = targetPosition - currentPosition;
         if (toTarget.sqrMagnitude <= enemy.attackRange * enemy.attackRange)
         {
+            if (enemy.attackType == AttackType.Ranged && !enemy.HasLineOfSightToPlayer(playerTransform))
+            {
+                return;
+            }
+
             enemyStateMachine.ChangeState(enemy.AttackState);
         }
     }
@@ -43,7 +48,8 @@ public class EnemyFollow : IEnemyState
 
         var toTarget = targetPosition - currentPosition;
         var sqrDistance = toTarget.sqrMagnitude;
-        if (sqrDistance <= enemy.attackRange * enemy.attackRange) return;
+        var inAttackRange = sqrDistance <= enemy.attackRange * enemy.attackRange;
+        if (inAttackRange && (enemy.attackType != AttackType.Ranged || enemy.HasLineOfSightToPlayer(playerTransform))) return;
         if (sqrDistance <= 0.0001f) return;
 
         var moveDirection = toTarget.normalized;

@@ -103,6 +103,7 @@ public partial class ChainVisualController : MonoBehaviour
     private Tween darkenTween;
     private bool isChainActive;
     private Vector3 darkenBaseScale = Vector3.one;
+    private Vector3 chainTextBaseScale = Vector3.one;
     private int pendingTextRefreshFrames;
     private Color chainTextBaseColor = Color.white;
     private Tween chainTextColorTween;
@@ -124,6 +125,7 @@ public partial class ChainVisualController : MonoBehaviour
         if (chainTextRoot == null && chainText != null) chainTextRoot = chainText.rectTransform;
         if (chainTextRoot == null && chainPanel != null) chainTextRoot = chainPanel.GetComponent<RectTransform>();
         if (chainTextGroup == null && chainPanel != null) chainTextGroup = chainPanel.GetComponent<CanvasGroup>();
+        if (chainTextRoot != null) chainTextBaseScale = chainTextRoot.localScale;
         if (damageTextFontAsset == null && chainText != null) damageTextFontAsset = chainText.font;
         if (chainText != null) chainTextBaseColor = chainText.color;
         EnsureChainTimerBar();
@@ -262,6 +264,7 @@ public partial class ChainVisualController : MonoBehaviour
         if (chainTextRoot == null && chainText != null) chainTextRoot = chainText.rectTransform;
         if (chainTextRoot == null && chainPanel != null) chainTextRoot = chainPanel.GetComponent<RectTransform>();
         if (chainTextGroup == null && chainPanel != null) chainTextGroup = chainPanel.GetComponent<CanvasGroup>();
+        if (chainTextRoot != null) chainTextBaseScale = chainTextRoot.localScale;
         if (chainText != null) chainTextBaseColor = chainText.color;
         EnsureChainTimerBar();
         if (darkenGroup == null && darkenRoot != null) darkenGroup = darkenRoot.GetComponent<CanvasGroup>();

@@ -25,6 +25,7 @@ public partial class PlayerMoveController : MonoBehaviour
     [Header("애니메이션")]
     [SerializeField] private Animator animator;
     [SerializeField] private string moveBlendParam = "MoveBlend";
+    [SerializeField] private bool keepAnimatorRealtimeDuringChain = true;
 
     private IInputCommand currentCommand;
     private IInputCommand moveCommand;
@@ -40,6 +41,12 @@ public partial class PlayerMoveController : MonoBehaviour
     private float nextCameraResolveTime;
     private float equipmentMoveSpeedBonus;
     private float specMoveSpeed;
+    private SlashDashController dashController;
+    private AutoSlashController autoSlashController;
+    private PlayerStateMachine playerStateMachine;
+    private float animatorBaseSpeed = 1f;
+    private AnimatorUpdateMode animatorBaseUpdateMode = AnimatorUpdateMode.Normal;
+    private bool hasAnimatorDefaults;
 
     private void Awake()
     {
@@ -51,6 +58,7 @@ public partial class PlayerMoveController : MonoBehaviour
         ResolveJoystick();
         ResolveCameraTransform();
         ResolveChainCombat();
+        ResolveLockRecoveryRefs();
         ResolveAnimator();
     }
 
@@ -88,6 +96,7 @@ public partial class PlayerMoveController : MonoBehaviour
             chainCombat.OnSlowStateChanged -= HandleChainSlowStateChanged;
         }
         ApplyChainLock(false);
+        ResetAnimatorTimingCompensation();
     }
 
     public void BindSceneRefs(
@@ -134,6 +143,9 @@ public partial class PlayerMoveController : MonoBehaviour
 
     private void Update()
     {
+        RecoverInvalidMovementLockIfNeeded();
+        UpdateAnimatorTimingCompensation();
+
         if (!useFixedUpdate)
         {
             ExecuteNextCommand(Time.deltaTime);
@@ -148,6 +160,8 @@ public partial class PlayerMoveController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        RecoverInvalidMovementLockIfNeeded();
+
         if (useFixedUpdate)
         {
             ExecuteNextCommand(Time.fixedDeltaTime);
@@ -156,9 +170,48 @@ public partial class PlayerMoveController : MonoBehaviour
 
     private void ResolveAnimator()
     {
-        if (animator != null) return;
-        animator = GetComponent<Animator>();
-        if (animator == null) animator = GetComponentInChildren<Animator>(true);
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            if (animator == null) animator = GetComponentInChildren<Animator>(true);
+        }
+
+        if (animator == null) return;
+        if (hasAnimatorDefaults) return;
+        animatorBaseSpeed = animator.speed;
+        animatorBaseUpdateMode = animator.updateMode;
+        hasAnimatorDefaults = true;
+    }
+
+    private void ResolveLockRecoveryRefs()
+    {
+        if (dashController == null) dashController = GetComponent<SlashDashController>();
+        if (dashController == null) dashController = GetComponentInParent<SlashDashController>();
+        if (dashController == null) dashController = FindObjectOfType<SlashDashController>();
+
+        if (autoSlashController == null) autoSlashController = GetComponent<AutoSlashController>();
+        if (autoSlashController == null) autoSlashController = GetComponentInParent<AutoSlashController>();
+        if (autoSlashController == null) autoSlashController = FindObjectOfType<AutoSlashController>();
+
+        if (playerStateMachine == null) playerStateMachine = GetComponent<PlayerStateMachine>();
+        if (playerStateMachine == null) playerStateMachine = GetComponentInParent<PlayerStateMachine>();
+        if (playerStateMachine == null) playerStateMachine = FindObjectOfType<PlayerStateMachine>();
+    }
+
+    private void RecoverInvalidMovementLockIfNeeded()
+    {
+        if (!movementLocked) return;
+
+        ResolveChainCombat();
+        ResolveLockRecoveryRefs();
+
+        if (playerStateMachine != null && playerStateMachine.IsDead) return;
+        if (chainCombat != null && chainCombat.IsSlowActive) return;
+        if (dashController != null && dashController.IsDashing) return;
+        if (autoSlashController != null && autoSlashController.IsReadyWaiting) return;
+
+        movementLockCount = 0;
+        movementLocked = false;
     }
 
     public void SetPlayerMoveSpeed(float speed)
@@ -175,6 +228,40 @@ public partial class PlayerMoveController : MonoBehaviour
     {
         var baseMoveSpeed = specMoveSpeed > 0f ? specMoveSpeed : Mathf.Max(0f, moveSpeed);
         return Mathf.Max(0f, baseMoveSpeed + equipmentMoveSpeedBonus);
+    }
+
+    private void UpdateAnimatorTimingCompensation()
+    {
+        if (!keepAnimatorRealtimeDuringChain) return;
+
+        ResolveAnimator();
+        if (animator == null) return;
+
+        ResolveChainCombat();
+
+        var useUnscaledAnimator = chainCombat != null && chainCombat.IsSlowActive;
+        var nextUpdateMode = useUnscaledAnimator
+            ? AnimatorUpdateMode.UnscaledTime
+            : animatorBaseUpdateMode;
+
+        if (animator.updateMode != nextUpdateMode)
+        {
+            animator.updateMode = nextUpdateMode;
+        }
+
+        if (!Mathf.Approximately(animator.speed, animatorBaseSpeed))
+        {
+            animator.speed = animatorBaseSpeed;
+        }
+    }
+
+    private void ResetAnimatorTimingCompensation()
+    {
+        if (!keepAnimatorRealtimeDuringChain) return;
+        if (animator == null) return;
+        if (!hasAnimatorDefaults) return;
+        animator.speed = animatorBaseSpeed;
+        animator.updateMode = animatorBaseUpdateMode;
     }
 
     private bool IsMovementBlocked()
