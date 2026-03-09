@@ -50,7 +50,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
             return;
         }
 
-        Init();
+        Init(stageManager);
     }
 
     void Update()
@@ -61,12 +61,9 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
     }
 
     #region method
-    private void Init()
+    private void Init(StageManager stageManager)
     {
         SetRule();
-
-        var stageManager = StageManager.Instance;
-        if (stageManager == null) return;
 
         ruleDataContainer.stageData = stageManager.selectDB;
         ruleDataContainer.waveCount = stageManager.selectDB.roundDatas != null
