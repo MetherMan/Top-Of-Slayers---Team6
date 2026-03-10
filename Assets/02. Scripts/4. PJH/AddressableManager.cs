@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.UI;
+using Cysharp.Threading.Tasks;
 
 public class AddressableManager : Singleton<AddressableManager>
 {
@@ -75,50 +75,47 @@ public class AddressableManager : Singleton<AddressableManager>
         return false;
     }
 
-    private async Task LoadAllData(IProgress<float> progress)
+    private async UniTask LoadAllData(IProgress<float> progress)
     {
-        //코루틴 처럼 프레임 관리가 안됨
-        //순차적으로 실행하기 위해서 작업이 완료 되었을 때 bool 값을 true로 넘겨서
-        //다음 작업이 진행되도록 제한한다
+        await CheckUpdate("Preload", progress);
+        await UniTask.NextFrame();
 
-        //대표적인 오류 Handle의 유효성 상실
-        await CheckUpdate("Preload" ,progress);
         await DownloadWithCapacityUI("Preload", progress);
+        await UniTask.NextFrame();
 
         //호출 리스트
-        Task databaseTask = LoadDatabase();
-        Task stageSOTask = LoadAllStageSO();
-        Task ruleSOTask = LoadAllRule();
-        Task uITask = LoadAllUI();
-        Task monsterSOTask = LoadAllMonsterSO();
-        Task monsterPfTask = LoadAllMonsterPf();
+        UniTask databaseTask = LoadDatabase();
+        UniTask stageSOTask = LoadAllStageSO();
+        UniTask ruleSOTask = LoadAllRule();
+        UniTask uITask = LoadAllUI();
+        UniTask monsterSOTask = LoadAllMonsterSO();
+        UniTask monsterPfTask = LoadAllMonsterPf();
         //ItemSO
         //ItemPrefab
-        Task vFXTask = LoadAllVFX();
+        UniTask vFXTask = LoadAllVFX();
         //SFX
 
-        List<Task> tasks = new List<Task> 
+        List<UniTask> tasks = new List<UniTask> 
         { databaseTask, stageSOTask, ruleSOTask, uITask, monsterSOTask, monsterPfTask, vFXTask };
 
-        //로딩
-
-        await Task.WhenAll(tasks);
-
+        await UniTask.WhenAll(tasks);
         progress.Report(1.0f);
         visualProgress = 1.0f;
 
-        await Task.Delay(2000);
+        await UniTask.Delay(2000);
         LoginUI.Instance.CompleteLoding();
         Debug.Log("모든 데이터 로드 완료");
     }
 
-    private async Task DownloadWithCapacityUI(object key, IProgress<float> progress)
+    private async UniTask DownloadWithCapacityUI(object key, IProgress<float> progress)
     {
         AsyncOperationHandle<long> sizeHandle = Addressables.GetDownloadSizeAsync(key);
         long totalBytes = await sizeHandle.Task;
+
         if (totalBytes > 0)
         {
             float totalMB = totalBytes / (1024f * 1024f);
+
             //정밀도 손상? Mathf -> Math
             LoginUI.Instance.downloadText.text
                 = $"필수 리소스 \n" +
@@ -126,26 +123,23 @@ public class AddressableManager : Singleton<AddressableManager>
                 $"다운로드가 필요합니다";
             LoginUI.Instance.DownloadUIOpen();
 
-            AsyncOperationHandle downloadHandle
-                = Addressables.DownloadDependenciesAsync(key, true);
-            /*
-            UnityEngine.AddressableAssets.Utility.ResourceManagerDiagnostics.GenerateCompletedOperationDisplayName
-            오류발생으로 핸들 유효성 체크 추가
-            */
-            while (downloadHandle.IsValid() && !downloadHandle.IsDone)
+            await UniTask.WaitUntil(() => LoginSceneManager.Instance.confirmDownload);
+
+
+            IProgress<float> progressProvider = Progress.Create<float>(p =>
             {
-                float currentMB = totalMB * downloadHandle.PercentComplete;
+                float currentMB = totalMB * p;
 
                 loadingText.text = $"{Math.Ceiling(currentMB * 100) / 100}" +
                     $" / {Math.Ceiling(totalMB * 100) / 100} MB";
+            });
 
-                await Task.Delay(100); // 무한 루프 방지 (Yield보다 cpu 점유율이 낮다)
-            }
+            await Addressables.DownloadDependenciesAsync(key, true)
+                .ToUniTask(progress: progressProvider);
 
-            if (downloadHandle.Status == AsyncOperationStatus.Succeeded)
-            {
-                Debug.Log("다운로드 완료");
-            }
+            //loadingText.text = $"{Math.Ceiling(totalMB * 100) / 100}" +
+            //    $" / {Math.Ceiling(totalMB * 100) / 100} MB";
+            Debug.Log("다운로드 완료");
         }
 
         if (sizeHandle.IsValid())
@@ -157,7 +151,7 @@ public class AddressableManager : Singleton<AddressableManager>
         Debug.Log("다운로드 프로세스 종료");
     }
 
-    private async Task CheckUpdate(object key, IProgress<float> progress)
+    private async UniTask CheckUpdate(object key, IProgress<float> progress)
     {
         AsyncOperationHandle<List<string>> updateHandle
             = Addressables.CheckForCatalogUpdates(false);
@@ -168,13 +162,18 @@ public class AddressableManager : Singleton<AddressableManager>
             await Addressables.UpdateCatalogs(updateHandle.Result).Task;
             Debug.Log("카탈로그 업데이트");
         }
-        Addressables.Release(updateHandle);
+        else
+        {
+            Debug.Log("업데이트 없음");
+        }
+
         progress.Report(0.2f);
+        Addressables.Release(updateHandle);
     }
 
     #region Load
     //StageConfigSO : 게임을 종료할 때까지 가지고 있는다.
-    private async Task LoadAllStageSO()
+    private async UniTask LoadAllStageSO()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("StageSO", typeof(StageConfigSO));
@@ -223,7 +222,7 @@ public class AddressableManager : Singleton<AddressableManager>
         Debug.Log("LoadAllStageSO : Completed");
     }
 
-    private async Task LoadDatabase()
+    private async UniTask LoadDatabase()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationsHandle
             = Addressables.LoadResourceLocationsAsync("Database" , typeof(StageDatabase));
@@ -326,7 +325,7 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //RuleSO
-    private async Task LoadAllRule()
+    private async UniTask LoadAllRule()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("RuleSO", typeof(WaveRule));
@@ -381,7 +380,7 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //UI
-    private async Task LoadAllUI()
+    private async UniTask LoadAllUI()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("UI", typeof(GameObject));
@@ -436,7 +435,7 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //MonsterSO
-    private async Task LoadAllMonsterSO()
+    private async UniTask LoadAllMonsterSO()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("MonsterSO", typeof(EnemyConfigSO));
@@ -492,7 +491,7 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //MonsterPrefab
-    private async Task LoadAllMonsterPf()
+    private async UniTask LoadAllMonsterPf()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("MonsterPrefab", typeof(GameObject));
@@ -562,7 +561,7 @@ public class AddressableManager : Singleton<AddressableManager>
     //}
 
     //VFX
-    private async Task LoadAllVFX()
+    private async UniTask LoadAllVFX()
     {
         AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
             = Addressables.LoadResourceLocationsAsync("VFX", typeof(GameObject));

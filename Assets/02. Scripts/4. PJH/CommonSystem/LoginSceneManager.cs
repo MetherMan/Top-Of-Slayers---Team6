@@ -17,7 +17,7 @@ public class LoginSceneManager : Singleton<LoginSceneManager>
     #region method
     public void CheckIn()
     {
-        LoadingSceneController.LoadScene("MainSceneVer2");
+        LoadingSceneController.LoadScene("1.Lobby");
     }
     #endregion
 }
