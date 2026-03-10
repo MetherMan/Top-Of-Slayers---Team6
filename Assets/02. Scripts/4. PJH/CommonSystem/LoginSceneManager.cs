@@ -5,6 +5,7 @@
 public class LoginSceneManager : Singleton<LoginSceneManager>
 {
     #region field
+    public bool confirmDownload;
     #endregion
 
     protected override void Awake()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -76,7 +77,12 @@ public class AddressableManager : Singleton<AddressableManager>
 
     private async Task LoadAllData(IProgress<float> progress)
     {
-        await CheckUpdate(progress);
+        //코루틴 처럼 프레임 관리가 안됨
+        //순차적으로 실행하기 위해서 작업이 완료 되었을 때 bool 값을 true로 넘겨서
+        //다음 작업이 진행되도록 제한한다
+
+        //대표적인 오류 Handle의 유효성 상실
+        await CheckUpdate("Preload" ,progress);
         await DownloadWithCapacityUI("Preload", progress);
 
         //호출 리스트
@@ -113,7 +119,12 @@ public class AddressableManager : Singleton<AddressableManager>
         if (totalBytes > 0)
         {
             float totalMB = totalBytes / (1024f * 1024f);
-            Debug.Log($"총 다운로드 용량 : {Math.Ceiling(totalMB * 100) / 100} MB");
+            //정밀도 손상? Mathf -> Math
+            LoginUI.Instance.downloadText.text
+                = $"필수 리소스 \n" +
+                $"{Math.Ceiling(totalMB * 100) / 100}MB \n" +
+                $"다운로드가 필요합니다";
+            LoginUI.Instance.DownloadUIOpen();
 
             AsyncOperationHandle downloadHandle
                 = Addressables.DownloadDependenciesAsync(key, true);
@@ -146,7 +157,7 @@ public class AddressableManager : Singleton<AddressableManager>
         Debug.Log("다운로드 프로세스 종료");
     }
 
-    private async Task CheckUpdate(IProgress<float> progress)
+    private async Task CheckUpdate(object key, IProgress<float> progress)
     {
         AsyncOperationHandle<List<string>> updateHandle
             = Addressables.CheckForCatalogUpdates(false);
@@ -547,7 +558,7 @@ public class AddressableManager : Singleton<AddressableManager>
     ////ItemPrefab
     //public async Task LoadAllItemPf()
     //{
-
+        //프리팹 추가로 코드 구현
     //}
 
     //VFX
