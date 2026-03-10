@@ -29,7 +29,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
             case EquipSlot.Armor:
                 armor = data;
                 break;
-            case EquipSlot.Emblem:
+            case EquipSlot.Ring:
                 emblem = data;
                 break;
         }
@@ -57,7 +57,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
                 armor = null;
                 break;
 
-            case EquipSlot.Emblem:
+            case EquipSlot.Ring:
                 emblem = null;
                 break;
         }

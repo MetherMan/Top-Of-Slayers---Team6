@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
+using UnityEngine.Experimental.GlobalIllumination;
 
 public class InventoryManager : Singleton<InventoryManager>
 {
@@ -61,8 +62,23 @@ public class InventoryManager : Singleton<InventoryManager>
         OnInventoryChanged?.Invoke();
     }
 
-    //소비아이템 사용
+    public bool SellItem(InventoryItem data)
+    {
+        if(data == null) return false;
 
+        if(!(data.item is EquipmentSO)) return false;
+
+        int sellPrice = data.item.price /2;
+
+        CurrencyManager.Instance.Add(sellPrice);
+
+        RemoveItem(data);
+
+        return true;
+    }
+
+
+    //소비아이템 사용
     public bool RemoveItem(ItemSO item, int amount)
     {
         InventoryItem slot = inventory.Find(x => x.item == item);
