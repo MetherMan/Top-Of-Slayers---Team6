@@ -11,6 +11,6 @@ public class GlovesSO : EquipmentSO
     }
     public override string GetStatText(int level)
     {
-        return $"치명타 확률 +{GetCritical(level):F1}%";
+        return $"치명타률 +{GetCritical(level):F1}%";
     }
 }

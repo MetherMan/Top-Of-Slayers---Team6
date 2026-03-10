@@ -4,7 +4,7 @@ public enum EquipSlot
 {
     Weapon,
     Armor,
-    Emblem,
+    Ring,
     Gloves,
     Shoes
 
