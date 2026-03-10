@@ -43,7 +43,7 @@ public class EquipmentSlotUI : MonoBehaviour
                 equip = EquipmentManager.Instance.armor;
                 break;
 
-            case EquipSlot.Emblem:
+            case EquipSlot.Ring:
                 equip = EquipmentManager.Instance.emblem;
                 break;
         }
