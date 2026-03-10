@@ -48,11 +48,28 @@ public partial class AutoSlashController : MonoBehaviour
     [SerializeField] private bool useInitialTargetConfirm = true;
     [SerializeField, Min(0f)] private float initialTargetConfirmTime = 0.05f;
     [SerializeField, Range(0f, 45f)] private float initialTargetInstantAngle = 6f;
+    [SerializeField] private bool useInitialInstantConfirm;
 
     [Header("초기 조준 안정")]
     [SerializeField] private bool useInitialAimStability = true;
     [SerializeField, Min(0f)] private float initialAimStableTime = 0.05f;
     [SerializeField, Range(0f, 720f)] private float initialAimMaxAngularSpeed = 180f;
+
+    [Header("초기 진입 입력")]
+    [SerializeField] private bool requireStrongerInputForInitialAttack = true;
+    [SerializeField, Range(0f, 1f)] private float initialInputDeadZone = 0.28f;
+
+    [Header("초기 진입 각도 제한")]
+    [SerializeField] private bool useInitialAimAngleLimit = true;
+    [SerializeField, Range(0f, 45f)] private float initialAimMaxAngle = 12f;
+
+    [Header("초기 반응 보정")]
+    [SerializeField] private bool useAdaptiveInitialResponse = true;
+    [SerializeField, Range(0.1f, 1f)] private float initialConfirmTimeMultiplier = 0.4f;
+    [SerializeField, Range(0.1f, 1f)] private float initialAimStableTimeMultiplier = 0.4f;
+    [SerializeField, Range(0.1f, 1f)] private float initialReadyDelayMultiplier = 0.3f;
+    [SerializeField, Range(0f, 15f)] private float initialInstantAngleBonus = 2f;
+    [SerializeField, Min(0f)] private float postChainAttackGraceTime = 0.18f;
 
     [Header("체인 재타격")]
     [SerializeField] private bool ignoreLastTargetDuringChain = true;
@@ -62,6 +79,13 @@ public partial class AutoSlashController : MonoBehaviour
     [SerializeField] private bool useSameTargetRelease = true;
     [SerializeField, Range(0f, 90f)] private float sameTargetReleaseAngle = 25f;
     [SerializeField, Min(0f)] private float sameTargetAutoReleaseTime = 0.15f;
+    [SerializeField] private bool allowForcedSameTargetReattack = true;
+    [SerializeField] private bool useSameTargetReattackInputGate = true;
+    [SerializeField, Range(0f, 90f)] private float sameTargetReattackOppositeAngle = 35f;
+    [SerializeField, Range(0f, 90f)] private float sameTargetReattackInputAngle = 12f;
+    [SerializeField, Min(0f)] private float sameTargetReattackHoldTime = 0.07f;
+    [SerializeField, Min(0f)] private float sameTargetReattackInputBufferTime = 0.08f;
+    [SerializeField, Min(0f)] private float sameTargetReattackDashLatchTime = 0.22f;
 
     [Header("조준 자동 보정")]
     [SerializeField] private bool useAimAssist = true;
@@ -75,9 +99,39 @@ public partial class AutoSlashController : MonoBehaviour
     [Header("체인 라인 관통")]
     [SerializeField] private bool useChainLinePierce = true;
 
+    [Header("초기 라인 관통")]
+    [SerializeField] private bool useInitialLinePierce = true;
+
+    [Header("초기 라인 앵커")]
+    [SerializeField] private bool useInitialLineAnchor = true;
+    [SerializeField, Min(0f)] private float initialLineAnchorWidthPadding = 0.05f;
+    [SerializeField, Min(0f)] private float initialLineAnchorCenterBias = 4f;
+    [SerializeField, Min(0f)] private float initialLinePierceRangeBonus = 1.5f;
+    [SerializeField, Min(0f)] private float initialLinePierceBackPadding = 0.25f;
+
+    [Header("라인 관통 여유")]
+    [SerializeField, Min(1f)] private float linePierceWidthMultiplier = 1.35f;
+    [SerializeField, Min(0f)] private float linePierceWidthPadding = 0.35f;
+
+    [Header("라인 관통 대시")]
+    [SerializeField, Min(0f)] private float pierceDashOvershootDistance = 0.6f;
+
+    [Header("체인 반응 보정")]
+    [SerializeField] private bool useAdaptiveChainConfirm = true;
+    [SerializeField, Range(0.1f, 1f)] private float chainConfirmTimeMultiplier = 0.65f;
+    [SerializeField, Range(0f, 20f)] private float chainInstantAngleBonus = 4f;
+
+    [Header("단일 적 재공격 보정")]
+    [SerializeField] private bool useSoloTargetRepeatDelay = true;
+    [SerializeField, Min(0f)] private float soloTargetRepeatDelay = 0.1f;
+
+    [Header("체인 먼 타깃 보정")]
+    [SerializeField] private bool useExtendedChainTargetSearch = true;
+    [SerializeField, Min(0f)] private float chainExtendedSearchRangeBonus = 2f;
+
     [Header("체인 사거리")]
     [SerializeField] private bool useChainRangeBoost = true;
-    [SerializeField, Min(1f)] private float chainRangeMultiplier = 1.5f;
+    [SerializeField, Min(1f)] private float chainRangeMultiplier = 3f;
 
     [Header("판정")]
     [SerializeField] private TimingGrade autoGrade = TimingGrade.Good;
@@ -91,6 +145,8 @@ public partial class AutoSlashController : MonoBehaviour
     private float detectTimer;
     private float cooldownTimer;
     private float lastAttackRange;
+    private bool wasChainActiveLastFrame;
+    private float postChainAttackGraceTimer;
 
     public event System.Action OnAttackReady;
     public bool IsChainSlowActive => chainCombat != null && chainCombat.IsSlowActive;

@@ -12,6 +12,7 @@ public class DamageSystem : MonoBehaviour
 
         var damageable = ResolveDamageable(target);
         if (damageable == null) return;
+        if (damageable.IsDead) return;
 
         damageable.ApplyDamage(amount);
 

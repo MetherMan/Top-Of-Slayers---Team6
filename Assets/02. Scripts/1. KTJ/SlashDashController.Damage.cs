@@ -37,20 +37,22 @@ public partial class SlashDashController
         }
 
         var hitCount = 0;
+        var appliedTargets = new HashSet<Transform>();
         if (pendingPierceTargets.Count > 0)
         {
             for (int i = 0; i < pendingPierceTargets.Count; i++)
             {
                 var target = pendingPierceTargets[i];
-                if (target == null) continue;
-                damageSystem.ApplyDamage(target, pendingDamage);
+                if (!TryApplyDamageToUniqueTarget(target, appliedTargets)) continue;
                 hitCount++;
             }
         }
         else if (pendingTarget != null)
         {
-            damageSystem.ApplyDamage(pendingTarget, pendingDamage);
-            hitCount++;
+            if (TryApplyDamageToUniqueTarget(pendingTarget, appliedTargets))
+            {
+                hitCount++;
+            }
         }
 
         ApplyHitHeal(hitCount);
@@ -93,10 +95,10 @@ public partial class SlashDashController
         return true;
     }
 
-    public bool TryStartAutoSlashPierce(Transform target, Vector3 aimDirection, float aimDistance, TimingGrade grade, float damageMultiplier, List<Transform> pierceTargets)
+    public bool TryStartAutoSlashPierce(Transform target, Vector3 aimDirection, float aimDistance, TimingGrade grade, float damageMultiplier, List<Transform> pierceTargets, Vector3 dashEndPoint, bool useDashEndPoint)
     {
         if (target == null) return false;
-        if (!TryStartDash(target, aimDirection, aimDistance, spec)) return false;
+        if (!TryStartDash(target, aimDirection, aimDistance, spec, dashEndPoint, useDashEndPoint)) return false;
         if (grade == TimingGrade.Miss) return true;
         if (spec == null) return true;
 
@@ -110,20 +112,80 @@ public partial class SlashDashController
             for (int i = 0; i < pierceTargets.Count; i++)
             {
                 var candidate = pierceTargets[i];
-                if (candidate == null) continue;
-                if (!pendingPierceTargets.Contains(candidate))
-                {
-                    pendingPierceTargets.Add(candidate);
-                }
+                TryAddPendingPierceTarget(candidate);
             }
         }
 
         if (pendingPierceTargets.Count == 0 && target != null)
         {
-            pendingPierceTargets.Add(target);
+            TryAddPendingPierceTarget(target);
         }
 
         return true;
+    }
+
+    private bool TryApplyDamageToUniqueTarget(Transform target, HashSet<Transform> appliedTargets)
+    {
+        if (target == null) return false;
+
+        var identity = ResolveDamageableTargetIdentity(target);
+        if (identity == null) return false;
+        if (!appliedTargets.Add(identity)) return false;
+
+        damageSystem.ApplyDamage(target, pendingDamage);
+        return true;
+    }
+
+    private bool TryAddPendingPierceTarget(Transform candidate)
+    {
+        if (candidate == null) return false;
+
+        var candidateIdentity = ResolveDamageableTargetIdentity(candidate);
+        for (int i = 0; i < pendingPierceTargets.Count; i++)
+        {
+            var registeredIdentity = ResolveDamageableTargetIdentity(pendingPierceTargets[i]);
+            if (registeredIdentity == candidateIdentity)
+            {
+                return false;
+            }
+        }
+
+        pendingPierceTargets.Add(candidate);
+        return true;
+    }
+
+    private Transform ResolveDamageableTargetIdentity(Transform target)
+    {
+        if (target == null) return null;
+
+        var direct = target.GetComponent<DamageSystem.IDamageable>();
+        if (direct is Component directComponent)
+        {
+            return directComponent.transform;
+        }
+
+        var parent = target.GetComponentInParent<DamageSystem.IDamageable>();
+        if (parent is Component parentComponent)
+        {
+            return parentComponent.transform;
+        }
+
+        var root = target.root;
+        if (root == null)
+        {
+            return target;
+        }
+
+        var components = root.GetComponentsInChildren<MonoBehaviour>(true);
+        for (int i = 0; i < components.Length; i++)
+        {
+            if (components[i] is DamageSystem.IDamageable)
+            {
+                return components[i].transform;
+            }
+        }
+
+        return target;
     }
 
     private void ApplyHitHeal(int hitCount)

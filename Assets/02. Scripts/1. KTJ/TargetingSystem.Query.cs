@@ -54,6 +54,7 @@ public partial class TargetingSystem
 
             var diff = candidate.position - origin;
             diff.y = 0f;
+            if (diff.sqrMagnitude <= TargetCoincidentSqrThreshold) continue;
             var sqr = diff.sqrMagnitude;
             if (sqr > rangeSqr) continue;
 
@@ -84,6 +85,7 @@ public partial class TargetingSystem
 
             var diff = candidate.position - point;
             diff.y = 0f;
+            if (diff.sqrMagnitude <= TargetCoincidentSqrThreshold) continue;
             var sqr = diff.sqrMagnitude;
             if (sqr > bestSqr) continue;
 
@@ -115,6 +117,7 @@ public partial class TargetingSystem
 
             var diff = candidate.position - origin;
             diff.y = 0f;
+            if (diff.sqrMagnitude <= TargetCoincidentSqrThreshold) continue;
             var sqr = diff.sqrMagnitude;
             if (sqr > rangeSqr) continue;
 

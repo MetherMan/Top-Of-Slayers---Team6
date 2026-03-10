@@ -13,12 +13,19 @@ public partial class AutoSlashController
         }
 
         var isChainActive = IsChainActive();
+        var justExitedChain = wasChainActiveLastFrame && !isChainActive;
+        wasChainActiveLastFrame = isChainActive;
         var delta = isChainActive ? Time.unscaledDeltaTime : Time.deltaTime;
+        UpdatePostChainAttackGrace(isChainActive, justExitedChain, delta);
 
         if (!isChainActive)
         {
             ResetChainTargetConfirm();
             ResetSameTargetRelease();
+            if (justExitedChain)
+            {
+                ResetPostChainAttackState();
+            }
         }
         else
         {
@@ -50,8 +57,10 @@ public partial class AutoSlashController
             rawAimDirection = rawAimDirection.normalized;
         }
 
+        CleanupInvalidAttackTargetState();
         UpdateInitialAimStability(rawAimDirection, delta, isChainActive);
         UpdateSameTargetRelease(rawAimDirection);
+        UpdateSameTargetReattackIntent(rawAimDirection, delta, isChainActive);
 
         var searchRange = GetAttackRange();
         if (isChainActive && useChainRangeBoost)
@@ -85,7 +94,7 @@ public partial class AutoSlashController
 
         if (isChainActive && requireInputDuringChain && moveController != null)
         {
-            if (!moveController.HasAimInput(chainInputDeadZone))
+            if (!moveController.HasAimInput(chainInputDeadZone) && !HasSameTargetReattackRequest())
             {
                 ResetChainTargetConfirm();
                 ResetSameTargetRelease();
@@ -109,24 +118,11 @@ public partial class AutoSlashController
         if (dashController.IsDashing) return;
 
         var aimDirection = GetStableAimDirection(isChainActive, delta);
-        if (isChainActive && useChainAimConfirm && blockAttackWhileAimChanging)
-        {
-            var angle = Vector3.Angle(rawAimDirection, aimDirection);
-            if (angle > blockAttackAngle)
-            {
-                return;
-            }
-        }
 
         Transform target = null;
         if (isChainActive)
         {
-            if (!TryGetChainPriorityTarget(aimOrigin, rawAimDirection, searchRange, ignoreTarget, out var chainTarget, out var chainDirection))
-            {
-                return;
-            }
-
-            if (!TryConfirmChainTarget(chainTarget, chainDirection, rawAimDirection, delta, out target, out aimDirection))
+            if (!TryResolveChainAttackTarget(aimOrigin, rawAimDirection, searchRange, ignoreTarget, delta, out target, out aimDirection))
             {
                 return;
             }
@@ -143,9 +139,27 @@ public partial class AutoSlashController
 
             target = assistTarget ?? targetingSystem.GetTarget(aimOrigin, aimDirection, searchRange, ignoreTarget);
         }
+        if (!isChainActive && TryGetInitialLineAnchorTarget(aimOrigin, aimDirection, searchRange, ignoreTarget, out var anchorTarget, out var anchorDirection))
+        {
+            target = anchorTarget;
+            aimDirection = anchorDirection;
+        }
         if (target == null)
         {
             if (!isChainActive)
+            {
+                ResetInitialTargetConfirm();
+            }
+            return;
+        }
+
+        if (!IsAttackableTarget(target))
+        {
+            if (isChainActive)
+            {
+                ResetChainTargetConfirm();
+            }
+            else
             {
                 ResetInitialTargetConfirm();
             }
@@ -164,20 +178,18 @@ public partial class AutoSlashController
             ResetInitialTargetConfirm();
         }
 
-        if (isChainActive && useSameTargetRelease && !sameTargetReleased && target == lastAttackTarget)
+        if (isChainActive && useSameTargetRelease && !sameTargetReleased && !HasSameTargetReattackRequest() && AreSameAttackTargets(target, lastAttackTarget))
         {
             return;
         }
 
         var aimDistance = searchRange > 0f ? searchRange : 0f;
         var damageMultiplier = chainCombat != null ? chainCombat.GetDamageMultiplier(target) : 1f;
-        var pierceTargets = GetPierceTargets(isChainActive, aimOrigin, aimDirection, searchRange, ignoreTarget, target);
-        var usePierce = pierceTargets != null && pierceTargets.Count > 1;
-        var attack = new PendingAttack(target, aimDirection, aimDistance, autoGrade, damageMultiplier, rawAimDirection, pierceTargets, usePierce);
+        var attack = new PendingAttack(target, aimDirection, aimDistance, autoGrade, damageMultiplier, rawAimDirection, null, false, target.position, false);
 
         if (ShouldUseReadyDelay(isChainActive))
         {
-            BeginReadyDelay(attack);
+            BeginReadyDelay(attack, isChainActive);
             return;
         }
 
@@ -193,14 +205,71 @@ public partial class AutoSlashController
     private bool HasAttackAimInput(bool isChainActive)
     {
         if (moveController == null) return true;
-
-        var deadZone = chainInputDeadZone > 0f ? chainInputDeadZone : 0.1f;
-        if (isChainActive)
+        if (isChainActive && HasSameTargetReattackRequest())
         {
-            return moveController.HasAimInput(deadZone);
+            return true;
+        }
+        if (!isChainActive && HasPostChainAttackGrace())
+        {
+            return moveController.HasAimInput(GetChainInputDeadZone());
         }
 
+        var deadZone = isChainActive
+            ? GetChainInputDeadZone()
+            : GetInitialInputDeadZone();
         return moveController.HasAimInput(deadZone);
+    }
+
+    private float GetInitialInputDeadZone()
+    {
+        if (HasPostChainAttackGrace())
+        {
+            return GetChainInputDeadZone();
+        }
+
+        var baseDeadZone = chainInputDeadZone > 0f ? chainInputDeadZone : 0.1f;
+        if (!requireStrongerInputForInitialAttack)
+        {
+            return baseDeadZone;
+        }
+
+        return Mathf.Max(baseDeadZone, initialInputDeadZone);
+    }
+
+    private float GetChainInputDeadZone()
+    {
+        return chainInputDeadZone > 0f ? chainInputDeadZone : 0.1f;
+    }
+
+    private void UpdatePostChainAttackGrace(bool isChainActive, bool justExitedChain, float delta)
+    {
+        if (isChainActive)
+        {
+            postChainAttackGraceTimer = 0f;
+            return;
+        }
+
+        if (justExitedChain)
+        {
+            postChainAttackGraceTimer = Mathf.Max(0f, postChainAttackGraceTime);
+            return;
+        }
+
+        if (postChainAttackGraceTimer <= 0f) return;
+        postChainAttackGraceTimer = Mathf.Max(0f, postChainAttackGraceTimer - Mathf.Max(0f, delta));
+    }
+
+    private bool HasPostChainAttackGrace()
+    {
+        return postChainAttackGraceTimer > 0f;
+    }
+
+    // 체인 중 멈춰 있던 일반 공격 타이머를 비워 체인 종료 직후 첫 공격이 밀리지 않게 한다.
+    private void ResetPostChainAttackState()
+    {
+        cooldownTimer = 0f;
+        detectTimer = 0f;
+        ResetSameTargetRelease();
     }
 
     private void CancelAttackFlowOnDeath()
