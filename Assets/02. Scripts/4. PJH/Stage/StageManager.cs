@@ -16,8 +16,12 @@ public class StageManager : Singleton<StageManager>
     protected override void Awake()
     {
         base.Awake();
-        stageDB = StageDatabase.Instance;
+        //stageDB = StageDatabase.Instance;
         if (selectDB != null) return;
+        if (stageDB == null)
+        {
+            stageDB = StageDatabase.Instance;
+        }
 
         /*
         if (stageDB == null || stageDB.stageData == null) return;

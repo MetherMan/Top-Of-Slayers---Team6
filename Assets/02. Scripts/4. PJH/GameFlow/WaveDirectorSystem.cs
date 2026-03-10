@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class RuleDataContainer
@@ -37,6 +38,9 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
     RuleDataContainer ruleDataContainer = new RuleDataContainer();
     private bool isRoundClearResolved;
     private PlayerHP playerHp;
+
+    public event Action<int> OnWaveClear;
+    public event Action OnRoundClear;
     #endregion
 
     protected override void Awake()
@@ -132,10 +136,14 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         if (gameFlow == null) return;
 
         gameFlow.waveIndex = ruleDataContainer.waveIndex;
+
+        Debug.Log($"라운드 클리어{ruleDataContainer.waveIndex}");
+        OnWaveClear?.Invoke(ruleDataContainer.waveIndex +1);
     }
 
     public void RoundClear()
     {
+        Debug.Log("웨이브시스템 스테이지 클리어");
         if (isRoundClearResolved) return;
 
         StageManager stageManager = StageManager.Instance;
@@ -160,6 +168,8 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         stageFlow.RoundClear();
 
         ruleType.OnExit(ruleDataContainer, this);
+
+        OnRoundClear?.Invoke();
     }
     #endregion
 }
