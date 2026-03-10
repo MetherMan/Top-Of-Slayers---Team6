@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
@@ -43,7 +43,11 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
                 DontDestroyOnLoad(gameObject);
             }
         }
-        else Destroy(gameObject);
+        else if(instance != this)
+        {
+            Destroy(gameObject);
+        }
+        //else Destroy(gameObject);
     }
 
     protected virtual void OnApplicationQuit()

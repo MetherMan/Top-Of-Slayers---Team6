@@ -16,6 +16,7 @@ public class EnemySpawnManager : MonoBehaviour
     [SerializeField] private float spawnDistance = 5f;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float spawnInterval = 0.1f;
+    [SerializeField] private float waveDelay = 1f;
 
     // 몬스터 수 관련은 몬스터매니저 같은 곳에서 하는 것이 좋을듯함
     private int monsterCount;
@@ -145,13 +146,10 @@ public class EnemySpawnManager : MonoBehaviour
         aliveEnemyIds.Clear();
     }
 
-    private IEnumerator Start()
+    private void Start()
     {
         monsterCount = 0;
-
-        yield return new WaitForSeconds(1f);
-
-        WaveStart();
+        StartCoroutine(WaveDelay());
     }
 
     private void WaveStart()
@@ -218,7 +216,7 @@ public class EnemySpawnManager : MonoBehaviour
                 dirIndex = 0;
             }
 
-            yield return new WaitForSeconds(spawnInterval); // 스폰 간격
+            yield return new WaitForSecondsRealtime(spawnInterval); // 스폰 간격
         }
     }
 
@@ -265,7 +263,7 @@ public class EnemySpawnManager : MonoBehaviour
         if (monsterCount > 0) return;
 
         currentRound++;
-        StageFlowManager.Instance.waveIndex = currentRound + 1;
+        StageFlowManager.Instance.waveIndex = currentRound;
 
         if (currentRound >= stageSO.roundDatas.Count)
         {
@@ -273,6 +271,12 @@ public class EnemySpawnManager : MonoBehaviour
             return;
         }
 
+        StartCoroutine(WaveDelay());
+    }
+
+    private IEnumerator WaveDelay()
+    {
+        yield return new WaitForSeconds(waveDelay);
         WaveStart();
     }
 
