@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -137,8 +136,6 @@ public class AddressableManager : Singleton<AddressableManager>
             await Addressables.DownloadDependenciesAsync(key, true)
                 .ToUniTask(progress: progressProvider);
 
-            //loadingText.text = $"{Math.Ceiling(totalMB * 100) / 100}" +
-            //    $" / {Math.Ceiling(totalMB * 100) / 100} MB";
             Debug.Log("다운로드 완료");
         }
 
