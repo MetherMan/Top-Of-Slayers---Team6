@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7635594683976371408}
   - component: {fileID: 325291485828146066}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: BackGround
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -87,7 +87,7 @@ GameObject:
   - component: {fileID: 7394082740453088852}
   - component: {fileID: 8255676525677929103}
   m_Layer: 5
-  m_Name: ItemName
+  m_Name: ItemNameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -142,8 +142,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: bd723adefb7aaea43987d805feb3b833, type: 2}
-  m_sharedMaterial: {fileID: 901040724057838567, guid: bd723adefb7aaea43987d805feb3b833,
+  m_fontAsset: {fileID: 11400000, guid: 1f71f7e42e559ad419043138ed1d14ec, type: 2}
+  m_sharedMaterial: {fileID: 9122802740971022442, guid: 1f71f7e42e559ad419043138ed1d14ec,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -207,7 +207,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &1035384485147368830
@@ -244,7 +244,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0, y: 27}
+  m_AnchoredPosition: {x: 0, y: 27}
   m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3145742957059573674
@@ -372,7 +372,7 @@ GameObject:
   - component: {fileID: 2984161911092108964}
   - component: {fileID: 2435797670368099232}
   m_Layer: 5
-  m_Name: ItemCount
+  m_Name: ItemCountText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -507,7 +507,7 @@ GameObject:
   - component: {fileID: 473466815000729657}
   - component: {fileID: 8378130427292212125}
   m_Layer: 5
-  m_Name: ItemLevel
+  m_Name: ItemLevelText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -661,9 +661,9 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2106929892536896901}
+  - {fileID: 6484496074674340153}
   - {fileID: 5242563327175782165}
   - {fileID: 9100412118783293084}
-  - {fileID: 6484496074674340153}
   - {fileID: 8564005468599409008}
   - {fileID: 3986001959936398575}
   m_Father: {fileID: 0}
