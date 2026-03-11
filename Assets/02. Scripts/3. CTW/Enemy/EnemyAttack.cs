@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyAttack : IEnemyState
 {
@@ -192,7 +192,7 @@ public class EnemyAttack : IEnemyState
         playerPos.y = 0f;
 
         float distance = Vector3.Distance(enemyPos, playerPos);
-        if (distance <= enemy.attackRange + 0.2f)
+        if (distance <= enemy.attackRange + 1f)
         {
             EnemyBase.TryApplyPlayerDamage(playerTransform.gameObject, enemy.attackDamage);
         }

@@ -31,14 +31,14 @@ public class EnemySpawnManager : MonoBehaviour
             case SpawnPattern.Diagonal:
                 return new Vector3[]
                 {
-                    new Vector3(1, 0, 1),
-                    new Vector3(-1, 0, 1),
-                    new Vector3(1, 0, -1),
-                    new Vector3(-1, 0, -1),
-                    new Vector3(2, 0, 2),
-                    new Vector3(-2, 0, 2),
-                    new Vector3(2, 0, -2),
-                    new Vector3(-2, 0, -2)
+                    new Vector3(2, 0, 1),
+                    new Vector3(-2, 0, 1),
+                    new Vector3(2, 0, -1),
+                    new Vector3(-2, 0, -1),
+                    new Vector3(4, 0, 2),
+                    new Vector3(-4, 0, 2),
+                    new Vector3(4, 0, -2),
+                    new Vector3(-4, 0, -2)
                 };
 
             case SpawnPattern.Cross:
@@ -46,12 +46,12 @@ public class EnemySpawnManager : MonoBehaviour
                 {
                     Vector3.forward,
                     Vector3.back,
-                    Vector3.left,
-                    Vector3.right,
+                    Vector3.left * 2,
+                    Vector3.right * 2,
                     Vector3.forward*2,
                     Vector3.back*2,
-                    Vector3.left*2,
-                    Vector3.right*2
+                    Vector3.left*4,
+                    Vector3.right*4
                 };
 
             case SpawnPattern.Around:
@@ -59,56 +59,56 @@ public class EnemySpawnManager : MonoBehaviour
                 {
                     Vector3.forward,
                     Vector3.back,
-                    Vector3.left,
-                    Vector3.right,
-                    new Vector3(1, 0, 1),
-                    new Vector3(-1, 0, 1),
-                    new Vector3(1, 0, -1),
-                    new Vector3(-1, 0, -1)
+                    Vector3.left * 2,
+                    Vector3.right * 2,
+                    new Vector3(2, 0, 1),
+                    new Vector3(-2, 0, 1),
+                    new Vector3(2, 0, -1),
+                    new Vector3(-2, 0, -1)
                 };
 
             case SpawnPattern.Up:
                 return new Vector3[]
                 {
                     Vector3.forward,
-                    new Vector3(1, 0, 1),
-                    new Vector3(-1, 0, 1),
+                    new Vector3(2, 0, 1),
+                    new Vector3(-2, 0, 1),
                     Vector3.forward*2,
-                    new Vector3(1, 0, 2),
-                    new Vector3(-1, 0, 2)
+                    new Vector3(2, 0, 2),
+                    new Vector3(-2, 0, 2)
                 };
 
             case SpawnPattern.Down:
                 return new Vector3[]
                 {
                     Vector3.back,
-                    new Vector3(1, 0, -1),
-                    new Vector3(-1, 0, -1),
+                    new Vector3(2, 0, -1),
+                    new Vector3(-2, 0, -1),
                     Vector3.back*2,
-                    new Vector3(1, 0, -2),
-                    new Vector3(-1, 0, -2)
+                    new Vector3(2, 0, -2),
+                    new Vector3(-2, 0, -2)
                 };
 
             case SpawnPattern.Left:
                 return new Vector3[]
                 {
-                    Vector3.left,
-                    new Vector3(-1, 0, 1),
-                    new Vector3(-1, 0, -1),
-                    Vector3.left*2,
+                    Vector3.left * 2,
                     new Vector3(-2, 0, 1),
-                    new Vector3(-2, 0, -1)
+                    new Vector3(-2, 0, -1),
+                    Vector3.left*4,
+                    new Vector3(-4, 0, 1),
+                    new Vector3(-4, 0, -1)
                 };
 
             case SpawnPattern.Right:
                 return new Vector3[]
                 {
-                    Vector3.right,
-                    new Vector3(1, 0, 1),
-                    new Vector3(1, 0, -1),
-                    Vector3.right*2,
+                    Vector3.right *2,
                     new Vector3(2, 0, 1),
-                    new Vector3(2, 0, -1)
+                    new Vector3(2, 0, -1),
+                    Vector3.right*4,
+                    new Vector3(4, 0, 1),
+                    new Vector3(4, 0, -1)
                 };
         }
 
