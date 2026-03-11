@@ -3,9 +3,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DG.Tweening;
 
 public class WaveUIAnim : MonoBehaviour
 {
+    [SerializeField] private CanvasGroup panelGroup;
     [SerializeField] private RectTransform wavePanel;
     [SerializeField] private RectTransform waveContainer;
 
@@ -16,6 +18,9 @@ public class WaveUIAnim : MonoBehaviour
     [SerializeField] private TextMeshProUGUI prevText;
     [SerializeField] private TextMeshProUGUI currentText;
     [SerializeField] private TextMeshProUGUI nextText;
+
+    [SerializeField] private TextMeshProUGUI clearText;
+    [SerializeField] private TextMeshProUGUI failText;
 
     [Header("패널 설정")]
     [SerializeField] private float expandTime;
@@ -49,9 +54,15 @@ public class WaveUIAnim : MonoBehaviour
         }
         prevSlot.gameObject.SetActive(false);
         nextSlot.gameObject.SetActive(false);
+
+        clearText.gameObject.SetActive(false);
+        failText.gameObject.SetActive(false);
     }
     public void PlayWavePanel(int currentWave)
     {
+        panelGroup.DOKill();
+        panelGroup.alpha = 1.0f;
+
         if(currentWave == 1)
         {
             SetNormalWave(1);
@@ -68,7 +79,7 @@ public class WaveUIAnim : MonoBehaviour
     {
         if (wave - 1 >= endWave)
         {
-            yield return StartCoroutine(ClearCoroutine());
+            //yield return StartCoroutine(ClearCoroutine());
             yield break;
         }
         Debug.Log($"현재 웨이브{wave}");
@@ -86,12 +97,16 @@ public class WaveUIAnim : MonoBehaviour
 
         waveContainer.anchoredPosition = originPos;
 
-        yield return StartCoroutine(AdjustSize(expandSize));
+        //yield return StartCoroutine(AdjustSize(expandSize));
+        yield return wavePanel.DOSizeDelta(new Vector2(expandSize, wavePanel.sizeDelta.y), expandTime)
+            .SetEase(Ease.OutBack).SetUpdate(true).WaitForCompletion();
 
         yield return new WaitForSecondsRealtime(0.2f);
 
         Vector2 nextPos = originPos + Vector2.left * moveDistance;
-        yield return StartCoroutine(MoveContainer(nextPos));
+        //yield return StartCoroutine(MoveContainer(nextPos));
+        yield return waveContainer.DOAnchorPos(nextPos, moveTime)
+            .SetEase(Ease.OutCubic).SetUpdate(true).WaitForCompletion();
 
 
         prevText.text = (wave - 1).ToString();
@@ -107,18 +122,11 @@ public class WaveUIAnim : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(stayTime);
 
-        yield return StartCoroutine(AdjustSize(normalSize));
-
         SetNormalWave(wave);
-    }
 
-    private IEnumerator ClearCoroutine()
-    {
-        prevSlot.SetActive(false);
-        currentSlot.SetActive(false);
-        nextSlot.SetActive(false);
-
-        yield return StartCoroutine(AdjustSize(expandSize));
+        //yield return StartCoroutine(AdjustSize(normalSize));
+        yield return wavePanel.DOSizeDelta(new Vector2(normalSize, wavePanel.sizeDelta.y), expandTime)
+            .SetEase(Ease.OutBack).SetUpdate(true).WaitForCompletion();
     }
 
     private IEnumerator AdjustSize(float nextSize)
@@ -155,7 +163,7 @@ public class WaveUIAnim : MonoBehaviour
 
     public void SetNormalWave(int wave)
     {
-        wavePanel.sizeDelta = new Vector2(normalSize, wavePanel.sizeDelta.y);
+        //wavePanel.sizeDelta = new Vector2(normalSize, wavePanel.sizeDelta.y);
 
         prevSlot.SetActive(false);
         nextSlot.SetActive(false);
@@ -164,5 +172,36 @@ public class WaveUIAnim : MonoBehaviour
         currentText.text = wave.ToString();
 
         waveContainer.anchoredPosition = originPos;
+
+        panelGroup.DOKill();
+
+        panelGroup.DOFade(0, 0.5f).SetDelay(1f).SetUpdate(true);
+    }
+
+    public void PlayClearPanel()
+    {
+        panelGroup.DOKill();
+        panelGroup.alpha = 1.0f;
+
+        if (waveCoroutine != null)
+        {
+            StopCoroutine(waveCoroutine);
+        }
+
+        waveCoroutine = StartCoroutine(ResultCoroutine(true));
+    }
+
+    private IEnumerator ResultCoroutine(bool isClear)
+    {
+        prevSlot.SetActive(false);
+        currentSlot.SetActive(false);
+        nextSlot.SetActive(false);
+
+        //yield return StartCoroutine(AdjustSize(expandSize));
+        yield return wavePanel.DOSizeDelta(new Vector2(expandSize, wavePanel.sizeDelta.y), expandTime)
+            .SetEase(Ease.OutBack).SetUpdate(true).WaitForCompletion();
+
+        clearText.gameObject.SetActive(isClear);
+        failText.gameObject.SetActive(!isClear);
     }
 }
