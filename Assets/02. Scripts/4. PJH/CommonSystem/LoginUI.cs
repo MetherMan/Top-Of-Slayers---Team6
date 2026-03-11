@@ -15,6 +15,7 @@ public class LoginUI : Singleton<LoginUI>
     [SerializeField] GameObject findUI;
 
     public System.Action<Tuple<string, string>> onClickLogin;
+    public System.Action<Tuple<string, string>> onClickCreate;
 
     [Header("로그인 입력란")]
     //TMP_InputField : console.Readline(); 같이 사용자가 입력한 값 받아오는 타입
@@ -128,6 +129,8 @@ public class LoginUI : Singleton<LoginUI>
             }
             else
             {
+                onClickCreate?.Invoke(new Tuple<string, string>(upId, upPw));
+                //조건 확인 후 실행
                 SignupUIClose();
             }
         });
