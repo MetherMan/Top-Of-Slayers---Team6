@@ -143,7 +143,8 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 
     public void RoundClear()
     {
-        Debug.Log("웨이브시스템 스테이지 클리어");
+        OnRoundClear?.Invoke();
+
         if (isRoundClearResolved) return;
 
         StageManager stageManager = StageManager.Instance;
@@ -168,8 +169,6 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         stageFlow.RoundClear();
 
         ruleType.OnExit(ruleDataContainer, this);
-
-        OnRoundClear?.Invoke();
     }
     #endregion
 }
