@@ -42,13 +42,11 @@ public class WaveUI : MonoBehaviour
 
     private void ShowWaveText(int wave)
     {
-        Debug.Log("쇼 웨이브 패널");
         UIAnim.PlayWavePanel(wave);
     }
 
     private void ShowClearText()
     {
-        Debug.Log("스테이지 클리어");
-        clearText.gameObject.SetActive(true);
+        UIAnim.PlayClearPanel();
     }
 }
