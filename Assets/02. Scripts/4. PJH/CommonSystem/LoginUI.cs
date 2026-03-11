@@ -19,7 +19,7 @@ public class LoginUI : Singleton<LoginUI>
 
     [Header("로그인 입력란")]
     //TMP_InputField : console.Readline(); 같이 사용자가 입력한 값 받아오는 타입
-    [SerializeField] TMP_InputField inputID;
+    [SerializeField] TMP_InputField inputEmail;
     [SerializeField] TMP_InputField inputPW;
 
     [Header("로그인 버튼")]
@@ -29,7 +29,7 @@ public class LoginUI : Singleton<LoginUI>
     [SerializeField] Button googleBtn;
 
     [Header("회원가입 입력란")]
-    [SerializeField] TMP_InputField upInputID;
+    [SerializeField] TMP_InputField upInputEmail;
     [SerializeField] TMP_InputField upInputPW;
     [SerializeField] TMP_InputField upInputRePW;
     [SerializeField] Button signupCheckBtn;
@@ -71,22 +71,22 @@ public class LoginUI : Singleton<LoginUI>
         {
             //람다식 안에 외부 변수를 사용하면 클로저가 형성되어 해당 변수들이 메모리에 더 오래 남을 수 있다.
             //LoginUI가 씬에서 계속 유지되는 동안에는 큰 문제가 되지 않는다.
-            string id = inputID.text;
+            string email = inputEmail.text;
             string pw = inputPW.text;
 
-            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(pw))
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(pw))
             {
-                confirmText.text = "아이디 / 비밀번호를 입력하시오";
+                confirmText.text = "이메일 / 비밀번호를 입력하시오";
                 ConfirmUIOpen();
             }
-            else if (id.Trim().Length < 5 || pw.Trim().Length < 8)
+            else if (pw.Trim().Length < 6)
             {
-                confirmText.text = "아이디 최소 5자 / 비밀번호 최소 8자";
+                confirmText.text = "비밀번호 최소 6자";
                 ConfirmUIOpen();
             }
             else
             {
-                this.onClickLogin?.Invoke(new Tuple<string, string>(id, pw));
+                this.onClickLogin?.Invoke(new Tuple<string, string>(email, pw));
 
                 //if ()
                 //{
@@ -105,7 +105,7 @@ public class LoginUI : Singleton<LoginUI>
         signupCheckBtn.onClick.AddListener(() =>
         {
             //아이디, 패스워드 확인 후
-            string upId = upInputID.text;
+            string upId = upInputEmail.text;
             string upPw = upInputPW.text;
             string upRePw = upInputRePW.text;
 
@@ -116,9 +116,9 @@ public class LoginUI : Singleton<LoginUI>
                 confirmText.text = "아이디, 비밀번호, 확인란이 비어있습니다";
                 ConfirmUIOpen();
             }
-            else if (upId.Trim().Length < 5 || upPw.Trim().Length < 8)
+            else if (upId.Trim().Length < 5 || upPw.Trim().Length < 6)
             {
-                confirmText.text = "아이디 최소 5자, 비밀번호 최소 8자";
+                confirmText.text = "아이디 최소 5자, 비밀번호 최소 6자";
                 ConfirmUIOpen();
             }
             else if (upPw.CompareTo(upRePw) != 0)

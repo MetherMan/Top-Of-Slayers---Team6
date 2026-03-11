@@ -56,12 +56,12 @@ public class FirebaseManager : Singleton<FirebaseManager>
         {
             if (task.IsCanceled)
             {
-                Debug.LogError("CreateUserWithEmailAndPasswordAsync was canceled.");
+                //Debug.LogError("CreateUserWithEmailAndPasswordAsync was canceled.");
                 return;
             }
             if (task.IsFaulted)
             {
-                Debug.LogError("CreateUserWithEmailAndPasswordAsync encountered an error : "
+                Debug.LogWarning("CreateUserWithEmailAndPasswordAsync encountered an error : "
                     + task.Exception);
                 return;
             }
@@ -80,12 +80,12 @@ public class FirebaseManager : Singleton<FirebaseManager>
         {
             if (task.IsCanceled)
             {
-                Debug.LogError("SignInWithEmailAndPasswordAsync was cancled.");
+                //Debug.LogError("SignInWithEmailAndPasswordAsync was cancled.");
                 return;
             }
             if (task.IsFaulted)
             {
-                Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: "
+                Debug.LogWarning("SignInWithEmailAndPasswordAsync encountered an error: "
                     + task.Exception);
             }
 
