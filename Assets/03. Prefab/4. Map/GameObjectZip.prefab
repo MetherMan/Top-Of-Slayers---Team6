@@ -1241,7 +1241,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DontDestroy: 1
-  TWCanvas: {fileID: 8782992768898579226}
+  DamageCanvas: {fileID: 8782992768898579226}
   damageText: {fileID: 7678568720223454366, guid: 4a0c6e02ef6a00f4b97d81c9ce15f64f,
     type: 3}
 --- !u!1 &7541103744938877253
@@ -1642,6 +1642,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7617946021949458432, guid: 60de70d6ee03e8c4b831d6a6dd031fd8,
+        type: 3}
+      propertyPath: playerHP
+      value: 
+      objectReference: {fileID: 3633349198474297088}
+    - target: {fileID: 7617946021949458432, guid: 60de70d6ee03e8c4b831d6a6dd031fd8,
+        type: 3}
+      propertyPath: playerTransform
+      value: 
+      objectReference: {fileID: 6337819778507379299}
     - target: {fileID: 8866657619367858892, guid: 60de70d6ee03e8c4b831d6a6dd031fd8,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -1855,6 +1865,18 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 603c4061ca3516d4687cfdd099487f97, type: 3}
+--- !u!114 &3633349198474297088 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5553049373299705317, guid: 603c4061ca3516d4687cfdd099487f97,
+    type: 3}
+  m_PrefabInstance: {fileID: 9186317547215960805}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7eb8213819a0d34f984371fa48598e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &6337819778507379299 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2920635628311685254, guid: 603c4061ca3516d4687cfdd099487f97,
