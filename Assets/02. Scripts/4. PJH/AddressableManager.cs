@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -118,9 +117,8 @@ public class AddressableManager : Singleton<AddressableManager>
 
             //정밀도 손상? Mathf -> Math
             LoginUI.Instance.downloadText.text
-                = $"필수 리소스 \n" +
-                $"{Math.Ceiling(totalMB * 100) / 100}MB \n" +
-                $"다운로드가 필요합니다";
+                = $"필수 리소스 {Math.Ceiling(totalMB * 100) / 100}MB \n" +
+                    $"다운로드가 필요합니다";
             LoginUI.Instance.DownloadUIOpen();
 
             await UniTask.WaitUntil(() => LoginSceneManager.Instance.confirmDownload);
@@ -137,8 +135,6 @@ public class AddressableManager : Singleton<AddressableManager>
             await Addressables.DownloadDependenciesAsync(key, true)
                 .ToUniTask(progress: progressProvider);
 
-            //loadingText.text = $"{Math.Ceiling(totalMB * 100) / 100}" +
-            //    $" / {Math.Ceiling(totalMB * 100) / 100} MB";
             Debug.Log("다운로드 완료");
         }
 

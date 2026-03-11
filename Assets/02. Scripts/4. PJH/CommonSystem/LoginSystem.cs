@@ -17,8 +17,7 @@ public class LoginSystem : MonoBehaviour
 
     private void Start()
     {
-        LoginUI.Instance.onClickLogin -= PushUserData;
-        LoginUI.Instance.onClickLogin += PushUserData;
+        RefreshEvent();
     }
 
     void Update()
@@ -27,10 +26,30 @@ public class LoginSystem : MonoBehaviour
     }
 
     #region method
+    //로그인 확인
     public void PushUserData(Tuple<string, string> data)
     {
-        Debug.LogFormat("<color=add8e6ff>id : {0}, pw : {1}</color>", data.Item1, data.Item2);
+        Debug.LogFormat("<color=fff>id : {0}, pw : {1}</color>", data.Item1, data.Item2);
+
+        //오류, 버그 검증 x 일단 테스트
+        FirebaseManager.Instance.Login(data);
     }
 
+    //회원가입 확인
+    public void PushCreateData(Tuple<string, string> data)
+    {
+        Debug.LogFormat("<color=green>create id : {0}, pw : {1}</color>", data.Item1, data.Item2);
+
+        FirebaseManager.Instance.CreateID(data);
+    }
+
+    private void RefreshEvent()
+    {
+        LoginUI.Instance.onClickLogin -= PushUserData;
+        LoginUI.Instance.onClickLogin += PushUserData;
+
+        LoginUI.Instance.onClickCreate -= PushCreateData;
+        LoginUI.Instance.onClickCreate += PushCreateData;
+    }
     #endregion
 }
