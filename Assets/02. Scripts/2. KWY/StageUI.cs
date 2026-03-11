@@ -9,6 +9,8 @@ public class StageUI : MonoBehaviour
     {
         //int clearStage = 스테이지매니저.현재클리어스테이지 메서드();
 
-        //stageText.text = $"Stage{clearStage + 1}";
+        //int currentStage = clearStage + 1;
+
+        //stageText.text = $"{currentStage}Stage";
     }
 }
