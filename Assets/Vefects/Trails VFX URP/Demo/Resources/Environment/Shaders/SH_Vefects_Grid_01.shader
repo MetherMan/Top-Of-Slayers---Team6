@@ -73,7 +73,7 @@ Shader "/_Vefects_/SH_Vefects_Grid_01"
 		
 
 		HLSLINCLUDE
-		#pragma target 4.5
+		#pragma target 3.5
 		#pragma prefer_hlslcc gles
 		// ensure rendering platforms toggle list is visible
 

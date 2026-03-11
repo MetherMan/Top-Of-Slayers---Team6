@@ -41,6 +41,12 @@ public class LoginUI : Singleton<LoginUI>
     [SerializeField] GameObject confirmUI;
     [SerializeField] TextMeshProUGUI confirmText;
     [SerializeField] Button confirmBtn;
+
+    [Header("Download UI")]
+    [SerializeField] GameObject downloadUI;
+    [SerializeField] public TextMeshProUGUI downloadText;
+    [SerializeField] Button yBtn;
+    [SerializeField] Button nBtn;
     #endregion
 
     protected override void Awake()
@@ -128,13 +134,7 @@ public class LoginUI : Singleton<LoginUI>
 
         cancleBtn.onClick.AddListener(SignupUIClose);
 
-        //구글회원가입 || 로그인
-        googleBtn.onClick.AddListener(() =>
-        {
-
-        });
-
-        //
+        //일단 보류
         findBtn.onClick.AddListener(() =>
         {
 
@@ -142,6 +142,15 @@ public class LoginUI : Singleton<LoginUI>
 
         //알림문구
         confirmBtn.onClick.AddListener(ConfirmUIClose);
+
+        yBtn.onClick.AddListener(() =>
+        {
+            LoginSceneManager.Instance.confirmDownload = true;
+            DownloadUIClose();
+        });
+
+        //어플리케이션 종료 : https://intunknown.tistory.com/entry/unity-%EA%B2%8C%EC%9E%84%EC%A2%85%EB%A3%8C-%EB%B2%84%ED%8A%BC-%EB%A7%8C%EB%93%A4%EA%B8%B0
+        nBtn.onClick.AddListener(Application.Quit);
     }
 
     public void CompleteLoding()
@@ -192,6 +201,18 @@ public class LoginUI : Singleton<LoginUI>
     {
         panel.SetActive(false);
         confirmUI.SetActive(false);
+    }
+
+    public void DownloadUIOpen()
+    {
+        panel.SetActive(true);
+        downloadUI.SetActive(true);
+    }
+
+    public void DownloadUIClose()
+    {
+        panel.SetActive(false);
+        downloadUI.SetActive(false);
     }
     #endregion
 
