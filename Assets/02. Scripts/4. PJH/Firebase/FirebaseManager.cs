@@ -26,9 +26,8 @@ public class FirebaseManager : Singleton<FirebaseManager>
     FirebaseFirestore db;
 
     //유저 게임 데이터
-    Dictionary<string, InventoryItem> iventory = new Dictionary<string, InventoryItem>();
+    List<InventoryItem> iventory = new List<InventoryItem>();
     List<InventoryItem> equipment = new List<InventoryItem>();
-    List<int> cost = new List<int>();
 
     //로그인 시 : User.userId keyValue / iventory, equipment 데이터 가져오기
 
@@ -140,7 +139,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
                 Debug.LogFormat("Firebase user created successfully : {0} ({1})",
                     result.User.DisplayName, result.User.UserId);
 
-                CreateUserData(result);
+                CreateUserData(result); //파이어베이스 데이터 생성
 
                 message = "계정 생성 성공";
                 createFailedEvent?.Invoke(message, true);
@@ -254,19 +253,132 @@ public class FirebaseManager : Singleton<FirebaseManager>
     private void CreateUserData(AuthResult result)
     {
         DocumentReference documentReference = db.Collection("UserData").Document(result.User.UserId);
-        Dictionary<string, object> user = new Dictionary<string, object>()
+        Dictionary<string, object> initialization = new Dictionary<string, object>()
         {
-            { "userId", result.User.UserId },
-            { "inventory", iventory }, //아이템
-            { "equipment", equipment}, //착용장비
-            { "cost", cost } //골드, 행동력
+            { "level", 1 },
+            { "Exp", 0 }
+        };
+
+        Dictionary<string, object> inventory = new Dictionary<string, object>()
+        {
+            { "0", null }
+        };
+
+        Dictionary<string, object> equipment = new Dictionary<string, object>()
+        {
+            { "weapon", null },
+            { "shoes", null },
+            { "gloves", null },
+            { "armor", null },
+            { "emblem", null }
+        };
+
+        Dictionary<string, object> cost = new Dictionary<string, object>()
+        {
+            { "gold", 0 }, //골드
+            { "energe", 60 } //행동력
+        };
+
+        Dictionary<string, object> user = new Dictionary<string, object>
+        {
+            { "User", initialization },
+            { "Inventory", inventory },
+            { "Equipment", equipment },
+            { "cost", cost }
         };
 
         documentReference.SetAsync(user).ContinueWithOnMainThread(task =>
         {
-            Debug.LogFormat("Added data to the user {0} document in the UserData collection."
-                , result.User.UserId);
+            if (task.IsCompleted && task.IsFaulted)
+            {
+                Debug.Log("Firebase: 유저 데이터 생성 성공");
+            }
+            else
+            {
+                Debug.LogError("Firebase: 유저데이터 생성 실패");
+            }
         });
+    }
+
+    public void GetUserData(string uid)
+    {
+        CollectionReference userRef = db.Collection("UserData");
+        userRef.GetSnapshotAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted && task.IsFaulted)
+            {
+                QuerySnapshot snapshot = task.Result;
+                foreach (DocumentSnapshot document in snapshot.Documents)
+                {
+                    if (document.Id == uid)
+                    {
+                        Dictionary<string, object> documentDictionary = document.ToDictionary();
+                        RefreshUserData(documentDictionary);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                Debug.Log("GetSnapshotAsync failed");
+            }
+        });
+    }
+
+    private void RefreshUserData(Dictionary<string, object> uid)
+    {
+        foreach (KeyValuePair<string, object> user in uid)
+        {
+            if (user.Key == "User")
+            {
+                Dictionary<string, object> userDetail = user.Value as Dictionary<string, object>;
+                if (userDetail != null)
+                {
+                    
+                }
+                else
+                {
+                    Debug.LogWarning("User Data Refresh Failed");
+                }
+            }
+            else if (user.Key == "Inventory")
+            {
+                Dictionary<string, object> inventory = user.Value as Dictionary<string, object>;
+                if (inventory != null)
+                {
+
+                }
+                else
+                {
+                    Debug.LogWarning("Inventory Data Refresh Failed");
+                }
+            }
+            else if (user.Key == "Equipment")
+            {
+                Dictionary<string, object> equipment = user.Value as Dictionary<string, object>;
+                if (equipment != null)
+                {
+
+                }
+                else
+                {
+                    Debug.LogWarning("Equipment Data Refresh Failed");
+                }
+            }
+            else if (user.Key == "cost")
+            {
+                Dictionary<string, object> cost = user.Value as Dictionary<string, object>;
+                if (cost != null)
+                {
+
+                }
+                else
+                {
+                    Debug.LogWarning("Cost Data Refresh Failed");
+                }
+            }
+            
+        }
     }
 
     public void FirebaseRefreshItem(string uid, bool get)
