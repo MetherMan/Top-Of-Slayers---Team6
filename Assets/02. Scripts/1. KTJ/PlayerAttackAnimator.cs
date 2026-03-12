@@ -268,7 +268,6 @@ public class PlayerAttackAnimator : MonoBehaviour
         if (moveController != null)
         {
             moveController.ClearSlashFacingDirection();
-            moveController.BlockInputRotationUntilRelease();
             moveController.RemoveRotationLock();
         }
     }
