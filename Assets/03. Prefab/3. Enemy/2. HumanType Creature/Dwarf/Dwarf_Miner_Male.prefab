@@ -1869,7 +1869,7 @@ GameObject:
   - component: {fileID: -1526411456589289686}
   m_Layer: 0
   m_Name: Dwarf_Miner_Male
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1949,7 +1949,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targeting: {fileID: 0}
   enemyBase: {fileID: -6105327917454614523}
-  hp: 30
+  enemySO: {fileID: 0}
+  maxHp: 30
+  currentHp: 0
 --- !u!114 &1485879726896468726
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2021,6 +2023,13 @@ MonoBehaviour:
   rb: {fileID: 0}
   enemyAnim: {fileID: 0}
   enemyStateMachine: {fileID: 0}
+  useChainChaseSlow: 1
+  chainChaseSlowRadius: 7
+  chainChaseSlowMultiplier: 0.1
+  useChainReactionAnimSlow: 1
+  chainReactionAnimSpeed: 0.72
+  chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: 82de04cf1519a0541ac197375496c165, type: 2}
 --- !u!114 &-1526411456589289686
 MonoBehaviour:

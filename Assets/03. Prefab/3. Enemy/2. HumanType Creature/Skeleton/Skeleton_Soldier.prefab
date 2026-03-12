@@ -1145,7 +1145,7 @@ GameObject:
   - component: {fileID: -995676803996032127}
   m_Layer: 7
   m_Name: Skeleton_Soldier
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1293,6 +1293,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: 515fad8995eabf340b31760fb54774a8, type: 2}
 --- !u!114 &2095622087195270289
 MonoBehaviour:

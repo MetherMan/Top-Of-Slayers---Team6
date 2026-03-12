@@ -2739,7 +2739,7 @@ GameObject:
   - component: {fileID: -1770043671593908112}
   m_Layer: 7
   m_Name: SnowDeer
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2887,6 +2887,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: 4afbf99d9471c384a8ebe33383faf02d, type: 2}
 --- !u!114 &-2676654042742153160
 MonoBehaviour:

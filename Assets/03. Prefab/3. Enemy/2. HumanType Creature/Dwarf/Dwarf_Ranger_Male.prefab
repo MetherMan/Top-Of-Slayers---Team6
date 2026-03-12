@@ -883,7 +883,7 @@ GameObject:
   - component: {fileID: -6834139800621055489}
   m_Layer: 7
   m_Name: Dwarf_Ranger_Male
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1016,6 +1016,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: 8122f62cf0a59314984def3f12735650, type: 2}
 --- !u!114 &5984361832896142406
 MonoBehaviour:
@@ -1079,6 +1080,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: 8122f62cf0a59314984def3f12735650, type: 2}
 --- !u!1 &2174366157673076707
 GameObject:
