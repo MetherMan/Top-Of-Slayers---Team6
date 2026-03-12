@@ -144,6 +144,16 @@ public partial class AutoSlashController
             target = anchorTarget;
             aimDirection = anchorDirection;
         }
+        if (!isChainActive && target == null && TryGetCloseRangeFallbackTarget(aimOrigin, rawAimDirection, searchRange, ignoreTarget, out var closeTarget, out var closeDirection))
+        {
+            target = closeTarget;
+            aimDirection = closeDirection;
+        }
+        if (!isChainActive && target == null && TryGetPostChainGraceTarget(rawAimDirection, searchRange, ignoreTarget, out var graceTarget, out var graceDirection))
+        {
+            target = graceTarget;
+            aimDirection = graceDirection;
+        }
         if (target == null)
         {
             if (!isChainActive)
@@ -278,6 +288,7 @@ public partial class AutoSlashController
         ResetChainTargetConfirm();
         ResetInitialTargetConfirm();
         ResetSameTargetRelease();
+        ClearLastAttackAnchor();
 
         if (dashController != null && dashController.IsDashing)
         {

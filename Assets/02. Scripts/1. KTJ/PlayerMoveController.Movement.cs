@@ -9,19 +9,6 @@ public partial class PlayerMoveController
             currentInput = Vector2.zero;
             currentCommand = stopCommand;
             currentCommand?.Execute(this, deltaTime);
-            if (allowRotationWhenLocked && !useFixedUpdate && !IsRotationLocked)
-            {
-                var input = GetRealtimeInput();
-                if (input != Vector2.zero)
-                {
-                    var moveInput = new Vector3(input.x, 0f, input.y);
-                    var direction = GetMoveDirection(moveInput);
-                    if (direction != Vector3.zero)
-                    {
-                        ApplyRotation(direction);
-                    }
-                }
-            }
             UpdateMoveAnimation(Vector2.zero);
             return;
         }
@@ -50,8 +37,6 @@ public partial class PlayerMoveController
         {
             transform.position += move;
         }
-
-        ApplyRotation(moveDirection);
     }
 
     public void ApplyStop()

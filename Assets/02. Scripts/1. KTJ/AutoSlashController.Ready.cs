@@ -35,7 +35,7 @@ public partial class AutoSlashController
         OnAttackReady?.Invoke();
         if (moveController != null)
         {
-            moveController.ForceLookDirection(attack.AimDirection);
+            moveController.SetReadyFacingDirection(attack.AimDirection);
         }
         if (isReadyWaiting)
         {
@@ -80,6 +80,10 @@ public partial class AutoSlashController
         readyTimer = 0f;
         readyTotalDuration = 0f;
         pendingAttack = default;
+        if (moveController != null)
+        {
+            moveController.ClearReadyFacingDirection();
+        }
         ApplyReadyMovementLock(false);
         ApplyReadyRotationLock(false);
     }

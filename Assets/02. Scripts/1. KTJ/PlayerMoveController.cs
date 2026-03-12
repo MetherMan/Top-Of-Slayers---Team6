@@ -38,6 +38,7 @@ public partial class PlayerMoveController : MonoBehaviour
     private bool chainLockApplied;
     private bool rotationLocked;
     private int rotationLockCount;
+    private bool blockInputRotationUntilRelease;
     private float nextCameraResolveTime;
     private float equipmentMoveSpeedBonus;
     private float specMoveSpeed;
@@ -149,13 +150,13 @@ public partial class PlayerMoveController : MonoBehaviour
         if (!useFixedUpdate)
         {
             ExecuteNextCommand(Time.deltaTime);
+        }
+        else if (IsMovementBlocked() && allowRotationWhenLocked && Mathf.Approximately(Time.timeScale, 0f))
+        {
             return;
         }
 
-        if (IsMovementBlocked() && allowRotationWhenLocked && !Mathf.Approximately(Time.timeScale, 0f))
-        {
-            UpdateLockedRotation();
-        }
+        ApplyAuthoritativeRotation();
     }
 
     private void FixedUpdate()

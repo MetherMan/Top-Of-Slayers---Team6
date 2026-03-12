@@ -2,36 +2,55 @@
 
 public partial class PlayerMoveController
 {
-    private void UpdateLockedRotation()
+    private const float RotationInputReleaseDeadZone = 0.05f;
+    private bool hasReadyFacingDirection;
+    private bool hasDashFacingDirection;
+    private bool hasSlashFacingDirection;
+    private Vector3 readyFacingDirection = Vector3.forward;
+    private Vector3 dashFacingDirection = Vector3.forward;
+    private Vector3 slashFacingDirection = Vector3.forward;
+
+    private enum RotationOverrideSource
     {
-        if (IsRotationLocked) return;
-        var input = GetRealtimeInput();
-        if (input == Vector2.zero) return;
-
-        var moveInput = new Vector3(input.x, 0f, input.y);
-        var direction = GetMoveDirection(moveInput);
-        if (direction == Vector3.zero) return;
-
-        ApplyRotation(direction);
+        None = 0,
+        Ready = 1,
+        Dash = 2,
+        Slash = 3
     }
 
-    public void ForceSyncRotation()
+    public void SetReadyFacingDirection(Vector3 direction)
     {
-        var input = GetRealtimeInput();
-        if (input == Vector2.zero) return;
-
-        var moveInput = new Vector3(input.x, 0f, input.y);
-        var direction = GetMoveDirection(moveInput);
-        if (direction == Vector3.zero) return;
-
-        ApplyRotation(direction, true);
+        SetRotationOverride(RotationOverrideSource.Ready, direction);
     }
 
-    public void ForceLookDirection(Vector3 direction)
+    public void ClearReadyFacingDirection()
     {
-        direction.y = 0f;
-        if (direction.sqrMagnitude <= 0f) return;
-        ApplyRotation(direction, true);
+        ClearRotationOverride(RotationOverrideSource.Ready);
+    }
+
+    public void SetDashFacingDirection(Vector3 direction)
+    {
+        SetRotationOverride(RotationOverrideSource.Dash, direction);
+    }
+
+    public void ClearDashFacingDirection()
+    {
+        ClearRotationOverride(RotationOverrideSource.Dash);
+    }
+
+    public void SetSlashFacingDirection(Vector3 direction)
+    {
+        SetRotationOverride(RotationOverrideSource.Slash, direction);
+    }
+
+    public void ClearSlashFacingDirection()
+    {
+        ClearRotationOverride(RotationOverrideSource.Slash);
+    }
+
+    public void BlockInputRotationUntilRelease()
+    {
+        blockInputRotationUntilRelease = true;
     }
 
     public Vector3 GetAimDirection()
@@ -52,6 +71,37 @@ public partial class PlayerMoveController
         return direction.normalized;
     }
 
+    private void ApplyAuthoritativeRotation()
+    {
+        if (TryGetRotationOverride(out var overrideDirection, out var overrideSource))
+        {
+            ApplyRotation(overrideDirection, true);
+            return;
+        }
+
+        if (TryGetInputFacingDirection(false, out var inputDirection))
+        {
+            ApplyRotation(inputDirection);
+        }
+    }
+
+    private bool TryGetInputFacingDirection(bool ignoreLock, out Vector3 direction)
+    {
+        direction = Vector3.zero;
+        if (ShouldBlockInputDrivenRotation()) return false;
+        if (IsMovementBlocked() && !allowRotationWhenLocked && !ignoreLock) return false;
+        if (IsRotationLocked && !ignoreLock) return false;
+
+        var input = GetRealtimeInput();
+        if (input == Vector2.zero) return false;
+
+        var moveInput = new Vector3(input.x, 0f, input.y);
+        direction = GetMoveDirection(moveInput);
+        if (direction == Vector3.zero) return false;
+
+        return true;
+    }
+
     private void ApplyRotation(Vector3 moveDirection, bool ignoreLock = false)
     {
         if (!ignoreLock && IsRotationLocked) return;
@@ -62,14 +112,104 @@ public partial class PlayerMoveController
 
         if (cachedRigidbody != null)
         {
-            cachedRigidbody.MoveRotation(targetRotation);
+            if (useFixedUpdate && Time.inFixedTimeStep && !cachedRigidbody.isKinematic)
+            {
+                cachedRigidbody.MoveRotation(targetRotation);
+            }
+            else
+            {
+                cachedRigidbody.rotation = targetRotation;
+            }
         }
-        else
+
+        // 물리 바디 갱신 타이밍과 무관하게 같은 프레임에 루트 Transform도 바로 맞춘다.
+        transform.rotation = targetRotation;
+    }
+
+    private bool ShouldBlockInputDrivenRotation()
+    {
+        if (!blockInputRotationUntilRelease) return false;
+
+        var input = GetRealtimeInput();
+        var releaseDeadZone = Mathf.Max(RotationInputReleaseDeadZone, keyboardDeadZone);
+        if (input.sqrMagnitude <= releaseDeadZone * releaseDeadZone)
         {
-            transform.rotation = targetRotation;
+            blockInputRotationUntilRelease = false;
+            return false;
+        }
+
+        return true;
+    }
+
+    private void SetRotationOverride(RotationOverrideSource source, Vector3 direction)
+    {
+        direction.y = 0f;
+        if (direction.sqrMagnitude <= 0f) return;
+
+        var normalizedDirection = direction.normalized;
+        switch (source)
+        {
+            case RotationOverrideSource.Ready:
+                hasReadyFacingDirection = true;
+                readyFacingDirection = normalizedDirection;
+                break;
+            case RotationOverrideSource.Dash:
+                hasDashFacingDirection = true;
+                dashFacingDirection = normalizedDirection;
+                break;
+            case RotationOverrideSource.Slash:
+                hasSlashFacingDirection = true;
+                slashFacingDirection = normalizedDirection;
+                break;
         }
     }
 
+    private void ClearRotationOverride(RotationOverrideSource source)
+    {
+        if (source == RotationOverrideSource.None) return;
+
+        switch (source)
+        {
+            case RotationOverrideSource.Ready:
+                hasReadyFacingDirection = false;
+                break;
+            case RotationOverrideSource.Dash:
+                hasDashFacingDirection = false;
+                break;
+            case RotationOverrideSource.Slash:
+                hasSlashFacingDirection = false;
+                break;
+        }
+    }
+
+    private bool TryGetRotationOverride(out Vector3 direction, out RotationOverrideSource source)
+    {
+        direction = Vector3.zero;
+        source = RotationOverrideSource.None;
+
+        if (hasSlashFacingDirection)
+        {
+            direction = slashFacingDirection;
+            source = RotationOverrideSource.Slash;
+            return direction.sqrMagnitude > 0f;
+        }
+
+        if (hasDashFacingDirection)
+        {
+            direction = dashFacingDirection;
+            source = RotationOverrideSource.Dash;
+            return direction.sqrMagnitude > 0f;
+        }
+
+        if (hasReadyFacingDirection)
+        {
+            direction = readyFacingDirection;
+            source = RotationOverrideSource.Ready;
+            return direction.sqrMagnitude > 0f;
+        }
+
+        return false;
+    }
     private Vector3 GetMoveDirection(Vector3 moveInput)
     {
         if (!useCameraRelative)
