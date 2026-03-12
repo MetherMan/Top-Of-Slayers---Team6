@@ -592,7 +592,7 @@ GameObject:
   - component: {fileID: 3443377691623297108}
   m_Layer: 7
   m_Name: Skeleton_Grunt
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -740,6 +740,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: 5a03f66d0366e4d4e88d37271f05b6b9, type: 2}
 --- !u!114 &-6108627998013789750
 MonoBehaviour:

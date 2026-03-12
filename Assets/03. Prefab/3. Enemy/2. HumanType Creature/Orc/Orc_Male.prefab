@@ -1015,7 +1015,7 @@ GameObject:
   - component: {fileID: -5792590505267269387}
   m_Layer: 7
   m_Name: Orc_Male
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1163,6 +1163,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: 360cd5958e0e8c946bf7368c2ed903a9, type: 2}
 --- !u!114 &7761857038730571946
 MonoBehaviour:

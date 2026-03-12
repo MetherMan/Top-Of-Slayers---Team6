@@ -2873,7 +2873,7 @@ GameObject:
   - component: {fileID: -9076089706575337845}
   m_Layer: 7
   m_Name: ZombieDeer
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3021,6 +3021,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: 80da13049f294a54e9e627d12fb79662, type: 2}
 --- !u!114 &-4508349113630001255
 MonoBehaviour:

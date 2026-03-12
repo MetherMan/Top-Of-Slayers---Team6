@@ -3229,7 +3229,7 @@ GameObject:
   - component: {fileID: -976115710956816899}
   m_Layer: 7
   m_Name: Gryphon
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3377,6 +3377,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: 474495e97fb204647953b072c54e492c, type: 2}
 --- !u!114 &-2771847656676221242
 MonoBehaviour:

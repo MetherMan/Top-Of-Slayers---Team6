@@ -1745,7 +1745,7 @@ GameObject:
   - component: {fileID: -2804639472422143719}
   m_Layer: 7
   m_Name: Orc_Warrior_Cleaver
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1893,6 +1893,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: 218c18edadf7e9c4bbb3b55e30f39242, type: 2}
 --- !u!114 &5239530261251254003
 MonoBehaviour:

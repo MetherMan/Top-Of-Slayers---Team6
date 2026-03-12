@@ -6032,7 +6032,7 @@ GameObject:
   - component: {fileID: -7829267637278069466}
   m_Layer: 7
   m_Name: BossWybern
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6180,6 +6180,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: a6afa771b195625418adb1dfac7c807a, type: 2}
 --- !u!114 &-474383221825081
 MonoBehaviour:

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -17,6 +18,8 @@ public class EnemySpawnManager : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float spawnInterval = 0.1f;
     [SerializeField] private float waveDelay = 1f;
+    [SerializeField] private GameObject VFXPrefab;
+    [SerializeField] private float VFXDelay = 0.5f;
 
     // 몬스터 수 관련은 몬스터매니저 같은 곳에서 하는 것이 좋을듯함
     private int monsterCount;
@@ -200,10 +203,25 @@ public class EnemySpawnManager : MonoBehaviour
             Vector3 dir = spawnDirections[dirIndex];
             Vector3 spawnPos = mapCenter.position + dir * spawnDistance;
             Vector3 finalSpawnPos = OnGround(spawnPos); // 최종 스폰위치는 땅에
+
+            GameObject vfx = ObjectPoolManager.Instance.SpawnPool(VFXPrefab, finalSpawnPos, Quaternion.Euler(90f, 0, 0));
+            yield return new WaitForSecondsRealtime(VFXDelay);
+
             var enemy = enemyFactory.Create(monster, finalSpawnPos, Quaternion.identity);
             if (enemy != null)
             {
                 aliveEnemyIds.Add(enemy.GetInstanceID());
+
+                Collider collider = enemy.GetComponent<Collider>();
+                if(collider != null) collider.enabled = false;
+
+                Vector3 startPos = finalSpawnPos - Vector3.up * 1.5f;
+                enemy.transform.position = startPos;
+
+                enemy.transform.DOMoveY(finalSpawnPos.y, 0.4f).SetEase(Ease.OutBack).OnComplete(()=>
+                {
+                    if (collider != null) collider.enabled = true;
+                }) ;
             }
 
             monsterCount++;
