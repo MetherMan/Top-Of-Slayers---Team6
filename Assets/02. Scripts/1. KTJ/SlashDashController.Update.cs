@@ -32,6 +32,10 @@ public partial class SlashDashController
 
         var move = dashDirection * step;
         Move(move);
+        if (!impactTriggered)
+        {
+            SyncDashFacing();
+        }
         TryTriggerContactStop(previousPosition, transform.position);
 
         dashTimer -= delta;
@@ -44,7 +48,6 @@ public partial class SlashDashController
             StopDashPathVfx(keepDashPathVfxAfterDash);
             RestorePhysics();
             SetMovementLock(false);
-            SyncMoveRotation();
             ApplyPendingDamageSafely();
         }
     }

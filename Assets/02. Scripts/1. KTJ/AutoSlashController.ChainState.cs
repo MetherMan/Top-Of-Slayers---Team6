@@ -11,6 +11,9 @@ public partial class AutoSlashController
     }
 
     private Transform lastAttackTarget;
+    private Transform lastAttackAnchorTarget;
+    private Vector3 lastAttackAnchorPosition;
+    private bool hasLastAttackAnchor;
     private bool sameTargetReleased = true;
     private Vector3 lastAttackAimDirection = Vector3.forward;
     private bool hasLastAttackAim;
@@ -57,6 +60,27 @@ public partial class AutoSlashController
         if (chainTarget == null) return attackTarget;
         if (!AreSameAttackTargets(attackTarget, chainTarget)) return null;
         return chainTarget;
+    }
+
+    private bool TryGetPostChainFallbackOrigin(out Vector3 origin)
+    {
+        origin = transform.position;
+
+        var anchor = chainCombat != null ? chainCombat.LastTarget : null;
+        if (anchor != null)
+        {
+            origin = anchor.position;
+            origin.y = transform.position.y;
+            return true;
+        }
+
+        if (!hasLastAttackAnchor) return false;
+
+        origin = lastAttackAnchorTarget != null
+            ? lastAttackAnchorTarget.position
+            : lastAttackAnchorPosition;
+        origin.y = transform.position.y;
+        return true;
     }
 
     private bool IsAttackableTarget(Transform target)
@@ -187,6 +211,9 @@ public partial class AutoSlashController
         if (target == null) return;
         var consumedSameTargetRequest = HasSameTargetReattackRequest() && AreSameAttackTargets(lastAttackTarget, target);
         lastAttackTarget = target;
+        lastAttackAnchorTarget = target;
+        lastAttackAnchorPosition = target.position;
+        hasLastAttackAnchor = true;
         sameTargetReleased = false;
         sameTargetReleaseTimer = 0f;
         sameTargetAutoReleaseTimer = 0f;
@@ -217,6 +244,13 @@ public partial class AutoSlashController
         sameTargetReleaseTimer = 0f;
         sameTargetAutoReleaseTimer = 0f;
         ClearSameTargetReattackState();
+    }
+
+    private void ClearLastAttackAnchor()
+    {
+        lastAttackAnchorTarget = null;
+        lastAttackAnchorPosition = transform.position;
+        hasLastAttackAnchor = false;
     }
 
     private void UpdateSameTargetRelease(Vector3 rawAimDirection)

@@ -611,7 +611,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 979927480826503235}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -14.6153965, y: -8.598587, z: -2.5710104}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -668,6 +668,7 @@ MonoBehaviour:
   cameraResolveInterval: 0.5
   animator: {fileID: 2625240027268037039}
   moveBlendParam: MoveBlend
+  keepAnimatorRealtimeDuringChain: 1
 --- !u!54 &3350404506160878809
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -865,20 +866,54 @@ MonoBehaviour:
   useInitialTargetConfirm: 1
   initialTargetConfirmTime: 0.05
   initialTargetInstantAngle: 6
+  useInitialInstantConfirm: 0
   useInitialAimStability: 1
   initialAimStableTime: 0.05
   initialAimMaxAngularSpeed: 180
+  requireStrongerInputForInitialAttack: 1
+  initialInputDeadZone: 0.28
+  useInitialAimAngleLimit: 1
+  initialAimMaxAngle: 12
+  useAdaptiveInitialResponse: 1
+  initialConfirmTimeMultiplier: 0.4
+  initialAimStableTimeMultiplier: 0.4
+  initialReadyDelayMultiplier: 0.3
+  initialInstantAngleBonus: 2
+  postChainAttackGraceTime: 0.18
   ignoreLastTargetDuringChain: 1
   allowSameTargetAngle: 16
   useSameTargetRelease: 1
   sameTargetReleaseAngle: 20
   sameTargetAutoReleaseTime: 0.15
+  allowForcedSameTargetReattack: 1
+  useSameTargetReattackInputGate: 1
+  sameTargetReattackOppositeAngle: 35
+  sameTargetReattackInputAngle: 12
+  sameTargetReattackHoldTime: 0.07
+  sameTargetReattackInputBufferTime: 0.08
+  sameTargetReattackDashLatchTime: 0.22
   useAimAssist: 1
   aimAssistOnlyDuringChain: 1
   aimAssistRadius: 2
   aimAssistAngle: 15
   useLastTargetAsAimOrigin: 1
   useChainLinePierce: 1
+  useInitialLinePierce: 1
+  useInitialLineAnchor: 1
+  initialLineAnchorWidthPadding: 0.05
+  initialLineAnchorCenterBias: 4
+  initialLinePierceRangeBonus: 1.5
+  initialLinePierceBackPadding: 0.25
+  linePierceWidthMultiplier: 1.35
+  linePierceWidthPadding: 0.35
+  pierceDashOvershootDistance: 0.6
+  useAdaptiveChainConfirm: 1
+  chainConfirmTimeMultiplier: 0.65
+  chainInstantAngleBonus: 4
+  useSoloTargetRepeatDelay: 1
+  soloTargetRepeatDelay: 0.1
+  useExtendedChainTargetSearch: 1
+  chainExtendedSearchRangeBonus: 2
   useChainRangeBoost: 1
   chainRangeMultiplier: 3
   autoGrade: 1
@@ -1150,6 +1185,11 @@ MonoBehaviour:
   chainCombat: {fileID: 0}
   readyTrigger: Attack
   slashTrigger: Slash
+  slashStateNames:
+  - Attack Hit
+  - BigSlash
+  - jigun
+  slashStateTransitionDuration: 0.03
   hitVfxPrefab: {fileID: 1429954232896169633, guid: 83036083a4ebcd34f98131bd3cf6f4d2,
     type: 3}
   hitVfxSpawnPoint: {fileID: 0}

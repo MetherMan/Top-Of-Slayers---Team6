@@ -673,7 +673,7 @@ GameObject:
   - component: {fileID: 6920882479469586924}
   m_Layer: 7
   m_Name: Pegasus
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -821,6 +821,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: a0d37a5cc95a9f846863059e2ff920a8, type: 2}
 --- !u!114 &-6473354718564851541
 MonoBehaviour:

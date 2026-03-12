@@ -19,7 +19,7 @@ GameObject:
   - component: {fileID: -7909116510746755591}
   m_Layer: 7
   m_Name: Horse_Skeleton
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -167,6 +167,7 @@ MonoBehaviour:
   useChainReactionAnimSlow: 1
   chainReactionAnimSpeed: 0.72
   chainReactionBlendSpeed: 8
+  turnSpeedDegrees: 720
   enemySO: {fileID: 11400000, guid: 612c4c6c6d2a14547aaebfada557e2d9, type: 2}
 --- !u!114 &6127533406526010361
 MonoBehaviour:

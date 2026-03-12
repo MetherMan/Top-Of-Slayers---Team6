@@ -78,6 +78,7 @@ public partial class SlashDashController
         dashTotalTime = dashTimer;
         dashTotalDistance = dashRemainingDistance;
 
+        SyncDashFacing();
         state = DashState.Dashing;
         SetDashTrailState(true);
         SpawnDashPathVfx();
@@ -103,7 +104,6 @@ public partial class SlashDashController
         StopDashPathVfx(false);
         RestorePhysics();
         SetMovementLock(false);
-        SyncMoveRotation();
     }
 
     private void Move(Vector3 move)
@@ -159,15 +159,26 @@ public partial class SlashDashController
             return;
         }
 
+        moveController.ClearDashFacingDirection();
+
         if (!dashRotationLockApplied) return;
         dashRotationLockApplied = false;
         moveController.RemoveRotationLock();
     }
 
-    private void SyncMoveRotation()
+    private void SyncDashFacing()
     {
-        if (moveController == null) return;
-        moveController.ForceSyncRotation();
+        var facingDirection = dashDirection;
+        facingDirection.y = 0f;
+        if (facingDirection.sqrMagnitude <= 0f) return;
+
+        if (moveController != null)
+        {
+            moveController.SetDashFacingDirection(facingDirection);
+            return;
+        }
+
+        transform.rotation = Quaternion.LookRotation(facingDirection.normalized, Vector3.up);
     }
 
     private Vector3 GetBehindPosition(Transform target)
