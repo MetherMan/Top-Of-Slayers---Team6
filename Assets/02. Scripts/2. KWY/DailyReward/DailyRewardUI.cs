@@ -5,10 +5,8 @@ public class DailyRewardUI : MonoBehaviour
 {
     [SerializeField] DailyRewardSystem dailySystem;
     [SerializeField] Image[] daySlot;
-    [SerializeField] ParticleSystem[] rewardParticle;
-
-    [SerializeField] Sprite defaultSprite;
-    [SerializeField] Sprite changeSprite;
+    [SerializeField] GameObject[] checkImage;
+    [SerializeField] GameObject[] partickles;
 
 
     private void OnEnable()
@@ -33,18 +31,16 @@ public class DailyRewardUI : MonoBehaviour
         for(int i =0; i < daySlot.Length; i++)
         {
 
-            daySlot[i].sprite = (i<day) ?changeSprite : defaultSprite;
+            //daySlot[i].sprite = defaultSprite;
+            checkImage[i].SetActive(i < day);
 
             if(i == day && canReward)
             {
-                if (!rewardParticle[i].isPlaying)
-                {
-                    rewardParticle[i].Play();
-                }
+                partickles[i].SetActive(true);
             }
             else
             {
-                rewardParticle[i].Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                partickles[i].SetActive(false);
             }
         }
     }

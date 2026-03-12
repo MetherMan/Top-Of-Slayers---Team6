@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using UnityEngine.SceneManagement;
+using UnityEngine;
+
 
 public class MainSceenLoadVer2 : MonoBehaviour
 {
@@ -14,7 +16,7 @@ public class MainSceenLoadVer2 : MonoBehaviour
 
         int index = circulDrag.CurrentIdex;
 
-        if(index >= 0 && index < stageSceneNames.Length)
+        if(index < 0 || index >= stageSceneNames.Length)
         {
             return;
         }
@@ -26,6 +28,7 @@ public class MainSceenLoadVer2 : MonoBehaviour
 
         string stageName = stageSceneNames[index];
 
+        //SceneManager.LoadScene("2.ForestStage");
         SceneLoadManager.Instance.ActiveScene(stageName);
     }
 }

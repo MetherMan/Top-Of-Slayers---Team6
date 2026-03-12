@@ -45,7 +45,7 @@ public class GachaChestUI : MonoBehaviour
         chestImage.sprite = defaultImage;
     }
 
-    private void OnDisable()
+    public void OnClickReset()
     {
         ResetChest();
     }
