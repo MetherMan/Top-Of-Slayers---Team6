@@ -25,9 +25,13 @@ public class FirebaseManager : Singleton<FirebaseManager>
 
     FirebaseFirestore db;
 
-    //유저 게임 데이터
-    List<InventoryItem> iventory = new List<InventoryItem>();
-    List<InventoryItem> equipment = new List<InventoryItem>();
+    //유저 게임 데이터 (세이브용)
+    int userLevel;
+    int userCurrentExp;
+    List<object> userInventory = new List<object>();
+    Dictionary<string, object> userEquipment = new Dictionary<string, object>();
+    int userGold;
+    int userEnerge;
 
     //로그인 시 : User.userId keyValue / iventory, equipment 데이터 가져오기
 
@@ -206,6 +210,8 @@ public class FirebaseManager : Singleton<FirebaseManager>
                 Debug.LogFormat("User signed in successfully: {0} ({1})",
                     result.User.DisplayName, result.User.UserId);
 
+                GetUserData(result.User.UserId);
+
                 message = "로그인 성공";
                 inputFailedEvent?.Invoke(message, true);
             }
@@ -253,38 +259,45 @@ public class FirebaseManager : Singleton<FirebaseManager>
     private void CreateUserData(AuthResult result)
     {
         DocumentReference documentReference = db.Collection("UserData").Document(result.User.UserId);
-        Dictionary<string, object> initialization = new Dictionary<string, object>()
+        Dictionary<string, object> initialization = new Dictionary<string, object>
         {
             { "level", 1 },
             { "Exp", 0 }
         };
 
-        Dictionary<string, object> inventory = new Dictionary<string, object>()
+        Dictionary<string, object> itemList = new Dictionary<string, object>
         {
-            { "0", null }
+            { "itemName", null },
+            { "count", 0 },
+            { "enhancementLevel", 0 }
         };
 
-        Dictionary<string, object> equipment = new Dictionary<string, object>()
+        List<object> inventory = new List<object>
         {
-            { "weapon", null },
-            { "shoes", null },
-            { "gloves", null },
-            { "armor", null },
-            { "emblem", null }
+            itemList
         };
 
-        Dictionary<string, object> cost = new Dictionary<string, object>()
+        Dictionary<string, object> equipment = new Dictionary<string, object>
         {
-            { "gold", 0 }, //골드
+            { "Weapon", null }, //enum EquipSlot list
+            { "Armor", null },
+            { "Ring", null },
+            { "Gloves", null },
+            { "Shoes", null }
+        };
+
+        Dictionary<string, object> cost = new Dictionary<string, object>
+        {
+            { "gold", 1000 }, //골드
             { "energe", 60 } //행동력
         };
 
         Dictionary<string, object> user = new Dictionary<string, object>
         {
-            { "User", initialization },
-            { "Inventory", inventory },
-            { "Equipment", equipment },
-            { "cost", cost }
+            { "User", initialization }, //Dictionary
+            { "Inventory", inventory }, //List
+            { "Equipment", equipment }, //Dictionary
+            { "Cost", cost }            //Dictionary
         };
 
         documentReference.SetAsync(user).ContinueWithOnMainThread(task =>
@@ -299,6 +312,9 @@ public class FirebaseManager : Singleton<FirebaseManager>
             }
         });
     }
+    #endregion
+
+    #region 유저 데이터관리
 
     public void GetUserData(string uid)
     {
@@ -334,7 +350,8 @@ public class FirebaseManager : Singleton<FirebaseManager>
                 Dictionary<string, object> userDetail = user.Value as Dictionary<string, object>;
                 if (userDetail != null)
                 {
-                    
+                    userLevel = System.Convert.ToInt32(userDetail["level"]);
+                    userCurrentExp = System.Convert.ToInt32(userDetail["Exp"]);
                 }
                 else
                 {
@@ -343,10 +360,14 @@ public class FirebaseManager : Singleton<FirebaseManager>
             }
             else if (user.Key == "Inventory")
             {
-                Dictionary<string, object> inventory = user.Value as Dictionary<string, object>;
+                List<object> inventory = user.Value as List<object>;
                 if (inventory != null)
                 {
-
+                    for (int i = 0; i < inventory.Count; i++)
+                    {
+                        Dictionary<string, object> item = inventory[i] as Dictionary<string, object>;
+                        LoadInventory(item);
+                    }
                 }
                 else
                 {
@@ -381,6 +402,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
         }
     }
 
+    //get=ture 아이템 추가 || get=false 아이템 제거
     public void FirebaseRefreshItem(string uid, bool get)
     {
         if (get)
@@ -392,6 +414,97 @@ public class FirebaseManager : Singleton<FirebaseManager>
 
         }
     }
+
+    //저장용 데이터 -> 인벤토리 아이템 변환
+    private void LoadInventory(Dictionary<string, object> serverData)
+    {
+        string itemName = serverData["itemName"].ToString();
+        int count = System.Convert.ToInt32(serverData["count"]);
+        int enhancementLevel = System.Convert.ToInt32(serverData["enhancementLevel"]);
+
+        ItemSO foundSO = StageManager.Instance.GetItemByID(itemName);
+
+        if (foundSO != null)
+        {
+            InventoryItem item = new InventoryItem();
+            item.item = foundSO;
+            item.count = count;
+            item.enhancementLevel = enhancementLevel;
+
+            InventoryManager.Instance.inventory.Add(item);
+        }
+        else
+        {
+            Debug.LogError($"아이템 로드 실패: {itemName}에 해당하는 SO를 찾을 수 없습니다.");
+        }
+    }
+
+    //인벤토리 아이템 -> 저장용 데이터 변환 -> UpdateAsync
+    public void SaveItem(InventoryItem item, string uid)
+    {
+        Dictionary<string, object> itemCast = new Dictionary<string, object>
+        {
+            { "itemName", item.item.itemName },
+            { "count", item.count },
+            { "enhancementLevel", item.enhancementLevel }
+        };
+
+        userInventory.Add(itemCast);
+
+        db.Collection("UserData").Document(uid).UpdateAsync("Inventory", userInventory);
+    }
+
+    //저장용 데이터 -> 장비템 변환
+    private void LoadEquipment(Dictionary<string, object> serverData)
+    {
+        string itemName = serverData["itemName"].ToString();
+        int count = System.Convert.ToInt32(serverData["count"]);
+        int enhancementLevel = System.Convert.ToInt32(serverData["enhancementLevel"]);
+
+        ItemSO foundSO = StageManager.Instance.GetItemByID(itemName);
+
+        if (foundSO != null)
+        {
+            InventoryItem item = new InventoryItem();
+            item.item = foundSO;
+            item.count = count;
+            item.enhancementLevel = enhancementLevel;
+
+            
+        }
+        else
+        {
+            Debug.LogError($"장비 로드 실패: {itemName}에 해당하는 SO를 찾을 수 없습니다.");
+        }
+    }
+
+    //장비템 -> 저장용 데이터 변환 -> UpdateAsync
+    public void SaveEquipment(
+        InventoryItem weapone, InventoryItem shoes, InventoryItem gloves,
+        InventoryItem armor, InventoryItem emblem, string uid
+        )
+    {
+        List<InventoryItem> equipmentList = new List<InventoryItem>
+        {
+            weapone, shoes, gloves, armor, emblem
+        };
+
+        for (int i = 0; i < equipmentList.Count; i++)
+        {
+            Dictionary<string, object> equipmentCast = new Dictionary<string, object>
+            {
+                { "itemName", equipmentList[i].item.itemName },
+                { "count", equipmentList[i].count },
+                { "enhancementLevel", equipmentList[i].enhancementLevel }
+            };
+
+            EquipmentSO cast = (EquipmentSO)equipmentList[i].item;
+
+            db.Collection("UserData").Document(uid)
+                .UpdateAsync(cast.equipSlot.ToString(), equipmentCast);
+        }
+    }
+    #endregion
 
     //메모리
     public void registerAuthEvent()
@@ -405,11 +518,5 @@ public class FirebaseManager : Singleton<FirebaseManager>
         auth.StateChanged -= AuthStateChanged;
         Debug.Log("AuthStateChanged 이벤트 해제");
     }
-    #endregion
-
-    #region 유저 데이터관리
-
-    #endregion
-
     #endregion
 }

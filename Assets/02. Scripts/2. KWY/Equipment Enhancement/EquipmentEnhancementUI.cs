@@ -1,4 +1,5 @@
 ﻿using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -91,6 +92,9 @@ public class EquipmentEnhancementUI : MonoBehaviour
 
         int cost = enhancementSystem.GetCost(currentLevel);
         costText.text = cost.ToString();
+
+        //firebase
+        CheckPlus(equip.equipSlot, afterLevelText.text);
     }
 
 
@@ -106,5 +110,46 @@ public class EquipmentEnhancementUI : MonoBehaviour
         afterStatText.text = "";
         afterLevelText.text = "";
         costText.text = "";
+    }
+
+    //firebase
+    private void CheckPlus(EquipSlot slot, string plus)
+    {
+        switch (slot)
+        {
+            //생성 파괴이지만 쓰고 버리는거라 메모리상 유의미?
+            //필드에 변수를 두고 사용하면 생성 파괴로 인한 연산부하는 없음
+            //그런데, level 변수를 굳이 필드에 만들어 둘 필요가?
+            case EquipSlot.Weapon:
+                {
+                    int level = System.Convert.ToInt32(plus);
+                    EquipmentManager.Instance.weapon.enhancementLevel = level;
+                }
+                break;
+            case EquipSlot.Shoes:
+                {
+                    int level = System.Convert.ToInt32(plus);
+                    EquipmentManager.Instance.shoes.enhancementLevel = level;
+                }
+                break;
+            case EquipSlot.Gloves:
+                {
+                    int level = System.Convert.ToInt32(plus);
+                    EquipmentManager.Instance.gloves.enhancementLevel = level;
+                }
+                break;
+            case EquipSlot.Armor:
+                {
+                    int level = System.Convert.ToInt32(plus);
+                    EquipmentManager.Instance.armor.enhancementLevel = level;
+                }
+                break;
+            case EquipSlot.Ring:
+                {
+                    int level = System.Convert.ToInt32(plus);
+                    EquipmentManager.Instance.emblem.enhancementLevel = level;
+                }
+                break;
+        }
     }
 }
