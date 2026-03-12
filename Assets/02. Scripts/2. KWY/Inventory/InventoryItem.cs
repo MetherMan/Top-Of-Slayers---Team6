@@ -7,5 +7,4 @@ public class InventoryItem
     public ItemSO item;
     public int count;
     public int enhancementLevel;
-
 }
