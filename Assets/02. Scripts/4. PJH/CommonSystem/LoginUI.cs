@@ -40,7 +40,7 @@ public class LoginUI : Singleton<LoginUI>
 
     [Header("Comfirm UI")]
     [SerializeField] GameObject confirmUI;
-    [SerializeField] TextMeshProUGUI confirmText;
+    [SerializeField] public TextMeshProUGUI confirmText;
     [SerializeField] Button confirmBtn;
 
     [Header("Download UI")]
@@ -62,6 +62,9 @@ public class LoginUI : Singleton<LoginUI>
     {
         if (!lodingUI.activeSelf) lodingUI.SetActive(true);
         if (loginUI.activeSelf) loginUI.SetActive(false);
+
+        FirebaseManager.Instance.inputFailedEvent += CheckInputFailed;
+        FirebaseManager.Instance.createFailedEvent += CreateInputFailed;
 
         /*
         사용되지 않는 익명함수(핸들러)는 가비지 콜렉터가 사용하지 않을 시 수거
@@ -87,13 +90,8 @@ public class LoginUI : Singleton<LoginUI>
             else
             {
                 this.onClickLogin?.Invoke(new Tuple<string, string>(email, pw));
-
-                //if ()
-                //{
-                //    //사용자 데이터 확인 후 로비 씬으로 이동
-                LoginSceneManager.Instance.CheckIn();
-                //}
             }
+            
         });
 
         //회원가입
@@ -109,19 +107,7 @@ public class LoginUI : Singleton<LoginUI>
             string upPw = upInputPW.text;
             string upRePw = upInputRePW.text;
 
-            if (string.IsNullOrEmpty(upId) || 
-                string.IsNullOrEmpty(upPw) || 
-                string.IsNullOrEmpty(upRePw)) //서버에서 아이디 중복 체크 추가해야 됨
-            {
-                confirmText.text = "아이디, 비밀번호, 확인란이 비어있습니다";
-                ConfirmUIOpen();
-            }
-            else if (upId.Trim().Length < 5 || upPw.Trim().Length < 6)
-            {
-                confirmText.text = "아이디 최소 5자, 비밀번호 최소 6자";
-                ConfirmUIOpen();
-            }
-            else if (upPw.CompareTo(upRePw) != 0)
+            if (upPw.CompareTo(upRePw) != 0)
             {
                 //문자열 비교 : https://developer-talk.tistory.com/223
                 confirmText.text = "비밀번호가 확인란과 동일하지 않습니다.";
@@ -130,8 +116,6 @@ public class LoginUI : Singleton<LoginUI>
             else
             {
                 onClickCreate?.Invoke(new Tuple<string, string>(upId, upPw));
-                //조건 확인 후 실행
-                SignupUIClose();
             }
         });
 
@@ -162,6 +146,33 @@ public class LoginUI : Singleton<LoginUI>
         loginUI.SetActive(true);
     }
 
+    public void CheckInputFailed(string message, bool check)
+    {
+        if(!check)
+        {
+            confirmText.text = message;
+            ConfirmUIOpen();
+        }
+        if (check)
+        {
+            CancleEvent();
+            LoginSceneManager.Instance.CheckIn();
+        }
+
+    }
+
+    public void CreateInputFailed(string message, bool check)
+    {
+        if(!check)
+        {
+            confirmText.text = message;
+            ConfirmUIOpen();
+        }
+        else if (check)
+        {
+            SignupUIClose();
+        }
+    }
 
     #region UI open / close
     public void LoginUIOpen()
@@ -219,6 +230,11 @@ public class LoginUI : Singleton<LoginUI>
     }
     #endregion
 
-
+    //메모리 : 구독 해제
+    public void CancleEvent()
+    {
+        FirebaseManager.Instance.inputFailedEvent -= CheckInputFailed;
+        FirebaseManager.Instance.createFailedEvent -= CreateInputFailed;
+    }
     #endregion
 }

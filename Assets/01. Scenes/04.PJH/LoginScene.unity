@@ -277,13 +277,13 @@ MonoBehaviour:
   loginUI: {fileID: 2068683479}
   signupUI: {fileID: 1538398578}
   findUI: {fileID: 0}
-  inputID: {fileID: 2022129264}
+  inputEmail: {fileID: 2022129264}
   inputPW: {fileID: 668371683}
   loginBtn: {fileID: 1380626782}
   findBtn: {fileID: 2052628017}
   signupBtn: {fileID: 1428334758}
   googleBtn: {fileID: 1326637085}
-  upInputID: {fileID: 1230268917}
+  upInputEmail: {fileID: 1230268917}
   upInputPW: {fileID: 854967347}
   upInputRePW: {fileID: 321862926}
   signupCheckBtn: {fileID: 340388307}
@@ -553,7 +553,7 @@ GameObject:
   m_Component:
   - component: {fileID: 288251469}
   m_Layer: 5
-  m_Name: IDPlace
+  m_Name: EmailPlace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3590,7 +3590,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC544\uC774\uB514 \uC785\uB825"
+  m_text: "\uC774\uBA54\uC77C \uC785\uB825"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2faf6db7d3b8c4445aa79081b74c1f67, type: 2}
   m_sharedMaterial: {fileID: -7947956429080880219, guid: 2faf6db7d3b8c4445aa79081b74c1f67,
@@ -4481,7 +4481,7 @@ GameObject:
   - component: {fileID: 1230268918}
   - component: {fileID: 1230268917}
   m_Layer: 5
-  m_Name: IDInputField
+  m_Name: EmailInputField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4721,7 +4721,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ID
+  m_text: Email
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2faf6db7d3b8c4445aa79081b74c1f67, type: 2}
   m_sharedMaterial: {fileID: -7947956429080880219, guid: 2faf6db7d3b8c4445aa79081b74c1f67,
@@ -5099,7 +5099,7 @@ GameObject:
   - component: {fileID: 1310338775}
   - component: {fileID: 1310338774}
   m_Layer: 5
-  m_Name: ID
+  m_Name: Email
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5144,7 +5144,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC544\uC774\uB514"
+  m_text: "\uC774\uBA54\uC77C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2faf6db7d3b8c4445aa79081b74c1f67, type: 2}
   m_sharedMaterial: {fileID: -7947956429080880219, guid: 2faf6db7d3b8c4445aa79081b74c1f67,
@@ -7152,7 +7152,7 @@ GameObject:
   - component: {fileID: 2022129265}
   - component: {fileID: 2022129264}
   m_Layer: 5
-  m_Name: InputID
+  m_Name: InputEmail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
