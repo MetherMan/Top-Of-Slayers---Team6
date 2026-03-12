@@ -508,6 +508,101 @@ public partial class AutoSlashController
         return false;
     }
 
+    private bool TryGetPostChainGraceTarget(Vector3 rawAimDirection, float searchRange, Transform ignoreTarget, out Transform target, out Vector3 aimDirection)
+    {
+        target = null;
+        aimDirection = rawAimDirection;
+
+        if (IsChainActive()) return false;
+        if (!HasPostChainAttackGrace()) return false;
+        if (!TryGetPostChainFallbackOrigin(out var fallbackOrigin)) return false;
+        if (targetingSystem == null) return false;
+
+        Transform assistTarget = null;
+        if (TryGetAimAssistDirection(true, fallbackOrigin, rawAimDirection, searchRange, ignoreTarget, out _, out var resolvedAssistTarget))
+        {
+            assistTarget = resolvedAssistTarget;
+        }
+
+        target = assistTarget ?? targetingSystem.GetTarget(fallbackOrigin, rawAimDirection, searchRange, ignoreTarget);
+        if (target == null)
+        {
+            if (!TryGetInitialLineAnchorTarget(fallbackOrigin, rawAimDirection, searchRange, ignoreTarget, out var anchorTarget, out _))
+            {
+                return false;
+            }
+
+            target = anchorTarget;
+        }
+
+        if (target == null) return false;
+
+        var toTarget = target.position - transform.position;
+        toTarget.y = 0f;
+        if (toTarget.sqrMagnitude <= CoincidentTargetSqrThreshold)
+        {
+            return false;
+        }
+
+        var maxRange = searchRange > 0f ? searchRange : (targetingSystem != null ? targetingSystem.MaxRange : 0f);
+        if (targetingSystem != null && targetingSystem.LineEndPadding > 0f)
+        {
+            maxRange += targetingSystem.LineEndPadding;
+        }
+
+        if (maxRange > 0f && toTarget.sqrMagnitude > maxRange * maxRange)
+        {
+            return false;
+        }
+
+        aimDirection = toTarget.normalized;
+        return true;
+    }
+
+    private bool TryGetCloseRangeFallbackTarget(Vector3 origin, Vector3 rawAimDirection, float searchRange, Transform ignoreTarget, out Transform target, out Vector3 aimDirection)
+    {
+        target = null;
+        aimDirection = rawAimDirection;
+
+        if (IsChainActive()) return false;
+        if (targetingSystem == null) return false;
+        if (targetingSystem.StrategyType != TargetingStrategyType.Line) return false;
+
+        rawAimDirection.y = 0f;
+        if (rawAimDirection.sqrMagnitude <= 0f) return false;
+
+        var maxRange = searchRange > 0f ? searchRange : targetingSystem.MaxRange;
+        if (maxRange <= 0f) return false;
+
+        var normalizedAim = rawAimDirection.normalized;
+        var probeDistance = Mathf.Min(maxRange, Mathf.Max(0.6f, targetingSystem.LineWidth));
+        var probeRadius = Mathf.Max(0.9f, targetingSystem.LineWidth + 0.35f);
+        var probePoint = origin + normalizedAim * probeDistance;
+
+        target = targetingSystem.GetTargetNearPoint(probePoint, probeRadius, ignoreTarget);
+        if (target == null)
+        {
+            var closeRange = Mathf.Min(maxRange, probeDistance + probeRadius);
+            target = targetingSystem.GetTargetByAngle(origin, normalizedAim, closeRange, ignoreTarget);
+        }
+
+        if (target == null) return false;
+
+        var toTarget = target.position - origin;
+        toTarget.y = 0f;
+        if (toTarget.sqrMagnitude <= CoincidentTargetSqrThreshold) return false;
+        if (toTarget.sqrMagnitude > maxRange * maxRange) return false;
+
+        var angleLimit = Mathf.Max(18f, initialAimMaxAngle, aimAssistAngle);
+        if (angleLimit > 0f && Vector3.Angle(normalizedAim, toTarget) > angleLimit)
+        {
+            return false;
+        }
+
+        aimDirection = toTarget.normalized;
+        return true;
+    }
+
     private bool IsInitialAimAngleAllowed(float angle)
     {
         if (!useInitialAimAngleLimit) return true;
