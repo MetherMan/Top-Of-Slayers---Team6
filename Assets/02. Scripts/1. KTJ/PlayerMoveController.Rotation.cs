@@ -48,11 +48,6 @@ public partial class PlayerMoveController
         ClearRotationOverride(RotationOverrideSource.Slash);
     }
 
-    public void BlockInputRotationUntilRelease()
-    {
-        blockInputRotationUntilRelease = true;
-    }
-
     public Vector3 GetAimDirection()
     {
         var input = GetRealtimeInput();
@@ -88,7 +83,6 @@ public partial class PlayerMoveController
     private bool TryGetInputFacingDirection(bool ignoreLock, out Vector3 direction)
     {
         direction = Vector3.zero;
-        if (ShouldBlockInputDrivenRotation()) return false;
         if (IsMovementBlocked() && !allowRotationWhenLocked && !ignoreLock) return false;
         if (IsRotationLocked && !ignoreLock) return false;
 
@@ -124,21 +118,6 @@ public partial class PlayerMoveController
 
         // 물리 바디 갱신 타이밍과 무관하게 같은 프레임에 루트 Transform도 바로 맞춘다.
         transform.rotation = targetRotation;
-    }
-
-    private bool ShouldBlockInputDrivenRotation()
-    {
-        if (!blockInputRotationUntilRelease) return false;
-
-        var input = GetRealtimeInput();
-        var releaseDeadZone = Mathf.Max(RotationInputReleaseDeadZone, keyboardDeadZone);
-        if (input.sqrMagnitude <= releaseDeadZone * releaseDeadZone)
-        {
-            blockInputRotationUntilRelease = false;
-            return false;
-        }
-
-        return true;
     }
 
     private void SetRotationOverride(RotationOverrideSource source, Vector3 direction)

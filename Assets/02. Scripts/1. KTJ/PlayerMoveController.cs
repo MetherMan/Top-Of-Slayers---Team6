@@ -38,7 +38,6 @@ public partial class PlayerMoveController : MonoBehaviour
     private bool chainLockApplied;
     private bool rotationLocked;
     private int rotationLockCount;
-    private bool blockInputRotationUntilRelease;
     private float nextCameraResolveTime;
     private float equipmentMoveSpeedBonus;
     private float specMoveSpeed;
