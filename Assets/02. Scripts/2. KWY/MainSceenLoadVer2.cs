@@ -35,11 +35,11 @@ public class MainSceenLoadVer2 : MonoBehaviour
 
         string stageName = stageSceneNames[index];
 
-        //테스트용
+        ////테스트용
         SceneManager.LoadScene(stageName);
 
         //실제사용
-        SceneLoadManager.Instance.ActiveScene(stageName);
-        //StageDatabase.Instance.GetStageData(string addressableName);
+        //SceneLoadManager.Instance.ActiveScene(stageName);
+        StageDatabase.Instance.GetStageData(stageName);
     }
 }
