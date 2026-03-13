@@ -20,18 +20,17 @@ public class RewardIcon : MonoBehaviour
     {
         if(reward.gold > 0)
         {
-            Debug.Log("재화");
             itemImage.sprite = goldIcon;
             backGround.sprite = normalColor;
-            itemText.text = "Gold";
-            amountText.text = $"+{reward.gold}";
+            itemText.text = "골드";
+            amountText.text = $"{reward.gold}";
             return;
         }
         ItemSO item = reward.item;
 
         itemImage.sprite = item.sprite;
         itemText.text = item.itemName;
-        amountText.text = $"+{reward.amount}";
+        amountText.text = $"{reward.amount}";
 
         switch (item.grade)
         {
