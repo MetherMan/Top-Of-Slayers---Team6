@@ -5,6 +5,8 @@ using Firebase.Firestore;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
+using static UnityEditor.Progress;
 
 public class FirebaseManager : Singleton<FirebaseManager>
 {
@@ -17,6 +19,14 @@ public class FirebaseManager : Singleton<FirebaseManager>
     string displayName;
     string emailAddress;
     string uid;
+    public string UID
+    {
+        get { return uid; }
+        private set
+        {
+            uid = value;
+        }
+    }
     //System.Uri photoUrl;
 
     //에러로그 처리
@@ -143,6 +153,8 @@ public class FirebaseManager : Singleton<FirebaseManager>
                 Debug.LogFormat("Firebase user created successfully : {0} ({1})",
                     result.User.DisplayName, result.User.UserId);
 
+                UID = result.User.UserId;
+
                 CreateUserData(result); //파이어베이스 데이터 생성
 
                 message = "계정 생성 성공";
@@ -209,6 +221,8 @@ public class FirebaseManager : Singleton<FirebaseManager>
                 Firebase.Auth.AuthResult result = task.Result;
                 Debug.LogFormat("User signed in successfully: {0} ({1})",
                     result.User.DisplayName, result.User.UserId);
+
+                UID = result.User.UserId;
 
                 GetUserData(result.User.UserId);
 
@@ -379,7 +393,13 @@ public class FirebaseManager : Singleton<FirebaseManager>
                 Dictionary<string, object> equipment = user.Value as Dictionary<string, object>;
                 if (equipment != null)
                 {
-
+                    foreach (KeyValuePair<string, object> equip in equipment)
+                    {
+                        string key = equip.Key; //딕셔너리에 들어갈 키 값 = EquipSlot enum List
+                        Dictionary<string, object> equipcast = equip.Value as Dictionary<string, object>;
+                        //equipcast = { "Weapon", Dictionary }
+                        LoadEquipment(equipcast, key);
+                    }
                 }
                 else
                 {
@@ -431,11 +451,28 @@ public class FirebaseManager : Singleton<FirebaseManager>
             item.count = count;
             item.enhancementLevel = enhancementLevel;
 
-            InventoryManager.Instance.inventory.Add(item);
+            userInventory.Add(item); //여기에 담아뒀다가 로비씬 활성화 될 때 Init문에 메서드 던져서 넘기기
         }
         else
         {
             Debug.LogError($"아이템 로드 실패: {itemName}에 해당하는 SO를 찾을 수 없습니다.");
+        }
+    }
+
+    //인벤토리 채워넣기 : InventoryManager.cs
+    public void PushItemList(List<InventoryItem> inventory)
+    {
+        for (int i = 0; i < inventory.Count; i++)
+        {
+            InventoryItem itemcast = userInventory[i] as InventoryItem;
+            if (itemcast != null)
+            {
+                inventory.Add(itemcast);
+            }
+            else
+            {
+                Debug.LogWarningFormat("PushItemList {0} casting Failed", itemcast.item.itemName);
+            }
         }
     }
 
@@ -454,8 +491,28 @@ public class FirebaseManager : Singleton<FirebaseManager>
         db.Collection("UserData").Document(uid).UpdateAsync("Inventory", userInventory);
     }
 
+    //인벤토리 -> 저장용 데이터 변환 -> UpdateAsync
+    public void SaveInventory(List<InventoryItem> inventory)
+    {
+        userInventory = new List<object>(); //초기화
+
+        for (int i = 0; i < inventory.Count; i++)
+        {
+            Dictionary<string, object> itemcast = new Dictionary<string, object>
+            {
+                { "itemName", inventory[i].item.itemName },
+                { "count", inventory[i].count },
+                { "enhancementLevel", inventory[i].enhancementLevel }
+            };
+
+            userInventory.Add(itemcast);
+            //UpdateAsync : 키 값이 같을 경우 덮어씌운다, 키 값이 없을 경우 새로 생성
+            db.Collection("UserData").Document(uid).UpdateAsync("Inventory", userInventory);
+        }
+    }
+
     //저장용 데이터 -> 장비템 변환
-    private void LoadEquipment(Dictionary<string, object> serverData)
+    private void LoadEquipment(Dictionary<string, object> serverData, string key)
     {
         string itemName = serverData["itemName"].ToString();
         int count = System.Convert.ToInt32(serverData["count"]);
@@ -470,7 +527,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
             item.count = count;
             item.enhancementLevel = enhancementLevel;
 
-            
+            userEquipment.Add(key, item);
         }
         else
         {
@@ -478,7 +535,69 @@ public class FirebaseManager : Singleton<FirebaseManager>
         }
     }
 
-    //장비템 -> 저장용 데이터 변환 -> UpdateAsync
+    //장비아이템 채워넣기 : EquipmentManager.cs
+    public void PushEquipment(InventoryItem weapone, InventoryItem shoes, InventoryItem gloves,
+        InventoryItem armor, InventoryItem emblem
+        )
+    {
+        List<InventoryItem> equipmentList = new List<InventoryItem>
+        {
+            weapone, shoes, gloves, armor, emblem
+        };
+
+        foreach (KeyValuePair<string, object> equip in userEquipment)
+        {
+            EquipSlot slot;
+            InventoryItem unBoxing = equip.Value as InventoryItem;
+            //파이어베이스에는 ScriptableObject는 안올라갈텐데?
+            EquipmentSO cast = unBoxing.item as EquipmentSO; // -> 값 할당
+
+            if (Enum.TryParse(equip.Key, true, out slot)) Debug.Log("Enum.TryParse 성공");
+            else Debug.LogWarning("PushEquipment Enum.TryParse 형변환 실패");
+
+                switch (slot)
+                {
+                    case EquipSlot.Weapon:
+                        {
+                            weapone = unBoxing;
+                            EquipmentSO extra = weapone.item as EquipmentSO;
+                            extra.equipSlot = slot;
+                        }
+                        break;
+                    case EquipSlot.Shoes:
+                        {
+                            shoes = unBoxing;
+                            EquipmentSO extra = shoes.item as EquipmentSO;
+                            extra.equipSlot = slot;
+                        }
+                        break;
+                    case EquipSlot.Gloves:
+                        {
+                            gloves = unBoxing;
+                            EquipmentSO extra = gloves.item as EquipmentSO;
+                            extra.equipSlot = slot;
+                        }
+                        break;
+                    case EquipSlot.Armor:
+                        {
+                            armor = unBoxing;
+                            EquipmentSO extra = armor.item as EquipmentSO;
+                            extra.equipSlot = slot;
+                        }
+                        break;
+                    case EquipSlot.Ring:
+                        {
+                            emblem = unBoxing;
+                            EquipmentSO extra = emblem.item as EquipmentSO;
+                            extra.equipSlot = slot;
+                        }
+                        break;
+                }
+        }
+
+    }
+
+    //장비템 -> 저장용 데이터 변환 -> UpdateAsync && 해제, 장착할 때 마다 실행?
     public void SaveEquipment(
         InventoryItem weapone, InventoryItem shoes, InventoryItem gloves,
         InventoryItem armor, InventoryItem emblem, string uid
@@ -504,6 +623,9 @@ public class FirebaseManager : Singleton<FirebaseManager>
                 .UpdateAsync(cast.equipSlot.ToString(), equipmentCast);
         }
     }
+
+    //유저 레벨, 경험치 -> 저장용 데이터
+
     #endregion
 
     //메모리

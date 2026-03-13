@@ -94,7 +94,7 @@ public class EquipmentEnhancementUI : MonoBehaviour
         costText.text = cost.ToString();
 
         //firebase
-        CheckPlus(equip.equipSlot, afterLevelText.text);
+        //CheckPlus(equip.equipSlot, afterLevelText.text);
     }
 
 
