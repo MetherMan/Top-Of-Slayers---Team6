@@ -4,10 +4,10 @@ using UnityEngine.UI;
 public class DailyRewardUI : MonoBehaviour
 {
     [SerializeField] DailyRewardSystem dailySystem;
+    [SerializeField] CoinDropEffect coinDropEffect;
     [SerializeField] Image[] daySlot;
     [SerializeField] GameObject[] checkImage;
     [SerializeField] GameObject[] partickles;
-
 
     private void OnEnable()
     {
@@ -18,8 +18,15 @@ public class DailyRewardUI : MonoBehaviour
     {
         if (dailySystem.CanReward())
         {
+            //현재 보상 받을 슬롯 위치
+            Vector3 coinStartPos = daySlot[dailySystem.currentDay].transform.position;
+
             dailySystem.GetReward();
+
+            //코인 이펙트
+            coinDropEffect.CoinParty(coinStartPos);
         }
+
         RefreshUI();
     }
 
@@ -28,13 +35,11 @@ public class DailyRewardUI : MonoBehaviour
         int day = dailySystem.currentDay;
         bool canReward = dailySystem.CanReward();
 
-        for(int i =0; i < daySlot.Length; i++)
+        for (int i = 0; i < daySlot.Length; i++)
         {
-
-            //daySlot[i].sprite = defaultSprite;
             checkImage[i].SetActive(i < day);
 
-            if(i == day && canReward)
+            if (i == day && canReward)
             {
                 partickles[i].SetActive(true);
             }
