@@ -35,11 +35,12 @@ public class ScoreUI : MonoBehaviour
         DOTween.To(() => currentScore, x =>
         {
             currentScore = x;
-            scoreText.text = currentScore.ToString();
+            scoreText.text = currentScore.ToString("N0");
         }, score, countDuration);
         scoreText.text = $"{score}";
 
         scoreText.transform.DOKill(); //이전 트윈이 있으면 제거
+        scoreText.transform.localScale = Vector3.one;
         //커졌다가 돌아오기
         scoreText.transform.DOPunchScale(Vector3.one * punchScale, punchDuration, 1, 0.5f);
     }
