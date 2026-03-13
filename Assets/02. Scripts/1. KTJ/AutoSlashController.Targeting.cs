@@ -541,7 +541,15 @@ public partial class AutoSlashController
         toTarget.y = 0f;
         if (toTarget.sqrMagnitude <= CoincidentTargetSqrThreshold)
         {
-            return false;
+            // 루트 피벗이 겹친 근접 적은 현재 조준 방향으로 후속 공격을 이어간다.
+            rawAimDirection.y = 0f;
+            if (rawAimDirection.sqrMagnitude <= 0f)
+            {
+                return false;
+            }
+
+            aimDirection = rawAimDirection.normalized;
+            return true;
         }
 
         var maxRange = searchRange > 0f ? searchRange : (targetingSystem != null ? targetingSystem.MaxRange : 0f);
@@ -579,7 +587,9 @@ public partial class AutoSlashController
         var probeRadius = Mathf.Max(0.9f, targetingSystem.LineWidth + 0.35f);
         var probePoint = origin + normalizedAim * probeDistance;
 
+        var foundByNearProbe = false;
         target = targetingSystem.GetTargetNearPoint(probePoint, probeRadius, ignoreTarget);
+        foundByNearProbe = target != null;
         if (target == null)
         {
             var closeRange = Mathf.Min(maxRange, probeDistance + probeRadius);
@@ -590,11 +600,17 @@ public partial class AutoSlashController
 
         var toTarget = target.position - origin;
         toTarget.y = 0f;
-        if (toTarget.sqrMagnitude <= CoincidentTargetSqrThreshold) return false;
+        if (toTarget.sqrMagnitude <= CoincidentTargetSqrThreshold)
+        {
+            // 근접 겹침 상태에서는 탐색으로 찾은 타겟만 유지하고 조준 방향은 입력값을 사용한다.
+            aimDirection = normalizedAim;
+            return true;
+        }
         if (toTarget.sqrMagnitude > maxRange * maxRange) return false;
 
         var angleLimit = Mathf.Max(18f, initialAimMaxAngle, aimAssistAngle);
-        if (angleLimit > 0f && Vector3.Angle(normalizedAim, toTarget) > angleLimit)
+        var shouldRelaxAngleCheck = foundByNearProbe && toTarget.sqrMagnitude <= probeRadius * probeRadius;
+        if (!shouldRelaxAngleCheck && angleLimit > 0f && Vector3.Angle(normalizedAim, toTarget) > angleLimit)
         {
             return false;
         }
