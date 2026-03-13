@@ -1,22 +1,31 @@
 ﻿using UnityEngine;
-using TMPro;
-using DG.Tweening;
+using UnityEngine.UI;
 
 public class StageTimer : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI timeText;
+    [SerializeField] private Image clockFill;
+    [SerializeField] private RectTransform clockNeedle;
 
+    private float maxTime;
     private int lastTime = -1;
-    private bool isZoomed = false;
+
+    private void Start()
+    {
+        if (StageFlowManager.Instance != null)
+        {
+            maxTime = StageFlowManager.Instance.remainingTime;
+
+            lastTime = (int)maxTime;
+            TimeUI(lastTime);
+        }
+    }
 
     void Update()
     {
-        if(StageFlowManager.Instance == null) return;
-
+        if (StageFlowManager.Instance == null) return;
         int time = StageFlowManager.Instance.remainingTime;
 
-        //시간이 바뀔때만 UI갱신
-        if(time != lastTime)
+        if (time != lastTime)
         {
             lastTime = time;
             TimeUI(time);
@@ -25,25 +34,16 @@ public class StageTimer : MonoBehaviour
 
     private void TimeUI(int time)
     {
-        timeText.text = $"{time}";
-        //int min = time / 60;
-        //int sec = time % 60;
-        //timeText.text = $"{min:D1}:{sec:D2}";
+        float ratio = ((float)time / maxTime);
+        clockFill.fillAmount = ratio;
 
-        if (time <= 10)
+        float angle = ratio * 360f;
+        clockNeedle.localRotation = Quaternion.Euler(0, 0, angle);
+        Debug.Log(angle);
+
+        if (angle <= 90)
         {
-            timeText.color = Color.red;
-        }
-
-        if(time == 0 && !isZoomed)
-        {
-            isZoomed = true;
-
-            timeText.transform.DOKill();
-            Sequence seq = DOTween.Sequence();
-            seq.Append(timeText.transform.DOScale(2f, 0.3f).SetEase(Ease.OutBack));//확대
-            seq.AppendInterval(0.5f);//유지
-            seq.Append(timeText.transform.DOScale(1f, 0.3f));//축소
+            clockFill.color = Color.red;
         }
     }
 }
