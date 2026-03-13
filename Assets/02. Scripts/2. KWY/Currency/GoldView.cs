@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class GoldView : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI goldText;
+    [SerializeField] private TextMeshProUGUI goldText;
 
-    int currentDisplayGold;
+    private int currentDisplayGold;
 
     private void Start()
     {
@@ -14,7 +14,6 @@ public class GoldView : MonoBehaviour
         goldText.text = currentDisplayGold.ToString();
 
         CurrencyManager.Instance.OnGoldChanged += Refresh;
-        //Refresh();
     }
 
     private void OnDestroy()
@@ -26,23 +25,23 @@ public class GoldView : MonoBehaviour
     public void Refresh()
     {
         int targetGold = CurrencyManager.Instance.GetGold();
+
         StopAllCoroutines();
         StartCoroutine(Count(targetGold));
     }
 
-
     IEnumerator Count(int target)
     {
         int start = currentDisplayGold;
+
         float duration = 0.5f;
-        float time = 0;
+        float time = 0f;
 
         while (time < duration)
         {
             time += Time.deltaTime;
 
             int value = (int)Mathf.Lerp(start, target, time / duration);
-
             goldText.text = value.ToString();
 
             yield return null;
