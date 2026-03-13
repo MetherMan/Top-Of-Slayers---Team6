@@ -5,8 +5,6 @@ using Firebase.Firestore;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEditor.Progress;
 
 public class FirebaseManager : Singleton<FirebaseManager>
 {
@@ -133,13 +131,13 @@ public class FirebaseManager : Singleton<FirebaseManager>
                             break;
                         case Firebase.Auth.AuthError.MissingEmail:
                             {
-                                message = "이메일 칸이 비어 있습니다.";
+                                message = "이메일 칸이 비어 있습니다. 최대 30자";
                                 createFailedEvent?.Invoke(message, false);
                             }
                             break;
                         case Firebase.Auth.AuthError.MissingPassword:
                             {
-                                message = "비밀번호 칸이 비어 있습니다.";
+                                message = "비밀번호 칸이 비어 있습니다. 최대 20자";
                                 createFailedEvent?.Invoke(message, false);
                             }
                             break;
@@ -227,6 +225,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
                 GetUserData(result.User.UserId);
 
                 message = "로그인 성공";
+                //LoginUI.cs
                 inputFailedEvent?.Invoke(message, true);
             }
         });
@@ -293,11 +292,11 @@ public class FirebaseManager : Singleton<FirebaseManager>
 
         Dictionary<string, object> equipment = new Dictionary<string, object>
         {
-            { "Weapon", null }, //enum EquipSlot list
-            { "Armor", null },
-            { "Ring", null },
-            { "Gloves", null },
-            { "Shoes", null }
+            { "Weapon", itemList }, //enum EquipSlot list
+            { "Armor", itemList },
+            { "Ring", itemList },
+            { "Gloves", itemList },
+            { "Shoes", itemList }
         };
 
         Dictionary<string, object> cost = new Dictionary<string, object>
@@ -316,12 +315,16 @@ public class FirebaseManager : Singleton<FirebaseManager>
 
         documentReference.SetAsync(user).ContinueWithOnMainThread(task =>
         {
-            if (task.IsCompleted && task.IsFaulted)
+            //.IsFaulted는 오류가 생겼을 때 true를 반환한다
+            //flase를 반환하는 건 문제가 없다는 뜻
+            if (task.IsCompleted && !task.IsFaulted)
             {
                 Debug.Log("Firebase: 유저 데이터 생성 성공");
             }
             else
             {
+                Debug.LogFormat("<color=blue>IsCompleted : {0}</color>", task.IsCompleted);
+                Debug.LogFormat("<color=blue>IsFaulted : {0}</color>", task.IsFaulted);
                 Debug.LogError("Firebase: 유저데이터 생성 실패");
             }
         });

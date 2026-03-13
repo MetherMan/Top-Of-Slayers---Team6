@@ -89,6 +89,7 @@ public class LoginUI : Singleton<LoginUI>
             }
             else
             {
+                //LoginSystem.cs
                 this.onClickLogin?.Invoke(new Tuple<string, string>(email, pw));
             }
             
@@ -146,6 +147,7 @@ public class LoginUI : Singleton<LoginUI>
         loginUI.SetActive(true);
     }
 
+    //로그인 성공 시 씬 이동
     public void CheckInputFailed(string message, bool check)
     {
         if(!check)

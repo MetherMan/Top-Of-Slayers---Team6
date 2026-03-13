@@ -307,6 +307,7 @@ public class AddressableManager : Singleton<AddressableManager>
         {
             if (h.Status == AsyncOperationStatus.Succeeded)
             {
+                Debug.LogFormat("<color=yellow> 씬 runtimeKey : {0}</color>", runtimeKey);
                 AddSceneSafely(runtimeKey.ToString(), h.Result);
             }
             else
