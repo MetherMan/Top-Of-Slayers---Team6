@@ -23,6 +23,20 @@ public partial class ChainVisualController : MonoBehaviour
     [SerializeField, Min(0f)] private float chainTextPunchDuration = 0.12f;
     [SerializeField] private Ease chainTextEase = Ease.OutBack;
 
+    [Header("체인 원근")]
+    [SerializeField] private bool useChainPerspective = true;
+    [SerializeField, Range(0f, 1f)] private float chainPerspectiveInset = 0.72f;
+    [SerializeField, Range(-0.3f, 0.3f)] private float chainPerspectiveVerticalSkew = -0.12f;
+    [SerializeField] private bool chainPerspectiveRecedeRight = true;
+    [SerializeField] private RectTransform chainBackdropRoot;
+    [SerializeField] private Image chainBackdropImage;
+    [SerializeField] private bool useChainBackdropSlide = true;
+    [SerializeField] private Vector2 chainBackdropSlideOffset = new Vector2(-180f, 0f);
+    [SerializeField, Min(0f)] private float chainBackdropSlideDuration = 0.16f;
+    [SerializeField] private Ease chainBackdropSlideEase = Ease.OutCubic;
+    [SerializeField, Min(0f)] private float chainBackdropPunchScale = 0.1f;
+    [SerializeField, Min(0f)] private float chainBackdropPunchDuration = 0.14f;
+
     [Header("체인 타이머 바")]
     [SerializeField] private Image chainTimerBarFillImage;
     [SerializeField] private Image chainTimerBarBackgroundImage;
@@ -104,10 +118,29 @@ public partial class ChainVisualController : MonoBehaviour
     private bool isChainActive;
     private Vector3 darkenBaseScale = Vector3.one;
     private Vector3 chainTextBaseScale = Vector3.one;
+    private Vector3 chainBackdropBaseScale = Vector3.one;
     private int pendingTextRefreshFrames;
     private Color chainTextBaseColor = Color.white;
     private Tween chainTextColorTween;
     private Tween chainTimerBarColorTween;
+    private Tween chainBackdropTween;
+    private TMPPerspectiveSkewEffect chainTextPerspective;
+    private UIPerspectiveSkewEffect chainBackdropPerspective;
+    private Vector2 chainTextBaseAnchoredPosition;
+    private bool hasChainTextBaseAnchoredPosition;
+    private Vector2 chainBackdropBaseAnchoredPosition;
+    private bool hasChainBackdropBaseAnchoredPosition;
+
+    private void OnValidate()
+    {
+        if (Application.isPlaying) return;
+
+        if (chainTextRoot == null && chainText != null) chainTextRoot = chainText.rectTransform;
+        if (chainTextGroup == null && chainPanel != null) chainTextGroup = chainPanel.GetComponent<CanvasGroup>();
+        if (chainText != null) chainTextBaseColor = chainText.color;
+
+        InitializeChainPerspective();
+    }
 
     private void Awake()
     {
@@ -128,6 +161,7 @@ public partial class ChainVisualController : MonoBehaviour
         if (chainTextRoot != null) chainTextBaseScale = chainTextRoot.localScale;
         if (damageTextFontAsset == null && chainText != null) damageTextFontAsset = chainText.font;
         if (chainText != null) chainTextBaseColor = chainText.color;
+        InitializeChainPerspective();
         EnsureChainTimerBar();
 
         if (darkenRoot == null)
@@ -266,6 +300,7 @@ public partial class ChainVisualController : MonoBehaviour
         if (chainTextGroup == null && chainPanel != null) chainTextGroup = chainPanel.GetComponent<CanvasGroup>();
         if (chainTextRoot != null) chainTextBaseScale = chainTextRoot.localScale;
         if (chainText != null) chainTextBaseColor = chainText.color;
+        InitializeChainPerspective();
         EnsureChainTimerBar();
         if (darkenGroup == null && darkenRoot != null) darkenGroup = darkenRoot.GetComponent<CanvasGroup>();
         if (darkenGraphic == null && darkenRoot != null) darkenGraphic = darkenRoot.GetComponent<Graphic>();
@@ -318,5 +353,138 @@ public partial class ChainVisualController : MonoBehaviour
     private void HandleChainMilestoneReached(int chain)
     {
         PlayChainMilestoneBeat(chain);
+    }
+
+    private void InitializeChainPerspective()
+    {
+        BindChainPerspectiveTargets();
+        CacheChainTextBasePosition();
+        CacheChainBackdropBasePosition();
+        ApplyChainPerspectiveState();
+    }
+
+    private void BindChainPerspectiveTargets()
+    {
+        if (chainBackdropRoot == null)
+        {
+            var candidate = FindChainBackdropRoot();
+            if (candidate != null)
+            {
+                chainBackdropRoot = candidate;
+            }
+        }
+
+        if (chainBackdropRoot != null && chainBackdropImage == null)
+        {
+            chainBackdropImage = chainBackdropRoot.GetComponent<Image>();
+        }
+
+        if (chainText != null && chainTextPerspective == null)
+        {
+            chainTextPerspective = chainText.GetComponent<TMPPerspectiveSkewEffect>();
+            if (chainTextPerspective == null)
+            {
+                chainTextPerspective = chainText.gameObject.AddComponent<TMPPerspectiveSkewEffect>();
+            }
+        }
+
+        if (chainBackdropRoot != null && chainBackdropPerspective == null)
+        {
+            chainBackdropPerspective = chainBackdropRoot.GetComponent<UIPerspectiveSkewEffect>();
+            if (chainBackdropPerspective == null)
+            {
+                chainBackdropPerspective = chainBackdropRoot.gameObject.AddComponent<UIPerspectiveSkewEffect>();
+            }
+        }
+    }
+
+    private void ApplyChainPerspectiveState()
+    {
+        var enabled = useChainPerspective &&
+            (chainPerspectiveInset > 0.001f || Mathf.Abs(chainPerspectiveVerticalSkew) > 0.001f);
+        var shear = chainPerspectiveVerticalSkew;
+        var inset = chainPerspectiveInset;
+
+        if (chainTextPerspective != null)
+        {
+            chainTextPerspective.enabled = enabled;
+            chainTextPerspective.RecedeRight = chainPerspectiveRecedeRight;
+            chainTextPerspective.Shear = shear;
+            chainTextPerspective.PerspectiveInset = inset;
+            chainTextPerspective.Refresh();
+        }
+
+        if (chainBackdropPerspective != null)
+        {
+            chainBackdropPerspective.enabled = enabled;
+            chainBackdropPerspective.RecedeRight = chainPerspectiveRecedeRight;
+            chainBackdropPerspective.Shear = shear;
+            chainBackdropPerspective.PerspectiveInset = inset;
+            chainBackdropPerspective.Refresh();
+        }
+    }
+
+    private void CacheChainBackdropBasePosition()
+    {
+        if (chainBackdropRoot == null) return;
+
+        chainBackdropBaseAnchoredPosition = chainBackdropRoot.anchoredPosition;
+        chainBackdropBaseScale = chainBackdropRoot.localScale;
+        hasChainBackdropBaseAnchoredPosition = true;
+    }
+
+    private void CacheChainTextBasePosition()
+    {
+        if (chainTextRoot == null) return;
+
+        chainTextBaseAnchoredPosition = chainTextRoot.anchoredPosition;
+        hasChainTextBaseAnchoredPosition = true;
+    }
+
+    private RectTransform FindChainBackdropRoot()
+    {
+        Transform searchRoot = null;
+
+        if (chainPanel != null && chainPanel.transform.parent != null)
+        {
+            searchRoot = chainPanel.transform.parent;
+        }
+        else if (chainText != null && chainText.transform.parent != null)
+        {
+            searchRoot = chainText.transform.parent;
+        }
+        else
+        {
+            searchRoot = transform;
+        }
+
+        if (searchRoot == null) return null;
+
+        var direct = searchRoot.Find("ImageZip/Image3");
+        if (direct != null) return direct as RectTransform;
+
+        return FindChildRecursive(searchRoot, "Image3") as RectTransform;
+    }
+
+    private static Transform FindChildRecursive(Transform parent, string targetName)
+    {
+        if (parent == null) return null;
+
+        for (var i = 0; i < parent.childCount; i++)
+        {
+            var child = parent.GetChild(i);
+            if (child.name == targetName)
+            {
+                return child;
+            }
+
+            var nested = FindChildRecursive(child, targetName);
+            if (nested != null)
+            {
+                return nested;
+            }
+        }
+
+        return null;
     }
 }
