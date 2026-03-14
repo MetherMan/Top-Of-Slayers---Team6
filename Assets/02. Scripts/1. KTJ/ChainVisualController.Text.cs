@@ -9,20 +9,27 @@ public partial class ChainVisualController
 
     private void ShowChain(int chain)
     {
+        var playIntroMotion = !IsChainVisible();
+
         if (chainUI != null && chainUI.IsReady)
         {
             chainUI.UpdateChainUI(chain);
+            SetChainBackdropVisible(true);
+            PlayChainBackdrop(playIntroMotion);
+            PlayChainText(playIntroMotion);
             return;
         }
 
-        SetChainPanelVisible(true);
         if (chainText != null)
         {
-            chainText.text = string.Format(chainTextFormat, chain);
+            chainText.text = FormatChainText(chain);
         }
 
+        SetChainPanelVisible(true);
+        SetChainBackdropVisible(true);
+        PlayChainBackdrop(playIntroMotion);
         EnsureChainTimerBar();
-        PlayChainText();
+        PlayChainText(playIntroMotion);
     }
 
     private void HideChain()
@@ -30,12 +37,18 @@ public partial class ChainVisualController
         if (chainUI != null && chainUI.IsReady)
         {
             chainUI.HideChainUI(lastChain);
+            SetChainBackdropVisible(false);
             return;
         }
 
-        if (chainPanel == null) return;
+        if (chainPanel == null)
+        {
+            SetChainBackdropVisible(false);
+            return;
+        }
         if (chainTextGroup == null)
         {
+            SetChainBackdropVisible(false);
             SetChainPanelVisible(false);
             return;
         }
@@ -46,7 +59,11 @@ public partial class ChainVisualController
             .DOFade(0f, chainTextFadeOut)
             .SetEase(Ease.OutQuad)
             .SetUpdate(useUnscaledTime)
-            .OnComplete(() => SetChainPanelVisible(false));
+            .OnComplete(() =>
+            {
+                SetChainBackdropVisible(false);
+                SetChainPanelVisible(false);
+            });
     }
 
     private bool IsChainVisible()
@@ -63,6 +80,8 @@ public partial class ChainVisualController
             chainUI.HideChainUI(lastChain);
         }
 
+        SetChainBackdropVisible(false);
+
         if (chainTextGroup != null)
         {
             chainTextGroup.DOKill();
@@ -77,9 +96,13 @@ public partial class ChainVisualController
         }
     }
 
-    private void PlayChainText()
+    private void PlayChainText(bool playIntroMotion)
     {
         if (chainTextRoot == null) return;
+        if (!hasChainTextBaseAnchoredPosition)
+        {
+            CacheChainTextBasePosition();
+        }
 
         chainTextRoot.DOKill();
         ResetChainTextTransformImmediate();
@@ -92,6 +115,11 @@ public partial class ChainVisualController
         }
 
         var sequence = DOTween.Sequence().SetUpdate(useUnscaledTime);
+        if (playIntroMotion && useChainBackdropSlide && chainBackdropSlideDuration > 0f && hasChainTextBaseAnchoredPosition)
+        {
+            chainTextRoot.anchoredPosition = chainTextBaseAnchoredPosition + chainBackdropSlideOffset;
+            sequence.Join(chainTextRoot.DOAnchorPos(chainTextBaseAnchoredPosition, chainBackdropSlideDuration).SetEase(chainBackdropSlideEase));
+        }
         if (chainTextGroup != null && needFadeIn)
         {
             sequence.Join(chainTextGroup.DOFade(1f, chainTextFadeIn).SetEase(Ease.OutQuad));
@@ -101,6 +129,33 @@ public partial class ChainVisualController
             var punch = Vector3.one * chainTextPunchScale;
             sequence.Join(chainTextRoot.DOPunchScale(punch, chainTextPunchDuration, 8, 0.6f).SetEase(chainTextEase));
         }
+    }
+
+    private void PlayChainBackdrop(bool playIntroMotion)
+    {
+        if (chainBackdropRoot == null) return;
+        if (!hasChainBackdropBaseAnchoredPosition)
+        {
+            CacheChainBackdropBasePosition();
+        }
+
+        chainBackdropRoot.DOKill();
+        ResetChainBackdropTransformImmediate();
+
+        var sequence = DOTween.Sequence().SetUpdate(useUnscaledTime);
+        if (playIntroMotion && useChainBackdropSlide && chainBackdropSlideDuration > 0f && hasChainBackdropBaseAnchoredPosition)
+        {
+            chainBackdropRoot.anchoredPosition = chainBackdropBaseAnchoredPosition + chainBackdropSlideOffset;
+            sequence.Join(chainBackdropRoot.DOAnchorPos(chainBackdropBaseAnchoredPosition, chainBackdropSlideDuration).SetEase(chainBackdropSlideEase));
+        }
+
+        if (chainBackdropPunchScale > 0f)
+        {
+            var punch = Vector3.one * chainBackdropPunchScale;
+            sequence.Join(chainBackdropRoot.DOPunchScale(punch, chainBackdropPunchDuration, 8, 0.55f).SetEase(chainTextEase));
+        }
+
+        chainBackdropTween = sequence.OnComplete(() => chainBackdropTween = null);
     }
 
     private void PlayChainMilestoneBeat(int chain)
@@ -117,6 +172,7 @@ public partial class ChainVisualController
         }
 
         PunchChainText(punchScale, milestoneTextPunchDuration);
+        PunchChainBackdrop(punchScale * 0.4f, milestoneTextPunchDuration);
         FlashChainTextColor(milestoneTextFlashColor, milestoneTextFlashReturn);
         FlashChainTimerBarColor(milestoneTimerBarFlashColor, milestoneTimerBarFlashReturn);
     }
@@ -132,6 +188,7 @@ public partial class ChainVisualController
         }
 
         PunchChainText(killFinishTextPunchScale, killFinishTextPunchDuration);
+        PunchChainBackdrop(killFinishTextPunchScale * 0.4f, killFinishTextPunchDuration);
         FlashChainTextColor(killFinishTextFlashColor, killFinishTextFlashReturn);
     }
 
@@ -144,6 +201,19 @@ public partial class ChainVisualController
         ResetChainTextTransformImmediate();
         var punch = Vector3.one * punchScale;
         chainTextRoot.DOPunchScale(punch, punchDuration, 9, 0.65f)
+            .SetEase(Ease.OutBack)
+            .SetUpdate(useUnscaledTime);
+    }
+
+    private void PunchChainBackdrop(float punchScale, float punchDuration)
+    {
+        if (chainBackdropRoot == null) return;
+        if (punchScale <= 0f || punchDuration <= 0f) return;
+
+        chainBackdropRoot.DOKill();
+        ResetChainBackdropTransformImmediate();
+        var punch = Vector3.one * punchScale;
+        chainBackdropRoot.DOPunchScale(punch, punchDuration, 8, 0.55f)
             .SetEase(Ease.OutBack)
             .SetUpdate(useUnscaledTime);
     }
@@ -188,6 +258,12 @@ public partial class ChainVisualController
 
     private void ResetChainBeatImmediate()
     {
+        if (chainBackdropTween != null)
+        {
+            chainBackdropTween.Kill();
+            chainBackdropTween = null;
+        }
+
         if (chainTextColorTween != null)
         {
             chainTextColorTween.Kill();
@@ -206,6 +282,7 @@ public partial class ChainVisualController
         }
 
         ResetChainTextTransformImmediate();
+        ResetChainBackdropTransformImmediate();
 
         if (chainTimerBarFillImage != null)
         {
@@ -308,15 +385,76 @@ public partial class ChainVisualController
 
     private void SetChainPanelVisible(bool visible)
     {
+        if (!visible)
+        {
+            SetChainBackdropVisible(false);
+        }
+
         if (chainPanel == null) return;
         if (chainPanel.activeSelf == visible) return;
         chainPanel.SetActive(visible);
     }
 
+    private void SetChainBackdropVisible(bool visible)
+    {
+        if (chainBackdropRoot == null)
+        {
+            BindChainPerspectiveTargets();
+        }
+
+        if (chainBackdropRoot == null) return;
+        if (!hasChainBackdropBaseAnchoredPosition)
+        {
+            CacheChainBackdropBasePosition();
+        }
+
+        if (chainBackdropTween != null)
+        {
+            chainBackdropTween.Kill();
+            chainBackdropTween = null;
+        }
+
+        var backdropObject = chainBackdropRoot.gameObject;
+        if (!visible)
+        {
+            if (hasChainBackdropBaseAnchoredPosition)
+            {
+                chainBackdropRoot.anchoredPosition = chainBackdropBaseAnchoredPosition;
+            }
+
+            if (backdropObject.activeSelf)
+            {
+                backdropObject.SetActive(false);
+            }
+            return;
+        }
+
+        if (!backdropObject.activeSelf)
+        {
+            backdropObject.SetActive(true);
+        }
+
+        ResetChainBackdropTransformImmediate();
+    }
+
     private void ResetChainTextTransformImmediate()
     {
         if (chainTextRoot == null) return;
+        if (hasChainTextBaseAnchoredPosition)
+        {
+            chainTextRoot.anchoredPosition = chainTextBaseAnchoredPosition;
+        }
         chainTextRoot.localScale = chainTextBaseScale;
+    }
+
+    private void ResetChainBackdropTransformImmediate()
+    {
+        if (chainBackdropRoot == null) return;
+        if (hasChainBackdropBaseAnchoredPosition)
+        {
+            chainBackdropRoot.anchoredPosition = chainBackdropBaseAnchoredPosition;
+        }
+        chainBackdropRoot.localScale = chainBackdropBaseScale;
     }
 
     private bool TryBindChainTimerBar()
@@ -424,5 +562,15 @@ public partial class ChainVisualController
             100f);
         chainTimerBarSprite.name = "ChainTimerBarSprite";
         return chainTimerBarSprite;
+    }
+
+    private string FormatChainText(int chain)
+    {
+        if (chainTextFormat == "Chain x {0}")
+        {
+            return $"Chain<size=68%> x{chain}</size>";
+        }
+
+        return string.Format(chainTextFormat, chain);
     }
 }
