@@ -44,6 +44,7 @@ public class StageFlowManager : Singleton<StageFlowManager>
 
     void Update()
     {
+        if (Time.timeScale <= 0f) return;
         //플레이 시간
         if (StageManager.Instance.selectDB != null)
         {
