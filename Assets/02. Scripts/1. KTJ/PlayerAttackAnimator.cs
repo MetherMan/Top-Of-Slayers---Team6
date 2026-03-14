@@ -27,6 +27,11 @@ public class PlayerAttackAnimator : MonoBehaviour
     [SerializeField] private Vector3 hitVfxOffset = new Vector3(0f, 0.6f, 0.8f);
     [SerializeField] private bool hitVfxFollowSpawnPoint;
     [SerializeField, Min(0f)] private float hitVfxAutoDestroyTime = 2f;
+    [SerializeField] private AudioSource hitAudioSource;
+    [SerializeField] private AudioClip primaryHitSound;
+    [SerializeField] private AudioClip secondaryHitSound;
+    [SerializeField, Range(0f, 1f)] private float primaryHitVolume = 1f;
+    [SerializeField, Range(0f, 1f)] private float secondaryHitVolume = 1f;
 
     private bool isAutoSlashSubscribed;
     private bool isImpactSubscribed;
@@ -101,6 +106,7 @@ public class PlayerAttackAnimator : MonoBehaviour
             PlayState(fullPathHash);
         }
 
+        PlayHitSounds();
         PlayHitVfx(hitTarget);
     }
 
@@ -125,6 +131,27 @@ public class PlayerAttackAnimator : MonoBehaviour
         if (moveController == null) moveController = GetComponent<PlayerMoveController>();
         if (moveController == null) moveController = GetComponentInParent<PlayerMoveController>();
         if (moveController == null) moveController = FindObjectOfType<PlayerMoveController>();
+
+        ResolveHitAudioSource();
+    }
+
+    private void ResolveHitAudioSource()
+    {
+        if (hitAudioSource == null)
+        {
+            hitAudioSource = GetComponent<AudioSource>();
+        }
+
+        if (hitAudioSource == null)
+        {
+            hitAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        if (hitAudioSource == null) return;
+
+        hitAudioSource.playOnAwake = false;
+        hitAudioSource.loop = false;
+        hitAudioSource.spatialBlend = 0f;
     }
 
     private void ResetAttackTriggers()
@@ -251,11 +278,6 @@ public class PlayerAttackAnimator : MonoBehaviour
             return;
         }
 
-        if (chainCombat != null && chainCombat.IsSlowActive)
-        {
-            return;
-        }
-
         ClearActiveSlashState();
         ReleaseSlashFacingLock();
     }
@@ -322,6 +344,22 @@ public class PlayerAttackAnimator : MonoBehaviour
     private static string BuildStatePath(string stateName)
     {
         return $"{BaseLayerName}.{stateName}";
+    }
+
+    private void PlayHitSounds()
+    {
+        ResolveHitAudioSource();
+        if (hitAudioSource == null) return;
+
+        if (primaryHitSound != null && primaryHitVolume > 0f)
+        {
+            hitAudioSource.PlayOneShot(primaryHitSound, primaryHitVolume);
+        }
+
+        if (secondaryHitSound != null && secondaryHitVolume > 0f)
+        {
+            hitAudioSource.PlayOneShot(secondaryHitSound, secondaryHitVolume);
+        }
     }
 
     private void PlayHitVfx(Transform hitTarget)

@@ -1190,6 +1190,11 @@ MonoBehaviour:
   - BigSlash
   - jigun
   slashStateTransitionDuration: 0.03
+  hitAudioSource: {fileID: 0}
+  primaryHitSound: {fileID: 8300000, guid: 0c3458199e75a7b4782d5363593cae84, type: 3}
+  secondaryHitSound: {fileID: 8300000, guid: b2e5ba559f888db43b3150f17099dcb2, type: 3}
+  primaryHitVolume: 0.1
+  secondaryHitVolume: 0.1
   hitVfxPrefab: {fileID: 1429954232896169633, guid: 83036083a4ebcd34f98131bd3cf6f4d2,
     type: 3}
   hitVfxSpawnPoint: {fileID: 0}
