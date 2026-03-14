@@ -277,13 +277,13 @@ MonoBehaviour:
   loginUI: {fileID: 2068683479}
   signupUI: {fileID: 1538398578}
   findUI: {fileID: 0}
-  inputID: {fileID: 2022129264}
+  inputEmail: {fileID: 2022129264}
   inputPW: {fileID: 668371683}
   loginBtn: {fileID: 1380626782}
   findBtn: {fileID: 2052628017}
   signupBtn: {fileID: 1428334758}
   googleBtn: {fileID: 1326637085}
-  upInputID: {fileID: 1230268917}
+  upInputEmail: {fileID: 1230268917}
   upInputPW: {fileID: 854967347}
   upInputRePW: {fileID: 321862926}
   signupCheckBtn: {fileID: 340388307}
@@ -553,7 +553,7 @@ GameObject:
   m_Component:
   - component: {fileID: 288251469}
   m_Layer: 5
-  m_Name: IDPlace
+  m_Name: EmailPlace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1714,6 +1714,53 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Padding: {x: -8, y: -5, z: -8, w: -5}
   m_Softness: {x: 0, y: 0}
+--- !u!1 &558699204
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 558699206}
+  - component: {fileID: 558699205}
+  m_Layer: 0
+  m_Name: StageManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &558699205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 558699204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18529d46a376efc45b2b3d91ec1b1da1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DontDestroy: 1
+  stageDB: {fileID: 0}
+  selectDB: {fileID: 0}
+--- !u!4 &558699206
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 558699204}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 467.24792, y: 638.4137, z: 6.1254897}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &589261286
 GameObject:
   m_ObjectHideFlags: 0
@@ -3590,7 +3637,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC544\uC774\uB514 \uC785\uB825"
+  m_text: "\uC774\uBA54\uC77C \uC785\uB825"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2faf6db7d3b8c4445aa79081b74c1f67, type: 2}
   m_sharedMaterial: {fileID: -7947956429080880219, guid: 2faf6db7d3b8c4445aa79081b74c1f67,
@@ -4481,7 +4528,7 @@ GameObject:
   - component: {fileID: 1230268918}
   - component: {fileID: 1230268917}
   m_Layer: 5
-  m_Name: IDInputField
+  m_Name: EmailInputField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4721,7 +4768,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ID
+  m_text: Email
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2faf6db7d3b8c4445aa79081b74c1f67, type: 2}
   m_sharedMaterial: {fileID: -7947956429080880219, guid: 2faf6db7d3b8c4445aa79081b74c1f67,
@@ -5099,7 +5146,7 @@ GameObject:
   - component: {fileID: 1310338775}
   - component: {fileID: 1310338774}
   m_Layer: 5
-  m_Name: ID
+  m_Name: Email
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5144,7 +5191,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC544\uC774\uB514"
+  m_text: "\uC774\uBA54\uC77C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2faf6db7d3b8c4445aa79081b74c1f67, type: 2}
   m_sharedMaterial: {fileID: -7947956429080880219, guid: 2faf6db7d3b8c4445aa79081b74c1f67,
@@ -6445,6 +6492,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1538398578}
   m_CullTransparentMesh: 1
+--- !u!1 &1671805895
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1671805896}
+  m_Layer: 0
+  m_Name: ------------------
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1671805896
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1671805895}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 467.24792, y: 638.4137, z: 6.1254897}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1711022621
 GameObject:
   m_ObjectHideFlags: 0
@@ -7152,7 +7230,7 @@ GameObject:
   - component: {fileID: 2022129265}
   - component: {fileID: 2022129264}
   m_Layer: 5
-  m_Name: InputID
+  m_Name: InputEmail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7808,9 +7886,11 @@ SceneRoots:
   - {fileID: 1108927065}
   - {fileID: 1504059876}
   - {fileID: 1248682434}
+  - {fileID: 1671805896}
   - {fileID: 1106925270}
   - {fileID: 2089032755}
   - {fileID: 132680842}
   - {fileID: 714577382}
   - {fileID: 1255585106}
   - {fileID: 229505132}
+  - {fileID: 558699206}

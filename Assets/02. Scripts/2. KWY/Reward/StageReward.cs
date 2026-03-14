@@ -42,11 +42,11 @@ public class StageReward : MonoBehaviour
     }
     public void TestFirstClear()
     {
-        StageClear(true);
+        StageClear(false);
     }
     public void TestRepeatClear()
     {
-        StageClear(false);
+        StageClear(true);
     }
 
 }

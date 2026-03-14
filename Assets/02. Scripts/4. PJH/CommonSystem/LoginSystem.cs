@@ -31,7 +31,6 @@ public class LoginSystem : MonoBehaviour
     {
         Debug.LogFormat("<color=fff>id : {0}, pw : {1}</color>", data.Item1, data.Item2);
 
-        //오류, 버그 검증 x 일단 테스트
         FirebaseManager.Instance.Login(data);
     }
 

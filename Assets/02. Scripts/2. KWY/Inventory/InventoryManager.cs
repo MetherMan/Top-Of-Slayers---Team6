@@ -10,11 +10,18 @@ public class InventoryManager : Singleton<InventoryManager>
     protected override void Awake()
     {
         base.Awake();
+        Init();
     }
     public void NotifyInventoryChanged()
     {
 
         OnInventoryChanged?.Invoke();
+    }
+
+    //firebase
+    private void Init()
+    {
+        FirebaseManager.Instance.PushItemList(inventory);
     }
 
     //아이템 추가

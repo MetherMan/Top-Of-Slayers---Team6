@@ -65,47 +65,10 @@ public class StageDatabase : ScriptableObject
 
         roundDatas = data.roundDatas;
         selectStage = data;
+
+        StageManager.Instance.GetData(selectStage, this);
+
         return selectStage;
     }
-
-    /*
-    private bool TryResolveStageKey(StageConfigSO data, out string stageKey)
-    {
-        stageKey = null;
-        if (!string.IsNullOrWhiteSpace(data.stageKey))
-        {
-            stageKey = data.stageKey.Trim();
-            return true;
-        }
-
-        string name = data.name;
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return false;
-        }
-
-        int start = -1;
-        int end = -1;
-        for (int i = 0; i < name.Length; i++)
-        {
-            if (char.IsDigit(name[i]))
-            {
-                if (start < 0) start = i;
-                end = i;
-                continue;
-            }
-
-            if (start >= 0) break;
-        }
-
-        if (start < 0 || end < start)
-        {
-            return false;
-        }
-
-        stageKey = name.Substring(start, end - start + 1);
-        return !string.IsNullOrWhiteSpace(stageKey);
-    }
-    */
     #endregion
 }

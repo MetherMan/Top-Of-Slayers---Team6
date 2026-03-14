@@ -11,6 +11,18 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
     public event Action OnEquipmentChanged;
 
+    //firebase
+    protected override void Awake()
+    {
+        base.Awake();
+        Init();
+    }
+
+    private void Init()
+    {
+        FirebaseManager.Instance.PushEquipment(weapon, shoes, gloves, armor, emblem);
+    }
+
     public void Equip(InventoryItem data)
     {
         if (!(data.item is EquipmentSO equip)) return;
@@ -33,6 +45,10 @@ public class EquipmentManager : Singleton<EquipmentManager>
                 emblem = data;
                 break;
         }
+
+        FirebaseManager.Instance.SaveEquipment(
+            weapon, shoes, gloves, armor, emblem, FirebaseManager.Instance.UID
+            );
 
         OnEquipmentChanged?.Invoke();
     }
@@ -61,6 +77,10 @@ public class EquipmentManager : Singleton<EquipmentManager>
                 emblem = null;
                 break;
         }
+
+        FirebaseManager.Instance.SaveEquipment(
+            weapon, shoes, gloves, armor, emblem, FirebaseManager.Instance.UID
+            );
 
         OnEquipmentChanged?.Invoke();
     }

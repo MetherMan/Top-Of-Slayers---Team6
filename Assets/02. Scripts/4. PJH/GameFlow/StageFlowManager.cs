@@ -32,10 +32,7 @@ public class StageFlowManager : Singleton<StageFlowManager>
     protected override void Awake()
     {
         base.Awake();
-    }
 
-    void Start()
-    {
         if (StageManager.Instance.selectDB != null)
         {
             remainingTime = StageManager.Instance.selectDB.stageTime;
@@ -47,10 +44,11 @@ public class StageFlowManager : Singleton<StageFlowManager>
 
     void Update()
     {
+        if (Time.timeScale <= 0f) return;
         //플레이 시간
         if (StageManager.Instance.selectDB != null)
         {
-            timer += Time.deltaTime;
+            timer += Time.unscaledDeltaTime;
 
             if (timer >= 1f)
             {

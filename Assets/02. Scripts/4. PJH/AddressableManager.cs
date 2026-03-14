@@ -8,19 +8,21 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.UI;
 using Cysharp.Threading.Tasks;
+using Unity.VisualScripting;
 
 public class AddressableManager : Singleton<AddressableManager>
 {
     #region field
     private List<AsyncOperationHandle> loadedAssets = new List<AsyncOperationHandle>();
-    public Dictionary<string, StageConfigSO> _stageSO = new Dictionary<string, StageConfigSO>();
-    public Dictionary<string, StageDatabase> _database = new Dictionary<string, StageDatabase>();
-    public Dictionary<string, SceneInstance> _stageScene = new Dictionary<string, SceneInstance>();
-    public Dictionary<string, WaveRule> _ruleSO = new Dictionary<string, WaveRule>();
-    public Dictionary<string, GameObject> _uI = new Dictionary<string, GameObject>();
-    public Dictionary<string, EnemyConfigSO> _enemySO = new Dictionary<string, EnemyConfigSO>();
-    public Dictionary<string, GameObject> _monsterPf = new Dictionary<string, GameObject>();
-    public Dictionary<string, GameObject> _vFX = new Dictionary<string, GameObject>();
+    private Dictionary<string, StageConfigSO> _stageSO = new Dictionary<string, StageConfigSO>();
+    private Dictionary<string, StageDatabase> _database = new Dictionary<string, StageDatabase>();
+    private Dictionary<string, SceneInstance> _stageScene = new Dictionary<string, SceneInstance>();
+    private Dictionary<string, WaveRule> _ruleSO = new Dictionary<string, WaveRule>();
+    private Dictionary<string, GameObject> _uI = new Dictionary<string, GameObject>();
+    private Dictionary<string, EnemyConfigSO> _enemySO = new Dictionary<string, EnemyConfigSO>();
+    private Dictionary<string, GameObject> _monsterPf = new Dictionary<string, GameObject>();
+    private Dictionary<string, GameObject> _vFX = new Dictionary<string, GameObject>();
+    private Dictionary<string, ItemSO> _itemSO = new Dictionary<string, ItemSO>();
 
     Slider loadingBar;
     TextMeshProUGUI loadingText;
@@ -44,6 +46,9 @@ public class AddressableManager : Singleton<AddressableManager>
         });
 
         await LoadAllData(progressHandle);
+
+        //ItemSO 다 가져오기 : 계정 로그인 시 활성화 될 메서드에 필요한 데이터
+        StageManager.Instance.LoadAllItemSO(); 
     }
 
     #region method
@@ -89,13 +94,17 @@ public class AddressableManager : Singleton<AddressableManager>
         UniTask uITask = LoadAllUI();
         UniTask monsterSOTask = LoadAllMonsterSO();
         UniTask monsterPfTask = LoadAllMonsterPf();
-        //ItemSO
+        UniTask itemSOTask = LoadAllItemSO();
         //ItemPrefab
         UniTask vFXTask = LoadAllVFX();
         //SFX
 
         List<UniTask> tasks = new List<UniTask> 
-        { databaseTask, stageSOTask, ruleSOTask, uITask, monsterSOTask, monsterPfTask, vFXTask };
+        { 
+            databaseTask, stageSOTask, ruleSOTask,
+            uITask, monsterSOTask, monsterPfTask,
+            itemSOTask, vFXTask
+        };
 
         await UniTask.WhenAll(tasks);
         progress.Report(1.0f);
@@ -545,15 +554,63 @@ public class AddressableManager : Singleton<AddressableManager>
     }
 
     //ItemSO
-    //public async Task LoadAllItemSO()
-    //{
+    private async UniTask LoadAllItemSO()
+    {
+        AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
+            = Addressables.LoadResourceLocationsAsync("ItemSO", typeof(ItemSO));
 
-    //}
+        await loadResourceLocationHandle.Task;
+
+        if (IsFailed(loadResourceLocationHandle)) Debug.LogError("loadResourceLocationHandle : Failed");
+
+        List<AsyncOperationHandle> ItemSOOpList = new List<AsyncOperationHandle>();
+
+        foreach (IResourceLocation location in loadResourceLocationHandle.Result)
+        {
+            AsyncOperationHandle<ItemSO> loadAssetHandle
+                = Addressables.LoadAssetAsync<ItemSO>(location);
+
+            loadAssetHandle.Completed += (op) =>
+            {
+                if (IsSucceeded(op))
+                {
+                    if (!_itemSO.ContainsKey(location.PrimaryKey))
+                    {
+                        _itemSO.Add(location.PrimaryKey, op.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"ItemSO 중복 : {location.PrimaryKey}");
+                    }
+                }
+                else if (IsFailed(op))
+                {
+                    Debug.LogError("LoadAllItemSO : Failed");
+                }
+            };
+            ItemSOOpList.Add(loadAssetHandle);
+        }
+
+        AsyncOperationHandle ItemSOGroup
+            = Addressables.ResourceManager.CreateGenericGroupOperation(ItemSOOpList);
+
+        await ItemSOGroup.Task;
+        loadedAssets.Add(ItemSOGroup);
+
+        Addressables.Release(loadResourceLocationHandle);
+
+        foreach (KeyValuePair<string, ItemSO> item in _itemSO)
+        {
+            Debug.Log($"ItemSO Key : {item.Key} value : {item.Value.name}");
+        }
+
+        Debug.Log("LoadAllItemSO : Completed");
+    }
 
     ////ItemPrefab
     //public async Task LoadAllItemPf()
     //{
-        //프리팹 추가로 코드 구현
+    //프리팹 추가로 코드 구현
     //}
 
     //VFX
@@ -708,6 +765,17 @@ public class AddressableManager : Singleton<AddressableManager>
             Debug.LogWarning("AddressableManager에 존재하지 않는 데이터");
         }
         return null;
+    }
+
+    public Dictionary<string, ItemSO> GetAllItemSO()
+    {
+        Dictionary<string, ItemSO> data = new Dictionary<string, ItemSO>();
+        foreach (KeyValuePair<string, ItemSO> item in _itemSO)
+        {
+            data.Add(item.Key, item.Value);
+        }
+
+        return data;
     }
     #endregion
 
