@@ -39,7 +39,6 @@ public class StageTimer : MonoBehaviour
 
         float angle = ratio * 360f;
         clockNeedle.localRotation = Quaternion.Euler(0, 0, angle);
-        Debug.Log(angle);
 
         if (angle <= 90)
         {
