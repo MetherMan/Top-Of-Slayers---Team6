@@ -53,6 +53,10 @@ public class LoginUI : Singleton<LoginUI>
     protected override void Awake()
     {
         base.Awake();
+    }
+
+    private void Start()
+    {
         Init();
     }
 

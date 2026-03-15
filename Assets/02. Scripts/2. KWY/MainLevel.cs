@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using Cysharp.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,9 +14,31 @@ public class MainLevel : MonoBehaviour
     [SerializeField] int maxExp = 100;
     [SerializeField] int stageClearExp = 20;
 
-    private void Start()
+    private async void Start()
     {
+        try
+        {
+            await WaitUntilDataLoaded();
+            Init();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"MainLevel Start중 Error: {ex.Message}\n{ex.StackTrace}");
+        }
+    }
+
+    private void Init()
+    {
+        FirebaseManager.Instance.RefreshLevel(currentLevel, currentExp);
         UpdateUI();
+    }
+
+    private async UniTask WaitUntilDataLoaded()
+    {
+        while (!FirebaseManager.Instance.IsDataLoaded)
+        {
+            await UniTask.Delay(500);
+        }
     }
 
     public void AddEXP(int amount)
@@ -26,6 +49,7 @@ public class MainLevel : MonoBehaviour
         {
             LevelUp();
         }
+        FirebaseManager.Instance.SaveLevel(currentLevel, currentExp);
         UpdateUI();
     }
     private void LevelUp()

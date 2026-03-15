@@ -38,6 +38,8 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         {
             instance = this as T;
 
+            transform.SetParent(null); //자식으로 들어가있다면 최상위로 이동
+
             if (DontDestroy)
             {
                 DontDestroyOnLoad(gameObject);

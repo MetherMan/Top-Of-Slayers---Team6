@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
-using UnityEngine.Experimental.GlobalIllumination;
+using Cysharp.Threading.Tasks;
 
 public class InventoryManager : Singleton<InventoryManager>
 {
@@ -10,8 +10,21 @@ public class InventoryManager : Singleton<InventoryManager>
     protected override void Awake()
     {
         base.Awake();
-        Init();
     }
+
+    private async void Start()
+    {
+        try
+        {
+            await WaitUntilDataLoaded();
+            Init();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"InventoryManager Start중 Error: {ex.Message}\n{ex.StackTrace}");
+        }
+    }
+
     public void NotifyInventoryChanged()
     {
 
@@ -21,7 +34,16 @@ public class InventoryManager : Singleton<InventoryManager>
     //firebase
     private void Init()
     {
-        FirebaseManager.Instance.PushItemList(inventory);
+        Debug.Log("InventoryManager: 데이터 로드 완료. Init 실행");
+        FirebaseManager.Instance.PushItemList(FirebaseManager.Instance.userInventory);
+    }
+
+    private async UniTask WaitUntilDataLoaded()
+    {
+        while (!FirebaseManager.Instance.IsDataLoaded)
+        {
+            await UniTask.Delay(500);
+        }
     }
 
     //아이템 추가
@@ -80,6 +102,7 @@ public class InventoryManager : Singleton<InventoryManager>
         CurrencyManager.Instance.Add(sellPrice);
 
         RemoveItem(data);
+        FirebaseManager.Instance.SaveInventory(inventory);
 
         return true;
     }

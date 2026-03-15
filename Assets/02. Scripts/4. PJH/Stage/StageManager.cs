@@ -12,6 +12,8 @@ public class StageManager : Singleton<StageManager>
     public StageDatabase stageDB;
     public StageConfigSO selectDB;
 
+    public System.Action LoadCompleted;
+
     private Dictionary<string, ItemSO> itemDict = new Dictionary<string, ItemSO>();
     #endregion
 
@@ -30,19 +32,26 @@ public class StageManager : Singleton<StageManager>
     //AddressableManager가 데이터를 다 받아오고 난 뒤 실행
     public void LoadAllItemSO()
     {
-        itemDict = AddressableManager.Instance.GetAllItemSO();
+        Dictionary<string, ItemSO> data = AddressableManager.Instance.GetAllItemSO();
+        
+        if (data != null && data.Count > 0)
+        {
+            foreach (ItemSO item in data.Values)
+            {
+                itemDict.Add(item.itemName, item);
+            }
+        }
+        Debug.LogFormat("<color=cyan>StageManager: {0}개 아이템 SO 로드 완료</color>", data.Count);
     }
 
     public ItemSO GetItemByID(string id)
     {
-        if (itemDict.ContainsKey(id)) 
+        if (itemDict != null && itemDict.TryGetValue(id, out ItemSO data)) 
         {
-            return itemDict[id];
+            return data;
         } 
-        else
-        {
-            Debug.LogWarningFormat("{0} : itemDict에 없는 데이터", id);
-        }
+        
+        Debug.LogWarningFormat("{0} : itemDict에 없는 데이터", id);
         return null;
     }
     #endregion

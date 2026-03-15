@@ -20,11 +20,6 @@ public class LoginSystem : MonoBehaviour
         RefreshEvent();
     }
 
-    void Update()
-    {
-        
-    }
-
     #region method
     //로그인 확인
     public void PushUserData(Tuple<string, string> data)
