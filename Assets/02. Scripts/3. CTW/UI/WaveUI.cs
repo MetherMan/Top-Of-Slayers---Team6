@@ -8,36 +8,75 @@ public class WaveUI : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI clearText;
 
+    private WaveDirectorSystem boundWaveDirector;
+
     private void Awake()
     {
         if (UIAnim == null)
         {
             UIAnim = GetComponent<WaveUIAnim>();
         }
+
+        if (stageSO == null && StageManager.Instance != null)
+        {
+            stageSO = StageManager.Instance.selectDB;
+        }
+
         if (clearText != null)
         {
             clearText.gameObject.SetActive(false);
         }
-        int endWave = stageSO.roundDatas.Count;
+
+        int endWave = stageSO != null && stageSO.roundDatas != null
+            ? stageSO.roundDatas.Count
+            : 0;
         UIAnim.Init(endWave);
     }
 
     private void OnEnable()
     {
-        if (WaveDirectorSystem.Instance != null)
-        {
-            WaveDirectorSystem.Instance.OnWaveClear += ShowWaveText;
-            WaveDirectorSystem.Instance.OnRoundClear += ShowClearText;
-        }
+        TryBindWaveDirector();
     }
 
     private void OnDisable()
     {
-        if (WaveDirectorSystem.Instance != null)
+        UnbindWaveDirector();
+    }
+
+    private void Update()
+    {
+        TryBindWaveDirector();
+    }
+
+    private void TryBindWaveDirector()
+    {
+        WaveDirectorSystem currentWaveDirector = WaveDirectorSystem.Instance;
+        if (currentWaveDirector == boundWaveDirector)
         {
-            WaveDirectorSystem.Instance.OnWaveClear -= ShowWaveText;
-            WaveDirectorSystem.Instance.OnRoundClear -= ShowClearText;
+            return;
         }
+
+        UnbindWaveDirector();
+        if (currentWaveDirector == null)
+        {
+            return;
+        }
+
+        currentWaveDirector.OnWaveClear += ShowWaveText;
+        currentWaveDirector.OnRoundClear += ShowClearText;
+        boundWaveDirector = currentWaveDirector;
+    }
+
+    private void UnbindWaveDirector()
+    {
+        if (boundWaveDirector == null)
+        {
+            return;
+        }
+
+        boundWaveDirector.OnWaveClear -= ShowWaveText;
+        boundWaveDirector.OnRoundClear -= ShowClearText;
+        boundWaveDirector = null;
     }
 
     private void ShowWaveText(int wave)

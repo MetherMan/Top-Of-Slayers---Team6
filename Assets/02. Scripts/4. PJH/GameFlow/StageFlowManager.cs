@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 /*
@@ -9,6 +9,22 @@ using UnityEngine;
     *변수 데이터 -> WaveDirectorySystem.cs 보내고 -> GameFlowManager에서 결과에 따라 메서드 실행
     *상태전환 <- GameStateMachine(상태머신) <- GameFlowManager 메서드 실행
 */
+
+public struct StageResultData
+{
+    public StageResultData(bool isClear, bool isFirstClear, int lastClearedWave, int totalWaveCount)
+    {
+        IsClear = isClear;
+        IsFirstClear = isFirstClear;
+        LastClearedWave = lastClearedWave;
+        TotalWaveCount = totalWaveCount;
+    }
+
+    public bool IsClear { get; }
+    public bool IsFirstClear { get; }
+    public int LastClearedWave { get; }
+    public int TotalWaveCount { get; }
+}
 
 public class StageFlowManager : Singleton<StageFlowManager>
 {
@@ -23,81 +39,133 @@ public class StageFlowManager : Singleton<StageFlowManager>
     public int waveLength;
     public int monsterCount;
     public int waveIndex; //EnemySpawnManager에서 값 변경
+    public int LastClearedWave { get; private set; }
 
     //(우영)
     //스테이지 클리어 여부 확인
     public static Action<bool> OnStageClear;
+    public static Action<StageResultData> OnStageFinished;
+
+    private bool hasStageResult;
+    private bool isStageStateInitialized;
     #endregion
 
     protected override void Awake()
     {
         base.Awake();
-
-        if (StageManager.Instance.selectDB != null)
-        {
-            remainingTime = StageManager.Instance.selectDB.stageTime;
-            waveLength = StageManager.Instance.selectDB.roundDatas != null
-                ? StageManager.Instance.selectDB.roundDatas.Count
-                : 0;
-        }
+        ResetStageState();
     }
 
-    void Update()
+    private void Start()
+    {
+        ResetStageState();
+    }
+
+    private void ResetStageState()
+    {
+        StageConfigSO stageConfig = StageManager.Instance != null ? StageManager.Instance.selectDB : null;
+        if (stageConfig == null)
+        {
+            isStageStateInitialized = false;
+            return;
+        }
+
+        stageConfig.clearResult = ClearResult.None;
+        remainingTime = stageConfig.stageTime;
+        playTime = 0;
+        timer = 0f;
+        waveLength = stageConfig.roundDatas != null ? stageConfig.roundDatas.Count : 0;
+        monsterCount = 0;
+        waveIndex = 0;
+        LastClearedWave = 0;
+        hasStageResult = false;
+        isStageStateInitialized = true;
+    }
+
+    private void Update()
     {
         if (Time.timeScale <= 0f) return;
-        //플레이 시간
-        if (StageManager.Instance.selectDB != null)
+
+        StageConfigSO stageConfig = StageManager.Instance != null ? StageManager.Instance.selectDB : null;
+        if (stageConfig == null) return;
+
+        if (!isStageStateInitialized)
         {
-            timer += Time.unscaledDeltaTime;
+            ResetStageState();
+            if (!isStageStateInitialized) return;
+        }
 
-            if (timer >= 1f)
-            {
-                timer -= 1f;
+        timer += Time.unscaledDeltaTime;
+        if (timer < 1f) return;
 
-                if (playTime < StageManager.Instance.selectDB.stageTime)
-                {
-                    playTime++;
-                }
+        timer -= 1f;
 
-                if (remainingTime > 0)
-                {
-                    remainingTime--;
-                }
-            }
+        if (playTime < stageConfig.stageTime)
+        {
+            playTime++;
+        }
+
+        if (remainingTime > 0)
+        {
+            remainingTime--;
         }
     }
 
     #region method
     public void MonsterCleared(int monsterIndex)
     {
-        
     }
 
     public void WaveClear()
     {
-        //상태전환 : UI 등등
+        RecordWaveStart(waveIndex);
+    }
+
+    public void RecordWaveStart(int currentWave)
+    {
+        if (hasStageResult) return;
+
+        waveIndex = Mathf.Clamp(currentWave, 0, waveLength);
+        LastClearedWave = Mathf.Clamp(waveIndex - 1, 0, waveLength);
+    }
+
+    public void MarkStageFailed()
+    {
+        CompleteStage(false);
     }
 
     public void RoundClear()
     {
-        //우영
-        //스테이지 클리어 보상 : false 미클리어 :: true 클리어
-        bool check = StageManager.Instance.selectDB.isCleared;
+        CompleteStage(true);
+        GameFlowManager.Instance?.RoundClear();
+    }
 
-        if (!check)
+    private void CompleteStage(bool isClear)
+    {
+        if (hasStageResult) return;
+
+        if (!isStageStateInitialized)
         {
-            //(첫클리어)
-            OnStageClear?.Invoke(check);
-        }
-        else
-        {
-            //(반복)
-            OnStageClear?.Invoke(check);
+            ResetStageState();
         }
 
-        GameFlowManager.Instance.RoundClear();
+        StageConfigSO stageConfig = StageManager.Instance != null ? StageManager.Instance.selectDB : null;
+        if (stageConfig == null) return;
 
-        //상태전환 : 씬 이동
+        bool wasAlreadyCleared = stageConfig.isCleared;
+        if (isClear)
+        {
+            LastClearedWave = waveLength;
+            OnStageClear?.Invoke(wasAlreadyCleared);
+            stageConfig.isCleared = true;
+        }
+
+        hasStageResult = true;
+        OnStageFinished?.Invoke(new StageResultData(
+            isClear,
+            !wasAlreadyCleared,
+            LastClearedWave,
+            waveLength));
     }
     #endregion
 }

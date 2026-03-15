@@ -81,11 +81,7 @@ public class KtjCameraFollowController : MonoBehaviour
     {
         if (followTarget == null)
         {
-            var player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
-            {
-                followTarget = player.transform;
-            }
+            followTarget = FindPlayerTarget();
         }
 
         if (dashController == null && followTarget != null)
@@ -97,6 +93,11 @@ public class KtjCameraFollowController : MonoBehaviour
             }
         }
 
+        if (dashController == null)
+        {
+            dashController = FindFirstObjectByType<SlashDashController>();
+        }
+
         if (chainCombat == null && followTarget != null)
         {
             chainCombat = followTarget.GetComponent<ChainCombatController>();
@@ -105,6 +106,13 @@ public class KtjCameraFollowController : MonoBehaviour
                 chainCombat = followTarget.GetComponentInChildren<ChainCombatController>(true);
             }
         }
+
+        if (chainCombat == null)
+        {
+            chainCombat = FindFirstObjectByType<ChainCombatController>();
+        }
+
+        CaptureOffsetIfNeeded();
     }
 
     private void CaptureOffsetIfNeeded()
@@ -115,5 +123,33 @@ public class KtjCameraFollowController : MonoBehaviour
 
         followOffset = transform.position - followTarget.position;
         hasCapturedOffset = true;
+    }
+
+    private static Transform FindPlayerTarget()
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        for (int i = 0; i < players.Length; i++)
+        {
+            GameObject player = players[i];
+            if (player == null) continue;
+
+            bool hasCombatController =
+                player.GetComponent<SlashDashController>() != null ||
+                player.GetComponent<ChainCombatController>() != null ||
+                player.GetComponentInChildren<SlashDashController>(true) != null ||
+                player.GetComponentInChildren<ChainCombatController>(true) != null;
+
+            if (hasCombatController)
+            {
+                return player.transform;
+            }
+        }
+
+        if (players.Length > 0 && players[0] != null)
+        {
+            return players[0].transform;
+        }
+
+        return null;
     }
 }

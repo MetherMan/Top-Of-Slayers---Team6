@@ -10,6 +10,10 @@ public class CurrencyManager : Singleton<CurrencyManager>
     {
         base.Awake();
 
+        if (Instance == this)
+        {
+            DontDestroyOnLoad(gameObject);
+        }
     }
     //현재 보유 골드 반환
     public int GetGold()

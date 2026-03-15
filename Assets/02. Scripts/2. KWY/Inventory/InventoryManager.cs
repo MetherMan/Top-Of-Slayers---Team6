@@ -10,6 +10,11 @@ public class InventoryManager : Singleton<InventoryManager>
     protected override void Awake()
     {
         base.Awake();
+
+        if (Instance == this)
+        {
+            DontDestroyOnLoad(gameObject);
+        }
     }
 
     private async void Start()
