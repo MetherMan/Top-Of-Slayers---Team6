@@ -2,7 +2,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System;
 using DG.Tweening;
 
 public class WaveUIAnim : MonoBehaviour
@@ -52,14 +51,55 @@ public class WaveUIAnim : MonoBehaviour
         {
             originPos = waveContainer.anchoredPosition;
         }
-        prevSlot.gameObject.SetActive(false);
-        nextSlot.gameObject.SetActive(false);
+        ResetPanelState();
+    }
 
-        clearText.gameObject.SetActive(false);
-        failText.gameObject.SetActive(false);
+    private void OnEnable()
+    {
+        ResetPanelState();
+    }
+
+    public void ResetPanelState()
+    {
+        if (waveCoroutine != null)
+        {
+            StopCoroutine(waveCoroutine);
+            waveCoroutine = null;
+        }
+
+        panelGroup?.DOKill();
+        wavePanel?.DOKill();
+        waveContainer?.DOKill();
+
+        if (wavePanel != null)
+        {
+            wavePanel.sizeDelta = new Vector2(normalSize, wavePanel.sizeDelta.y);
+            wavePanel.gameObject.SetActive(false);
+        }
+
+        if (waveContainer != null)
+        {
+            waveContainer.anchoredPosition = originPos;
+        }
+
+        if (panelGroup != null)
+        {
+            panelGroup.alpha = 0f;
+        }
+
+        if (prevSlot != null) prevSlot.SetActive(false);
+        if (currentSlot != null) currentSlot.SetActive(false);
+        if (nextSlot != null) nextSlot.SetActive(false);
+        if (clearText != null) clearText.gameObject.SetActive(false);
+        if (failText != null) failText.gameObject.SetActive(false);
     }
     public void PlayWavePanel(int currentWave)
     {
+        if (wavePanel != null && !wavePanel.gameObject.activeSelf)
+        {
+            wavePanel.gameObject.SetActive(true);
+        }
+
         panelGroup.DOKill();
         panelGroup.alpha = 1.0f;
 
@@ -81,8 +121,6 @@ public class WaveUIAnim : MonoBehaviour
         {
             yield break;
         }
-        Debug.Log($"현재 웨이브{wave}");
-
         prevSlot.SetActive(true);
         currentSlot.SetActive(true);
         nextSlot.SetActive(true);
@@ -143,6 +181,11 @@ public class WaveUIAnim : MonoBehaviour
 
     public void PlayClearPanel()
     {
+        if (wavePanel != null && !wavePanel.gameObject.activeSelf)
+        {
+            wavePanel.gameObject.SetActive(true);
+        }
+
         panelGroup.DOKill();
         panelGroup.alpha = 1.0f;
 

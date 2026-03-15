@@ -44,6 +44,13 @@ public class MainSceenLoadVer2 : MonoBehaviour
 
         //string stageName = stageSceneNames[index];
         StageConfigSO stage = stageSO[index];
+        if (stage == null)
+        {
+            return;
+        }
+
+        stage.clearResult = ClearResult.None;
+        StageManager.Instance.GetData(stage, StageDatabase.Instance);
         LoadingSceneController.LoadScene(stage.sceneReference.editorAsset.name);
 
 

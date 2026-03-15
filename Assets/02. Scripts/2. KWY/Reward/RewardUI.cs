@@ -10,7 +10,12 @@ public class RewardUI : MonoBehaviour
 
     public void ShowReward(List<RewardData> rewards)
     {
-        ClearResult();
+        ResetPresentation();
+
+        if (rewardPanel == null || iconParent == null || iconPrefab == null)
+        {
+            return;
+        }
 
         rewardPanel.SetActive(true);
 
@@ -22,9 +27,17 @@ public class RewardUI : MonoBehaviour
         }
     }
 
-    private void ClearResult()
+    public void ResetPresentation()
     {
-        rewardPanel.SetActive(false);
+        if (rewardPanel != null)
+        {
+            rewardPanel.SetActive(false);
+        }
+
+        if (iconParent == null)
+        {
+            return;
+        }
 
         foreach(Transform child in iconParent)
         {

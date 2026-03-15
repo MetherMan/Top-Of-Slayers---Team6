@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class RuleDataContainer
 {
@@ -85,6 +86,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         ruleDataContainer.waveCount = stageManager.selectDB.roundDatas != null
             ? stageManager.selectDB.roundDatas.Count
             : 0;
+        ruleDataContainer.currentPlayerHp = -1;
         isStageResultResolved = false;
         UnsubscribePlayerHp();
         UnsubscribePlayerDeath();
@@ -117,13 +119,13 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 
         if (playerCombatResource == null)
         {
-            playerCombatResource = FindFirstObjectByType<PlayerCombatResource>();
+            playerCombatResource = FindStagePlayerCombatResource();
             SubscribePlayerDeath();
         }
 
         if (playerHp == null)
         {
-            playerHp = FindFirstObjectByType<PlayerHP>();
+            playerHp = FindStagePlayerHp();
             SubscribePlayerHp();
         }
 
@@ -136,7 +138,10 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         if (playerHp != null)
         {
             ruleDataContainer.currentPlayerHp = playerHp.currentHP;
+            return;
         }
+
+        ruleDataContainer.currentPlayerHp = -1;
     }
 
     private void EnsureInitialized()
@@ -203,6 +208,64 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         if (nextCurrentHp > 0) return;
 
         ResolveStageFailure();
+    }
+
+    private PlayerCombatResource FindStagePlayerCombatResource()
+    {
+        PlayerCombatResource[] candidates = FindObjectsByType<PlayerCombatResource>(FindObjectsSortMode.None);
+        return FindBestStagePlayer(candidates);
+    }
+
+    private PlayerHP FindStagePlayerHp()
+    {
+        PlayerHP[] candidates = FindObjectsByType<PlayerHP>(FindObjectsSortMode.None);
+        return FindBestStagePlayer(candidates);
+    }
+
+    private T FindBestStagePlayer<T>(T[] candidates) where T : Component
+    {
+        if (candidates == null || candidates.Length == 0)
+        {
+            return null;
+        }
+
+        Scene ownerScene = gameObject.scene;
+
+        for (int i = 0; i < candidates.Length; i++)
+        {
+            T candidate = candidates[i];
+            if (!IsStagePlayerCandidate(candidate, ownerScene, true))
+            {
+                continue;
+            }
+
+            return candidate;
+        }
+
+        for (int i = 0; i < candidates.Length; i++)
+        {
+            T candidate = candidates[i];
+            if (!IsStagePlayerCandidate(candidate, ownerScene, false))
+            {
+                continue;
+            }
+
+            return candidate;
+        }
+
+        return null;
+    }
+
+    private static bool IsStagePlayerCandidate(Component candidate, Scene ownerScene, bool requireSameScene)
+    {
+        if (candidate == null) return false;
+        if (!candidate.gameObject.activeInHierarchy) return false;
+        if (requireSameScene && candidate.gameObject.scene != ownerScene) return false;
+        if (candidate.GetComponentInParent<Canvas>(true) != null) return false;
+
+        PlayerMoveController moveController = candidate.GetComponent<PlayerMoveController>();
+        if (moveController == null) moveController = candidate.GetComponentInParent<PlayerMoveController>();
+        return moveController != null;
     }
     #endregion
 
@@ -279,6 +342,12 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 
         EnsureInitialized();
 
+        StageFlowManager stageFlow = StageFlowManager.Instance;
+        if (stageFlow == null || stageFlow.waveIndex <= 0)
+        {
+            return;
+        }
+
         StageManager stageManager = StageManager.Instance;
         if (stageManager == null || stageManager.selectDB == null) return;
 
@@ -291,7 +360,6 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
 
         isStageResultResolved = true;
 
-        StageFlowManager stageFlow = StageFlowManager.Instance;
         if (stageFlow != null)
         {
             stageFlow.MarkStageFailed();

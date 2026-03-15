@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ObjectPoolManager : Singleton<ObjectPoolManager>
 {
@@ -19,10 +20,15 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
     //풀에서 현재 개수 추적하는 딕셔너리
     private Dictionary<GameObject, int> poolCurrent = new Dictionary<GameObject, int>();
+    private readonly Dictionary<GameObject, GameObject> pooledObjectSources = new Dictionary<GameObject, GameObject>();
 
     protected override void Awake()
     {
         base.Awake();
+        if (Instance != this)
+        {
+            return;
+        }
 
         if (poolDictionary == null) poolDictionary = new Dictionary<GameObject, Queue<GameObject>>();
         if (poolCurrent == null) poolCurrent = new Dictionary<GameObject, int>();
@@ -50,6 +56,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             for (int i = 0; i < pool.size; i++)
             {
                 GameObject obj = Instantiate(pool.prefab, transform);
+                RegisterPooledObject(pool.prefab, obj);
                 obj.SetActive(false);
                 objectQ.Enqueue(obj);
             }
@@ -57,6 +64,15 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             poolDictionary.Add(pool.prefab, objectQ);
             poolCurrent.Add(pool.prefab, Mathf.Max(0, pool.size));
         }
+
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+    }
+
+    protected override void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        base.OnDestroy();
     }
 
     public GameObject SpawnPool(GameObject prefab, Vector3 position, Quaternion rotation)
@@ -101,7 +117,13 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
             //큐가 비어있으면 새로 생성
             obj = Instantiate(prefab, transform);
+            RegisterPooledObject(prefab, obj);
             poolCurrent[prefab] = currentCount + 1;
+        }
+
+        if (obj.transform.parent != transform)
+        {
+            obj.transform.SetParent(transform);
         }
 
         obj.transform.SetPositionAndRotation(position, rotation);
@@ -120,7 +142,79 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             poolDictionary[prefab] = objectQueue;
         }
 
+        if (obj.transform.parent != transform)
+        {
+            obj.transform.SetParent(transform);
+        }
+
         obj.SetActive(false);
         objectQueue.Enqueue(obj);
+    }
+
+    private void RegisterPooledObject(GameObject prefab, GameObject obj)
+    {
+        if (prefab == null || obj == null)
+        {
+            return;
+        }
+
+        pooledObjectSources[obj] = prefab;
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        CleanupActivePooledObjects();
+    }
+
+    private void CleanupActivePooledObjects()
+    {
+        if (pooledObjectSources.Count == 0)
+        {
+            return;
+        }
+
+        List<GameObject> destroyedObjects = null;
+
+        foreach (var pair in pooledObjectSources)
+        {
+            GameObject pooledObject = pair.Key;
+            GameObject prefab = pair.Value;
+
+            if (pooledObject == null)
+            {
+                destroyedObjects ??= new List<GameObject>();
+                destroyedObjects.Add(pooledObject);
+                continue;
+            }
+
+            if (!pooledObject.activeSelf)
+            {
+                continue;
+            }
+
+            if (!poolDictionary.TryGetValue(prefab, out Queue<GameObject> objectQueue))
+            {
+                objectQueue = new Queue<GameObject>();
+                poolDictionary[prefab] = objectQueue;
+            }
+
+            if (pooledObject.transform.parent != transform)
+            {
+                pooledObject.transform.SetParent(transform);
+            }
+
+            pooledObject.SetActive(false);
+            objectQueue.Enqueue(pooledObject);
+        }
+
+        if (destroyedObjects == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < destroyedObjects.Count; i++)
+        {
+            pooledObjectSources.Remove(destroyedObjects[i]);
+        }
     }
 }
