@@ -59,6 +59,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4809681814500864338}
+  - component: {fileID: 731246802468024680}
   m_Layer: 0
   m_Name: GameObjectZip
   m_TagString: Untagged
@@ -97,6 +98,36 @@ Transform:
   - {fileID: 9136782962854233951}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &731246802468024680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872723113358623121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08f60df7bf216c242872131f551205ca, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  dropTable: {fileID: 0}
+  firstCleargold: 100
+  repeatGold: 20
+  rewardSystem: {fileID: 0}
+  rewardUI: {fileID: 0}
+  stageRewardCanvases:
+  - stage: {fileID: 11400000, guid: 6595e2f02375d2843aed2d34d0738fb6, type: 2}
+    rewardCanvasPrefab: {fileID: 100100000, guid: f124309e6620c1748bfa4d31f6f7ee96, type: 3}
+  - stage: {fileID: 11400000, guid: be796b4c20ad046429fd9911017484a7, type: 2}
+    rewardCanvasPrefab: {fileID: 100100000, guid: f6589e3158f808a4e9752c6484f2964d, type: 3}
+  - stage: {fileID: 11400000, guid: 49637c06cde745944be4928df236d9f4, type: 2}
+    rewardCanvasPrefab: {fileID: 100100000, guid: afe3ae9eb73484f4f9834fa185763ce0, type: 3}
+  - stage: {fileID: 11400000, guid: 3cce250698ff540479541de736d97c5d, type: 2}
+    rewardCanvasPrefab: {fileID: 100100000, guid: ac671c9249298c84c8a32593565ad30c, type: 3}
+  - stage: {fileID: 11400000, guid: 00bbee7258bbf23478d5168d0abb849c, type: 2}
+    rewardCanvasPrefab: {fileID: 100100000, guid: 03f1cd988c5f82447be6be9823716974, type: 3}
+  partialWaveGoldPerWave: 10
+  pauseGameOnResult: 1
 --- !u!1 &1783909769626270113
 GameObject:
   m_ObjectHideFlags: 0

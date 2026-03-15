@@ -595,7 +595,6 @@ GameObject:
   - component: {fileID: 880780763298822044}
   - component: {fileID: 5553049373299705317}
   - component: {fileID: 978730829616110939}
-  - component: {fileID: 3028669781289198661}
   m_Layer: 6
   m_Name: 1.Main Char(Add Collider)
   m_TagString: Player
@@ -1282,20 +1281,6 @@ MonoBehaviour:
   hitZoomInEase: 6
   hitZoomOutEase: 9
   useUnscaledZoom: 1
---- !u!114 &3028669781289198661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 979927480826503235}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7eb8213819a0d34f984371fa48598e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHP: 100
-  currentHP: 0
 --- !u!1 &999006695309444835
 GameObject:
   m_ObjectHideFlags: 0

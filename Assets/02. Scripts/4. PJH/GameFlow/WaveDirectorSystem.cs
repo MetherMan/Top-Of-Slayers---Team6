@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+using System;
 using UnityEngine;
 
 public class RuleDataContainer
@@ -10,7 +9,7 @@ public class RuleDataContainer
     public int currentPlayerHp = -1; //플레이어 체력 -> RIP
 
     public int waveCount; //해당 라운드 웨이브 수
-    public int waveIndex; //웨이브 클리어 확인
+    public int waveIndex; //현재 진행 중인 웨이브
 }
 
 public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
@@ -35,9 +34,13 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
     }
 
     [Header("스테이지 실시간 데이터 연동")]
-    RuleDataContainer ruleDataContainer = new RuleDataContainer();
-    private bool isRoundClearResolved;
+    private readonly RuleDataContainer ruleDataContainer = new RuleDataContainer();
+    private bool isStageResultResolved;
+    private bool isInitialized;
     private PlayerHP playerHp;
+    private PlayerCombatResource playerCombatResource;
+    private bool isPlayerDeathSubscribed;
+    private bool isPlayerHpSubscribed;
 
     public event Action<int> OnWaveClear;
     public event Action OnRoundClear;
@@ -47,7 +50,7 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
     {
         base.Awake();
 
-        var stageManager = StageManager.Instance;
+        StageManager stageManager = StageManager.Instance;
         if (stageManager == null || stageManager.selectDB == null)
         {
             Debug.LogWarning("StageManager.selectDB가 없어 WaveDirectorSystem 초기화를 보류합니다.");
@@ -57,28 +60,43 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         Init(stageManager);
     }
 
-    void Update()
+    private void Update()
     {
         ConnectData();
-        if (ruleType != null) ruleType.OnUpdate(ruleDataContainer, this);
-
+        EnsureInitialized();
+        if (ruleType != null)
+        {
+            ruleType.OnUpdate(ruleDataContainer, this);
+        }
     }
 
     #region method
     private void Init(StageManager stageManager)
     {
+        if (stageManager == null || stageManager.selectDB == null)
+        {
+            isInitialized = false;
+            return;
+        }
+
         SetRule();
 
         ruleDataContainer.stageData = stageManager.selectDB;
         ruleDataContainer.waveCount = stageManager.selectDB.roundDatas != null
             ? stageManager.selectDB.roundDatas.Count
             : 0;
-        isRoundClearResolved = false;
+        isStageResultResolved = false;
+        UnsubscribePlayerHp();
+        UnsubscribePlayerDeath();
+        playerHp = null;
+        playerCombatResource = null;
+        isInitialized = true;
+        ConnectData();
     }
 
     private void SetRule()
     {
-        var stageManager = StageManager.Instance;
+        StageManager stageManager = StageManager.Instance;
         if (stageManager == null || stageManager.selectDB == null) return;
 
         ruleType = stageManager.selectDB.stageRule;
@@ -87,20 +105,32 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         ruleType.OnStart(ruleDataContainer, this);
     }
 
-
     //실시간 데이터 연동
     private void ConnectData()
     {
-        var stageFlow = StageFlowManager.Instance;
+        StageFlowManager stageFlow = StageFlowManager.Instance;
         if (stageFlow == null) return;
 
         ruleDataContainer.playTime = stageFlow.playTime;
         ruleDataContainer.waveIndex = stageFlow.waveIndex;
         ruleDataContainer.waveCount = stageFlow.waveLength;
 
+        if (playerCombatResource == null)
+        {
+            playerCombatResource = FindFirstObjectByType<PlayerCombatResource>();
+            SubscribePlayerDeath();
+        }
+
         if (playerHp == null)
         {
             playerHp = FindFirstObjectByType<PlayerHP>();
+            SubscribePlayerHp();
+        }
+
+        if (playerCombatResource != null)
+        {
+            ruleDataContainer.currentPlayerHp = playerCombatResource.CurrentHp;
+            return;
         }
 
         if (playerHp != null)
@@ -108,44 +138,112 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
             ruleDataContainer.currentPlayerHp = playerHp.currentHP;
         }
     }
+
+    private void EnsureInitialized()
+    {
+        if (isInitialized && ruleType != null && ruleDataContainer.stageData != null)
+        {
+            return;
+        }
+
+        StageManager stageManager = StageManager.Instance;
+        if (stageManager == null || stageManager.selectDB == null)
+        {
+            return;
+        }
+
+        Init(stageManager);
+    }
+
+    private void SubscribePlayerDeath()
+    {
+        if (playerCombatResource == null || isPlayerDeathSubscribed) return;
+
+        playerCombatResource.OnDead += HandlePlayerDead;
+        isPlayerDeathSubscribed = true;
+    }
+
+    private void SubscribePlayerHp()
+    {
+        if (playerHp == null || isPlayerHpSubscribed) return;
+
+        playerHp.OnHPChanged += HandlePlayerHpChanged;
+        isPlayerHpSubscribed = true;
+    }
+
+    private void UnsubscribePlayerDeath()
+    {
+        if (playerCombatResource == null || !isPlayerDeathSubscribed) return;
+
+        playerCombatResource.OnDead -= HandlePlayerDead;
+        isPlayerDeathSubscribed = false;
+    }
+
+    private void UnsubscribePlayerHp()
+    {
+        if (playerHp == null || !isPlayerHpSubscribed) return;
+
+        playerHp.OnHPChanged -= HandlePlayerHpChanged;
+        isPlayerHpSubscribed = false;
+    }
+
+    private void HandlePlayerDead()
+    {
+        if (playerCombatResource != null)
+        {
+            ruleDataContainer.currentPlayerHp = playerCombatResource.CurrentHp;
+        }
+
+        ResolveStageFailure();
+    }
+
+    private void HandlePlayerHpChanged(int nextCurrentHp, int nextMaxHp)
+    {
+        ruleDataContainer.currentPlayerHp = nextCurrentHp;
+        if (nextCurrentHp > 0) return;
+
+        ResolveStageFailure();
+    }
     #endregion
 
     #region 룰
     public void TimeOver()
     {
-        var stageManager = StageManager.Instance;
-        if (stageManager == null || stageManager.selectDB == null) return;
-        if (stageManager.selectDB.clearResult != ClearResult.None) return;
-
-        stageManager.selectDB.clearResult = (ClearResult)2;
+        ResolveStageFailure();
     }
 
     public void HpZero()
     {
-        var stageManager = StageManager.Instance;
-        if (stageManager == null || stageManager.selectDB == null) return;
-        if (stageManager.selectDB.clearResult != ClearResult.None) return;
-
-        stageManager.selectDB.clearResult = (ClearResult)2;
+        ResolveStageFailure();
     }
 
     public void WaveClear()
     {
-        //웨이브 전환 시점에만 호출
-        var gameFlow = GameFlowManager.Instance;
-        if (gameFlow == null) return;
+        EnsureInitialized();
 
-        gameFlow.waveIndex = ruleDataContainer.waveIndex;
+        int currentWave = Mathf.Clamp(ruleDataContainer.waveIndex, 1, Mathf.Max(1, ruleDataContainer.waveCount));
 
-        Debug.Log($"라운드 클리어{ruleDataContainer.waveIndex}");
-        OnWaveClear?.Invoke(ruleDataContainer.waveIndex +1);
+        GameFlowManager gameFlow = GameFlowManager.Instance;
+        if (gameFlow != null)
+        {
+            gameFlow.waveIndex = currentWave;
+        }
+
+        StageFlowManager stageFlow = StageFlowManager.Instance;
+        if (stageFlow != null)
+        {
+            stageFlow.RecordWaveStart(currentWave);
+        }
+
+        Debug.Log($"웨이브 시작 {currentWave}");
+        OnWaveClear?.Invoke(currentWave);
     }
 
     public void RoundClear()
     {
-        OnRoundClear?.Invoke();
+        if (isStageResultResolved) return;
 
-        if (isRoundClearResolved) return;
+        EnsureInitialized();
 
         StageManager stageManager = StageManager.Instance;
         if (stageManager == null || stageManager.selectDB == null)
@@ -154,10 +252,15 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
             return;
         }
 
-        if (stageManager.selectDB.clearResult != ClearResult.None) return;
+        if (stageManager.selectDB.clearResult == ClearResult.None)
+        {
+            stageManager.selectDB.clearResult = ClearResult.Success;
+        }
 
-        isRoundClearResolved = true;
-        stageManager.selectDB.clearResult = (ClearResult)1;
+        if (stageManager.selectDB.clearResult != ClearResult.Success) return;
+
+        isStageResultResolved = true;
+        OnRoundClear?.Invoke();
 
         StageFlowManager stageFlow = StageFlowManager.Instance;
         if (stageFlow == null)
@@ -167,8 +270,40 @@ public class WaveDirectorSystem : Singleton<WaveDirectorSystem>
         }
 
         stageFlow.RoundClear();
+        ruleType?.OnExit(ruleDataContainer, this);
+    }
 
-        ruleType.OnExit(ruleDataContainer, this);
+    private void ResolveStageFailure()
+    {
+        if (isStageResultResolved) return;
+
+        EnsureInitialized();
+
+        StageManager stageManager = StageManager.Instance;
+        if (stageManager == null || stageManager.selectDB == null) return;
+
+        if (stageManager.selectDB.clearResult == ClearResult.None)
+        {
+            stageManager.selectDB.clearResult = ClearResult.Faile;
+        }
+
+        if (stageManager.selectDB.clearResult != ClearResult.Faile) return;
+
+        isStageResultResolved = true;
+
+        StageFlowManager stageFlow = StageFlowManager.Instance;
+        if (stageFlow != null)
+        {
+            stageFlow.MarkStageFailed();
+        }
+
+        ruleType?.OnExit(ruleDataContainer, this);
     }
     #endregion
+
+    private void OnDisable()
+    {
+        UnsubscribePlayerHp();
+        UnsubscribePlayerDeath();
+    }
 }
