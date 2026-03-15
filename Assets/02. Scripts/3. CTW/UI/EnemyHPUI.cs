@@ -15,7 +15,10 @@ public class EnemyHPUI : MonoBehaviour
 
     private void Awake()
     {
-        mainCamera = Camera.main;
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+        }
     }
 
     private void OnDisable()
@@ -32,6 +35,13 @@ public class EnemyHPUI : MonoBehaviour
 
     public void Init(DummyTarget target, GameObject prefab)
     {
+        GameObject canvasObj = GameObject.Find("TWCanvas");
+        if (canvasObj != null)
+        {
+            Canvas mainCanvas = canvasObj.GetComponent<Canvas>();
+            transform.SetParent(mainCanvas.transform, false);
+        }
+
         if (this.target != null)
         {
             this.target.OnHPChanged -= UpdateHPUI;
