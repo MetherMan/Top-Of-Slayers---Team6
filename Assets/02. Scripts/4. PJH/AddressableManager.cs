@@ -8,7 +8,6 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.UI;
 using Cysharp.Threading.Tasks;
-using Unity.VisualScripting;
 
 public class AddressableManager : Singleton<AddressableManager>
 {
@@ -23,10 +22,16 @@ public class AddressableManager : Singleton<AddressableManager>
     private Dictionary<string, GameObject> _monsterPf = new Dictionary<string, GameObject>();
     private Dictionary<string, GameObject> _vFX = new Dictionary<string, GameObject>();
     private Dictionary<string, ItemSO> _itemSO = new Dictionary<string, ItemSO>();
+    //private Dictionary<string, Material> _uIMat = new Dictionary<string, Material>();
+    //private Dictionary<string, TMP_FontAsset> _uIAsset = new Dictionary<string, TMP_FontAsset>();
+    //private Dictionary<string, Sprite> _uISprite = new Dictionary<string, Sprite>();
+    //private Dictionary<string, Font> _uIFont = new Dictionary<string, Font>();
+    //private Dictionary<string, Shader> _uIShader = new Dictionary<string, Shader>();
 
     Slider loadingBar;
     TextMeshProUGUI loadingText;
     float visualProgress = 0f;
+
     #endregion
 
     protected override void Awake()
@@ -45,10 +50,13 @@ public class AddressableManager : Singleton<AddressableManager>
             loadingText.text = $"{visualProgress * 100}%";
         });
 
-        await LoadAllData(progressHandle);
+        bool isSuccess = await LoadAllData(progressHandle);
 
         //ItemSO 다 가져오기 : 계정 로그인 시 활성화 될 메서드에 필요한 데이터
-        StageManager.Instance.LoadAllItemSO(); 
+        if (isSuccess)
+        {
+            StageManager.Instance.LoadAllItemSO();
+        }
     }
 
     #region method
@@ -79,40 +87,50 @@ public class AddressableManager : Singleton<AddressableManager>
         return false;
     }
 
-    private async UniTask LoadAllData(IProgress<float> progress)
+    private async UniTask<bool> LoadAllData(IProgress<float> progress)
     {
-        await CheckUpdate("Preload", progress);
-        await UniTask.NextFrame();
+        try
+        {
+            await CheckUpdate("Preload", progress);
+            await UniTask.NextFrame();
 
-        await DownloadWithCapacityUI("Preload", progress);
-        await UniTask.NextFrame();
+            await DownloadWithCapacityUI("Preload", progress);
+            await UniTask.NextFrame();
 
-        //호출 리스트
-        UniTask databaseTask = LoadDatabase();
-        UniTask stageSOTask = LoadAllStageSO();
-        UniTask ruleSOTask = LoadAllRule();
-        UniTask uITask = LoadAllUI();
-        UniTask monsterSOTask = LoadAllMonsterSO();
-        UniTask monsterPfTask = LoadAllMonsterPf();
-        UniTask itemSOTask = LoadAllItemSO();
-        //ItemPrefab
-        UniTask vFXTask = LoadAllVFX();
-        //SFX
+            //호출 리스트
+            UniTask databaseTask = LoadDatabase();
+            UniTask stageSOTask = LoadAllStageSO();
+            UniTask ruleSOTask = LoadAllRule();
+            UniTask uITask = LoadAllUI();
+            UniTask monsterSOTask = LoadAllMonsterSO();
+            UniTask monsterPfTask = LoadAllMonsterPf();
+            UniTask itemSOTask = LoadAllItemSO();
+            //ItemPrefab
+            //UniTask uIResourceTask = LoadAllUIResource();
+            UniTask vFXTask = LoadAllVFX();
+            //SFX
 
-        List<UniTask> tasks = new List<UniTask> 
-        { 
-            databaseTask, stageSOTask, ruleSOTask,
-            uITask, monsterSOTask, monsterPfTask,
-            itemSOTask, vFXTask
-        };
+            List<UniTask> tasks = new List<UniTask> 
+            { 
+                databaseTask, stageSOTask, ruleSOTask,
+                uITask, monsterSOTask, monsterPfTask,
+                itemSOTask, vFXTask
+            };
 
-        await UniTask.WhenAll(tasks);
-        progress.Report(1.0f);
-        visualProgress = 1.0f;
+            await UniTask.WhenAll(tasks);
+            progress.Report(1.0f);
+            visualProgress = 1.0f;
 
-        await UniTask.Delay(2000);
-        LoginUI.Instance.CompleteLoding();
-        Debug.Log("모든 데이터 로드 완료");
+            await UniTask.Delay(2000);
+            LoginUI.Instance.CompleteLoding();
+            Debug.Log("<color=white>모든 데이터 로드 완료</color>");
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"로드중 에러 발생 :" + ex.Message);
+            return false;
+        }
     }
 
     private async UniTask DownloadWithCapacityUI(object key, IProgress<float> progress)
@@ -141,10 +159,23 @@ public class AddressableManager : Singleton<AddressableManager>
                     $" / {Math.Ceiling(totalMB * 100) / 100} MB";
             });
 
-            await Addressables.DownloadDependenciesAsync(key, true)
-                .ToUniTask(progress: progressProvider);
+            AsyncOperationHandle downloadHandle = Addressables.DownloadDependenciesAsync(key, true);
 
-            Debug.Log("다운로드 완료");
+            try
+            {
+                await downloadHandle.ToUniTask(progress: progressProvider, autoReleaseWhenCanceled: false);
+
+                if (IsSucceeded(downloadHandle))
+                {
+                    Debug.Log("다운로드 완료");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"다운로드 실패 : {downloadHandle.OperationException}");
+                LoginUI.Instance.confirmText.text = downloadHandle.OperationException.ToString();
+                LoginUI.Instance.ConfirmUIOpen();
+            }
         }
 
         if (sizeHandle.IsValid())
@@ -219,10 +250,10 @@ public class AddressableManager : Singleton<AddressableManager>
         await stageSOGroupOp.Task;
         loadedAssets.Add(stageSOGroupOp);
 
-        foreach (KeyValuePair<string, StageConfigSO> item in _stageSO)
-        {
-            Debug.Log($"stageSO Key : {item.Key} value : {item.Value.name}");
-        }
+        //foreach (KeyValuePair<string, StageConfigSO> item in _stageSO)
+        //{
+        //    Debug.Log($"stageSO Key : {item.Key} value : {item.Value.name}");
+        //}
 
         Debug.Log("LoadAllStageSO : Completed");
     }
@@ -274,10 +305,10 @@ public class AddressableManager : Singleton<AddressableManager>
 
         Addressables.Release(loadResourceLocationsHandle);
 
-        foreach (KeyValuePair<string, StageDatabase> item in _database)
-        {
-            Debug.LogFormat($"StageDatabase key : {0}, value : {1}", item.Key, item.Value);
-        }
+        //foreach (KeyValuePair<string, StageDatabase> item in _database)
+        //{
+        //    Debug.LogFormat($"StageDatabase key : {0}, value : {1}", item.Key, item.Value);
+        //}
 
         Debug.Log("LoadDatabase : Completed");
     }
@@ -307,6 +338,7 @@ public class AddressableManager : Singleton<AddressableManager>
         {
             if (h.Status == AsyncOperationStatus.Succeeded)
             {
+                Debug.LogFormat("<color=yellow> 씬 runtimeKey : {0}</color>", runtimeKey);
                 AddSceneSafely(runtimeKey.ToString(), h.Result);
             }
             else
@@ -376,10 +408,10 @@ public class AddressableManager : Singleton<AddressableManager>
 
         Addressables.Release(loadResourceLocationHandle);
 
-        foreach (KeyValuePair<string, WaveRule> item in _ruleSO)
-        {
-            Debug.Log($"ruleSO Key : {item.Key} value : {item.Value.name}");
-        }
+        //foreach (KeyValuePair<string, WaveRule> item in _ruleSO)
+        //{
+        //    Debug.Log($"ruleSO Key : {item.Key} value : {item.Value.name}");
+        //}
 
         Debug.Log("LoadAllRule : Completed");
     }
@@ -431,10 +463,10 @@ public class AddressableManager : Singleton<AddressableManager>
 
         Addressables.Release(loadResourceLocationHandle);
 
-        foreach (KeyValuePair<string, GameObject> item in _uI)
-        {
-            Debug.Log($"UI Key : {item.Key} value : {item.Value.name}");
-        }
+        //foreach (KeyValuePair<string, GameObject> item in _uI)
+        //{
+        //    Debug.Log($"UI Key : {item.Key} value : {item.Value.name}");
+        //}
 
         Debug.Log("LoadAllUI : Completed");
     }
@@ -487,10 +519,10 @@ public class AddressableManager : Singleton<AddressableManager>
 
         Addressables.Release(loadResourceLocationHandle);
 
-        foreach (KeyValuePair<string, EnemyConfigSO> item in _enemySO)
-        {
-            Debug.Log($"MonsterSO Key : {item.Key} value : {item.Value.name}");
-        }
+        //foreach (KeyValuePair<string, EnemyConfigSO> item in _enemySO)
+        //{
+        //    Debug.Log($"MonsterSO Key : {item.Key} value : {item.Value.name}");
+        //}
 
         Debug.Log("LoadAllMonsterSO : Completed");
     }
@@ -545,10 +577,10 @@ public class AddressableManager : Singleton<AddressableManager>
         //ResourceLocation 위치 정보이기에 메모리를 지워도 데이터가 사라지지 않는다.
         Addressables.Release(loadResourceLocationHandle);
 
-        foreach (KeyValuePair<string, GameObject> item in _monsterPf)
-        {
-            Debug.Log($"MonsterPf Key : {item.Key} value : {item.Value.name}");
-        }
+        //foreach (KeyValuePair<string, GameObject> item in _monsterPf)
+        //{
+        //    Debug.Log($"MonsterPf Key : {item.Key} value : {item.Value.name}");
+        //}
 
         Debug.Log("LoadAllMonsterPf : Completed");
     }
@@ -599,10 +631,10 @@ public class AddressableManager : Singleton<AddressableManager>
 
         Addressables.Release(loadResourceLocationHandle);
 
-        foreach (KeyValuePair<string, ItemSO> item in _itemSO)
-        {
-            Debug.Log($"ItemSO Key : {item.Key} value : {item.Value.name}");
-        }
+        //foreach (KeyValuePair<string, ItemSO> item in _itemSO)
+        //{
+        //    Debug.Log($"ItemSO Key : {item.Key} value : {item.Value.name}");
+        //}
 
         Debug.Log("LoadAllItemSO : Completed");
     }
@@ -660,10 +692,10 @@ public class AddressableManager : Singleton<AddressableManager>
 
         Addressables.Release(loadResourceLocationHandle);
 
-        foreach (KeyValuePair<string, GameObject> item in _vFX)
-        {
-            Debug.Log($"VFX Key : {item.Key} value : {item.Value.name}");
-        }
+        //foreach (KeyValuePair<string, GameObject> item in _vFX)
+        //{
+        //    Debug.Log($"VFX Key : {item.Key} value : {item.Value.name}");
+        //}
 
         Debug.Log("LoadAllVFX : Completed");
     }
@@ -672,6 +704,194 @@ public class AddressableManager : Singleton<AddressableManager>
     //public async Task LoadAllSFX()
     //{
 
+    //}
+
+    //UIResource
+    //private async UniTask LoadAllUIResource()
+    //{
+    //    AsyncOperationHandle<IList<IResourceLocation>> handle
+    //        = Addressables.LoadResourceLocationsAsync("UIResource");
+
+    //    await handle.Task;
+    //    if (IsFailed(handle)) Debug.LogError("LoadAllUIResource : Failed");
+
+    //    List<AsyncOperationHandle> opList = new List<AsyncOperationHandle>();
+
+    //    foreach (IResourceLocation location in handle.Result)
+    //    {
+    //        string path = location.InternalId;
+    //        if (path.EndsWith(".mat"))
+    //        {
+    //            AsyncOperationHandle<Material> loadLocationHandle
+    //                = Addressables.LoadAssetAsync<Material>(location);
+    //            opList.Add(loadLocationHandle);
+
+    //            await loadLocationHandle.Task;
+
+    //            if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
+
+    //            loadLocationHandle.Completed += (loadHandle) =>
+    //            {
+    //                if (!_uIMat.ContainsKey(location.PrimaryKey))
+    //                {
+    //                    _uIMat.Add(location.PrimaryKey, loadHandle.Result);
+    //                }
+    //                else
+    //                {
+    //                    Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
+    //                }
+    //            };
+    //        }
+    //        else if (path.EndsWith(".asset"))
+    //        {
+    //            AsyncOperationHandle<TMPro.TMP_FontAsset> loadLocationHandle
+    //                = Addressables.LoadAssetAsync<TMPro.TMP_FontAsset>(location);
+    //            opList.Add(loadLocationHandle);
+
+    //            await loadLocationHandle.Task;
+
+    //            if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
+
+    //            loadLocationHandle.Completed += (loadHandle) =>
+    //            {
+    //                if (!_uIAsset.ContainsKey(location.PrimaryKey))
+    //                {
+    //                    _uIAsset.Add(location.PrimaryKey, loadHandle.Result);
+    //                }
+    //                else
+    //                {
+    //                    Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
+    //                }
+    //            };
+    //        }
+    //        else if (path.EndsWith(".png"))
+    //        {
+    //            AsyncOperationHandle<Sprite> loadLocationHandle
+    //                = Addressables.LoadAssetAsync<Sprite>(location);
+    //            opList.Add(loadLocationHandle);
+
+    //            await loadLocationHandle.Task;
+
+    //            if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
+
+    //            loadLocationHandle.Completed += (loadHandle) =>
+    //            {
+    //                if (!_uISprite.ContainsKey(location.PrimaryKey))
+    //                {
+    //                    _uISprite.Add(location.PrimaryKey, loadHandle.Result);
+    //                }
+    //                else
+    //                {
+    //                    Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
+    //                }
+    //            };
+    //        }
+    //        else if (path.EndsWith(".ttf"))
+    //        {
+    //            AsyncOperationHandle<Font> loadLocationHandle
+    //                = Addressables.LoadAssetAsync<Font>(location);
+    //            opList.Add(loadLocationHandle);
+
+    //            await loadLocationHandle.Task;
+
+    //            if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
+
+    //            loadLocationHandle.Completed += (loadHandle) =>
+    //            {
+    //                if (!_uIFont.ContainsKey(location.PrimaryKey))
+    //                {
+    //                    _uIFont.Add(location.PrimaryKey, loadHandle.Result);
+    //                }
+    //                else
+    //                {
+    //                    Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
+    //                }
+    //            };
+    //        }
+    //        else if (path.EndsWith(".shader"))
+    //        {
+    //            AsyncOperationHandle<Shader> loadLocationHandle
+    //                = Addressables.LoadAssetAsync<Shader>(location);
+    //            opList.Add(loadLocationHandle);
+
+    //            await loadLocationHandle.Task;
+
+    //            if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
+
+    //            loadLocationHandle.Completed += (loadHandle) =>
+    //            {
+    //                if (!_uIShader.ContainsKey(location.PrimaryKey))
+    //                {
+    //                    _uIShader.Add(location.PrimaryKey, loadHandle.Result);
+    //                }
+    //                else
+    //                {
+    //                    Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
+    //                }
+    //            };
+
+    //        }
+    //    };
+
+    //    AsyncOperationHandle opListGroup
+    //        = Addressables.ResourceManager.CreateGenericGroupOperation(opList);
+
+    //    await opListGroup.Task;
+
+    //    loadedAssets.Add(opListGroup);
+
+    //    Addressables.Release(handle);
+
+    //    foreach (KeyValuePair<string, TMP_FontAsset> item in _uIAsset)
+    //    {
+    //        Debug.Log($"<color=blue>uIAsset Key : {item.Key} value : {item.Value.name}</color>");
+    //    }
+
+    //    foreach (KeyValuePair<string, Material> item in _uIMat)
+    //    {
+    //        Debug.Log($"<color=blue>uIMat Key : {item.Key} value : {item.Value.name}</color>");
+    //    }
+
+    //    foreach (KeyValuePair<string, Font> item in _uIFont)
+    //    {
+    //        Debug.Log($"<color=blue>uIFont Key : {item.Key} value : {item.Value.name}</color>");
+    //    }
+
+    //    foreach (KeyValuePair<string, Shader> item in _uIShader)
+    //    {
+    //        Debug.Log($"<color=blue>uIShader Key : {item.Key} value : {item.Value.name}</color>");
+    //    }
+
+    //    foreach (KeyValuePair<string, Sprite> item in _uISprite)
+    //    {
+    //        Debug.Log($"<color=blue>uISprite Key : {item.Key} value : {item.Value.name}</color>");
+    //    }
+
+    //    //RefreshUI();
+
+    //    Debug.Log("LoadUIResource : Completed");
+    //}
+
+    //private void RefreshUI()
+    //{
+    //    //(true) 비활성화 객체 포함 UI SetActive:False되있는 것도 포함시킬 때 쓰는 용도랑 동일
+    //    TextMeshProUGUI[] allTexts = FindObjectsOfType<TMPro.TextMeshProUGUI>(true);
+    //    foreach (TextMeshProUGUI text in allTexts)
+    //    {
+    //        if (text.font != null && _uIAsset.TryGetValue(text.font.name, out TMP_FontAsset loadedFont))
+    //        {
+    //            text.font = loadedFont; //폰트 강제로 재할당
+    //            text.fontSharedMaterial = loadedFont.material; //기본 재질 강제로 재할당
+    //        }
+    //    }
+
+    //    TMP_SubMeshUI[] subMeshes = FindObjectsOfType<TMP_SubMeshUI>(true);
+    //    foreach (TMP_SubMeshUI sub in subMeshes)
+    //    {
+
+    //    }
+
+    //    Debug.Log("Font 갱신");
     //}
     #endregion
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
+using System;
 using UnityEngine;
 
 public class EquipmentManager : Singleton<EquipmentManager>
@@ -15,12 +16,34 @@ public class EquipmentManager : Singleton<EquipmentManager>
     protected override void Awake()
     {
         base.Awake();
-        Init();
+    }
+
+    private async void Start()
+    {
+        try
+        {
+            await WaitUntilDataLoaded();
+            Init();
+        } 
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"EquipmentManager Start중 Error: {ex.Message}\n{ex.StackTrace}");
+        }
     }
 
     private void Init()
     {
-        FirebaseManager.Instance.PushEquipment(weapon, shoes, gloves, armor, emblem);
+        Debug.Log("EquipmentManager: 데이터 로드 완료. Init 실행");
+        FirebaseManager.Instance.PushEquipment(ref weapon, ref shoes, ref gloves, ref armor, ref emblem);
+    }
+
+    private async UniTask WaitUntilDataLoaded()
+    {
+        while (!FirebaseManager.Instance.IsDataLoaded)
+        {
+            Debug.LogFormat("IsDataLoaded : {0}", FirebaseManager.Instance.IsDataLoaded);
+            await UniTask.Delay(500);
+        }
     }
 
     public void Equip(InventoryItem data)
@@ -93,5 +116,4 @@ public class EquipmentManager : Singleton<EquipmentManager>
             gloves == data ||
             emblem == data;
     }
-
 }

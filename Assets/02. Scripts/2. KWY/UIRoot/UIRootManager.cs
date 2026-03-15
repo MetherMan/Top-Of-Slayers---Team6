@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class UIRootManager : MonoBehaviour
 {
@@ -176,5 +177,11 @@ public class UIRootManager : MonoBehaviour
     public void CloseCurrent(GameObject target)
     {
         target.SetActive(false);
+        Debug.Log($"target : {target.name}");
+        if (target.name == "Inventory")
+        {
+            FirebaseManager.Instance.SaveInventory(InventoryManager.Instance.inventory);
+            Debug.Log("인벤토리 save");
+        }
     }
 }

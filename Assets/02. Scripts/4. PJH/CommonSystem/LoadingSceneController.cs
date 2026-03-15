@@ -19,14 +19,14 @@ public class LoadingSceneController : MonoBehaviour
         StartCoroutine(LoadAddressableSceneProcess());
     }
     
-    public static void LoadStage(string key)
+    public static void LoadStage(string key) //스테이지 이동
     {
         targetKey = key;
         isStageLoading = true;
         SceneManager.LoadScene("LoadingScene");
     }
 
-    public static void LoadScene(string key)
+    public static void LoadScene(string key) //로비, 로그인
     {
         targetKey = key;
         isStageLoading = false;
@@ -38,8 +38,8 @@ public class LoadingSceneController : MonoBehaviour
     IEnumerator LoadAddressableSceneProcess()
     {
         AsyncOperationHandle<SceneInstance> op = isStageLoading
-            ? AddressableManager.Instance.RequestStageScene(targetKey)
-            : AddressableManager.Instance.RequestScene(targetKey);
+            ? AddressableManager.Instance.RequestStageScene(targetKey) //StageSO 이름
+            : AddressableManager.Instance.RequestScene(targetKey); // SceneRemote 이름
 
         while (op.IsValid() && !op.IsDone)
         {
