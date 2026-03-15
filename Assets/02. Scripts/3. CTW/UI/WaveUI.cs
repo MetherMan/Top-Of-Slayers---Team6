@@ -9,6 +9,7 @@ public class WaveUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI clearText;
 
     private WaveDirectorSystem boundWaveDirector;
+    private bool hasWaveStarted;
 
     private void Awake()
     {
@@ -35,11 +36,15 @@ public class WaveUI : MonoBehaviour
 
     private void OnEnable()
     {
+        hasWaveStarted = false;
+        UIAnim?.ResetPanelState();
+        StageFlowManager.OnStageFinished += HandleStageFinished;
         TryBindWaveDirector();
     }
 
     private void OnDisable()
     {
+        StageFlowManager.OnStageFinished -= HandleStageFinished;
         UnbindWaveDirector();
     }
 
@@ -63,7 +68,6 @@ public class WaveUI : MonoBehaviour
         }
 
         currentWaveDirector.OnWaveClear += ShowWaveText;
-        currentWaveDirector.OnRoundClear += ShowClearText;
         boundWaveDirector = currentWaveDirector;
     }
 
@@ -75,17 +79,22 @@ public class WaveUI : MonoBehaviour
         }
 
         boundWaveDirector.OnWaveClear -= ShowWaveText;
-        boundWaveDirector.OnRoundClear -= ShowClearText;
         boundWaveDirector = null;
     }
 
     private void ShowWaveText(int wave)
     {
+        hasWaveStarted = true;
         UIAnim.PlayWavePanel(wave);
     }
 
-    private void ShowClearText()
+    private void HandleStageFinished(StageResultData result)
     {
+        if (!result.IsClear || !hasWaveStarted)
+        {
+            return;
+        }
+
         UIAnim.PlayClearPanel();
     }
 }

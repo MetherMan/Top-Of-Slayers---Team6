@@ -34,14 +34,30 @@ public class StageReward : MonoBehaviour
 
     private void OnEnable()
     {
+        if (!ShouldListenStageFlowEvents())
+        {
+            return;
+        }
+
+        ClearResolvedTargets();
+        ResetAllRewardPresentations();
+        ResetRewardPresentation();
         StageFlowManager.OnStageClear += StageClear;
         StageFlowManager.OnStageFinished += HandleStageFinished;
     }
 
     private void OnDisable()
     {
+        if (!ShouldListenStageFlowEvents())
+        {
+            return;
+        }
+
         StageFlowManager.OnStageClear -= StageClear;
         StageFlowManager.OnStageFinished -= HandleStageFinished;
+        ResetAllRewardPresentations();
+        DisposeRuntimeRewardCanvas();
+        ClearResolvedTargets();
     }
 
     private void HandleStageFinished(StageResultData result)
@@ -95,6 +111,7 @@ public class StageReward : MonoBehaviour
 
     public void OnClickClaim()
     {
+        ResetAllRewardPresentations();
         Time.timeScale = 1f;
         LoadingSceneController.LoadScene("1.LobbyModify");
     }
@@ -310,5 +327,71 @@ public class StageReward : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void ResetRewardPresentation()
+    {
+        if (TryResolveSceneTargets(out _, out _, out RewardUI targetRewardUI))
+        {
+            HideRewardCanvas(targetRewardUI);
+        }
+
+        if (runtimeRewardCanvasInstance != null)
+        {
+            HideRewardCanvas(runtimeRewardUI);
+            runtimeRewardCanvasInstance.SetActive(false);
+        }
+    }
+
+    private void ClearResolvedTargets()
+    {
+        sceneRewardSource = null;
+        sceneRewardSystem = null;
+        sceneRewardUI = null;
+        runtimeRewardSource = null;
+        runtimeRewardSystem = null;
+        runtimeRewardUI = null;
+    }
+
+    private void DisposeRuntimeRewardCanvas()
+    {
+        if (runtimeRewardCanvasInstance == null)
+        {
+            return;
+        }
+
+        Destroy(runtimeRewardCanvasInstance);
+        runtimeRewardCanvasInstance = null;
+    }
+
+    private bool ShouldListenStageFlowEvents()
+    {
+        return GetComponentInParent<Canvas>(true) == null;
+    }
+
+    private void ResetAllRewardPresentations()
+    {
+        RewardUI[] rewardUIs = FindObjectsByType<RewardUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < rewardUIs.Length; i++)
+        {
+            HideRewardCanvas(rewardUIs[i]);
+        }
+    }
+
+    private static void HideRewardCanvas(RewardUI targetRewardUI)
+    {
+        if (targetRewardUI == null)
+        {
+            return;
+        }
+
+        targetRewardUI.ResetPresentation();
+
+        Canvas rewardCanvas = targetRewardUI.GetComponentInParent<Canvas>(true);
+        GameObject rewardRoot = rewardCanvas != null ? rewardCanvas.gameObject : targetRewardUI.transform.root.gameObject;
+        if (rewardRoot != null && rewardRoot.activeSelf)
+        {
+            rewardRoot.SetActive(false);
+        }
     }
 }
