@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class PlayerHP : MonoBehaviour
@@ -89,7 +89,7 @@ public class PlayerHP : MonoBehaviour
         currentHP = Mathf.Max(0, currentHP - damage);
         EnemyDamageUI.Instance.ShowDamage(transform, damage);
         NotifyHpChanged();
-
+        Debug.Log(damage);
         if (currentHP > 0) return;
 
         Die();
