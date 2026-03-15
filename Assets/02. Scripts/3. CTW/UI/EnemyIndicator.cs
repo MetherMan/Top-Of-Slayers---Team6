@@ -8,8 +8,39 @@ public class EnemyIndicator : MonoBehaviour
     [SerializeField] private Camera mainCam;
     [SerializeField] private float margin = 80f;
 
+    private void Awake()
+    {
+        if(mainCam == null)
+        {
+            mainCam = Camera.main;
+        }
+    }
+
     void Update()
     {
+        if (mainCam == null)
+        {
+            mainCam = Camera.main;
+        }
+
+        if (player == null)
+        {
+            GameObject p = GameObject.FindWithTag("Player");
+            if (p != null)
+            {
+                player = p.transform;
+            }
+        }
+
+        if (arrow.transform.parent == null)
+        {
+            GameObject canvasObj = GameObject.Find("TWCanvas");
+            if (canvasObj != null)
+            {
+                arrow.SetParent(canvasObj.transform, false);
+            }
+        }
+
         if (enemy == null)
         {
             FindCloseEnemy();
