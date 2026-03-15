@@ -40,6 +40,6 @@ public class PauseUI : MonoBehaviour
     public void ClickMain()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("1.Lobby");
+        LoadingSceneController.LoadScene("1.LobbyModify");
     }
 }

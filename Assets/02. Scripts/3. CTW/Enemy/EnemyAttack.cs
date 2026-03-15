@@ -95,7 +95,7 @@ public class EnemyAttack : IEnemyState
             }
             else if (enemy.attackType == AttackType.Melee || enemy.attackType == AttackType.Corn)
             {
-                if (timer >= attackDuration * 0.9f)
+                if (timer >= attackDuration * 0.4f)
                 {
                     MeleeAttack();
                     isShoot = true;
@@ -192,7 +192,7 @@ public class EnemyAttack : IEnemyState
         playerPos.y = 0f;
 
         float distance = Vector3.Distance(enemyPos, playerPos);
-        if (distance <= enemy.attackRange + 1f)
+        if (distance <= enemy.attackRange + 0.5f)
         {
             EnemyBase.TryApplyPlayerDamage(playerTransform.gameObject, enemy.attackDamage);
         }
