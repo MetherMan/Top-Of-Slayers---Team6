@@ -79,7 +79,6 @@ public class WaveUIAnim : MonoBehaviour
     {
         if (wave - 1 >= endWave)
         {
-            //yield return StartCoroutine(ClearCoroutine());
             yield break;
         }
         Debug.Log($"현재 웨이브{wave}");
@@ -97,7 +96,6 @@ public class WaveUIAnim : MonoBehaviour
 
         waveContainer.anchoredPosition = originPos;
 
-        //yield return StartCoroutine(AdjustSize(expandSize));
         yield return wavePanel.DOSizeDelta(new Vector2(expandSize, wavePanel.sizeDelta.y), expandTime)
             .SetEase(Ease.OutBack).SetUpdate(true).WaitForCompletion();
 
@@ -124,47 +122,12 @@ public class WaveUIAnim : MonoBehaviour
 
         SetNormalWave(wave);
 
-        //yield return StartCoroutine(AdjustSize(normalSize));
         yield return wavePanel.DOSizeDelta(new Vector2(normalSize, wavePanel.sizeDelta.y), expandTime)
             .SetEase(Ease.OutBack).SetUpdate(true).WaitForCompletion();
     }
 
-    private IEnumerator AdjustSize(float nextSize)
-    {
-        float startSize = wavePanel.sizeDelta.x;
-        float timer = 0f;
-
-        while(timer < expandTime)
-        {
-            timer += Time.unscaledDeltaTime;
-            float t = timer / expandTime;
-            float size = Mathf.Lerp(startSize, nextSize, t);
-            wavePanel.sizeDelta = new Vector2(size, wavePanel.sizeDelta.y);
-            yield return null;
-        }
-        wavePanel.sizeDelta = new Vector2(nextSize, wavePanel.sizeDelta.y);
-    }
-
-    private IEnumerator MoveContainer(Vector2 nextPos)
-    {
-        Vector2 startPos = waveContainer.anchoredPosition;
-        float timer = 0f;
-
-        while (timer < moveTime)
-        {
-            timer += Time.unscaledDeltaTime;
-            float t = timer / moveTime;
-
-            waveContainer.anchoredPosition = Vector2.Lerp(startPos, nextPos, t);
-            yield return null;
-        }
-        waveContainer.anchoredPosition = nextPos;
-    }
-
     public void SetNormalWave(int wave)
     {
-        //wavePanel.sizeDelta = new Vector2(normalSize, wavePanel.sizeDelta.y);
-
         prevSlot.SetActive(false);
         nextSlot.SetActive(false);
 
@@ -197,7 +160,6 @@ public class WaveUIAnim : MonoBehaviour
         currentSlot.SetActive(false);
         nextSlot.SetActive(false);
 
-        //yield return StartCoroutine(AdjustSize(expandSize));
         yield return wavePanel.DOSizeDelta(new Vector2(expandSize, wavePanel.sizeDelta.y), expandTime)
             .SetEase(Ease.OutBack).SetUpdate(true).WaitForCompletion();
 
