@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
+using System;
 
 /*
     게임루프
 */
 public enum State
 {
-    Loding,
     Login,
     Lobby,
     Play,
@@ -38,14 +38,15 @@ public class GameFlowMachine : Singleton<GameFlowMachine>
         //객체 생성의 효율성, 안전성
         //클래스의 인스턴스 선언과 같다. 요지는 '지금 즉시 만들어서 할당하는 것' 이다.
         //메모리에 잠깐 올렸다가 버리는 방식
-        ChangeState(new LoadingState(this), State.Loding);
+        ChangeState(new LoadingState(this), State.Login);
     }
 
-    private void Update()
+    private async void Update()
     {
         //'?' Null인지 확인 : Null이라면 아무것도 하지 않는다. :Null이 아니라면 Execute를 실행한다
         //if (_currentState != null) _currentState.Execute();
         _currentState?.Execute();
+        await UniTask.Delay(1000);
     }
 
     #region method

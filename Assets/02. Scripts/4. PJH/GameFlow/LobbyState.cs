@@ -16,7 +16,7 @@ public class LobbyState : IGameState
 
     public void Execute()
     {
-        //상태 전환 조건
+        //상태 전환 조건 : 스테이지 진입 UI 클릭 시
         if (true)
         {
             _machine.ChangeState(new PlayState(_machine), State.Play);

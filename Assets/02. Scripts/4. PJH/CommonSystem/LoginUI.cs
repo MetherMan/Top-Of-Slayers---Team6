@@ -48,6 +48,9 @@ public class LoginUI : Singleton<LoginUI>
     [SerializeField] public TextMeshProUGUI downloadText;
     [SerializeField] Button yBtn;
     [SerializeField] Button nBtn;
+
+    //상태변환 변수
+    public bool changeState = false;
     #endregion
 
     protected override void Awake()
@@ -161,6 +164,7 @@ public class LoginUI : Singleton<LoginUI>
         }
         if (check)
         {
+            changeState = true;
             CancleEvent();
             LoginSceneManager.Instance.CheckIn();
         }
