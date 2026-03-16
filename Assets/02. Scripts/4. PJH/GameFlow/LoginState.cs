@@ -11,12 +11,12 @@ public class LoginState : IGameState
 
     public void Enter()
     {
-        Debug.Log("로그인 UI / 회원가입 UI 활성화");
+        Debug.Log("<color=green>로그인 UI / 회원가입 UI 활성화</color>");
     }
 
     public void Execute()
     {
-        if (LoginUI.Instance.changeState)
+        if (FirebaseManager.Instance.loginSucceeded)
         {
             _machine.ChangeState(new LobbyState(_machine), State.Lobby);
         }

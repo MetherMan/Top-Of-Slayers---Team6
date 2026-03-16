@@ -34,10 +34,18 @@ public class StageTimer : MonoBehaviour
 
     private void TimeUI(int time)
     {
+        if (maxTime <= 0)
+        {
+            Debug.LogWarning("maxTime이 0이라서 회전값을 계산할 수 없습니다");
+            return;
+        }
+
         float ratio = ((float)time / maxTime);
         clockFill.fillAmount = ratio;
 
         float angle = ratio * 360f;
+
+        if (float.IsNaN(angle)) return;
         clockNeedle.localRotation = Quaternion.Euler(0, 0, angle);
 
         if (angle <= 90)

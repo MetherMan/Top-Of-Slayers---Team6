@@ -14,19 +14,16 @@ public class PlayState : IGameState
 
     public void Enter()
     {
-        Debug.Log("스테이지 활성화");
+        StageFlowManager.Instance.stageIn = false;
+        Debug.Log("<color=green>스테이지 활성화</color>");
     }
 
     public void Execute()
     {
-        //이벤트 활성화 조건 : 스테이지 웨이브 종료 후 활성화
-        if (isEventActive) //외부에서 스테이지 웨이브 종료 유무까지 해야하고 그 값을 받아 조건식으로 추가
-        {
-            _machine.ChangeState(new EventState(_machine), State.Event);
-        }
         //스테이지 종료 조건
-        if (!isEventActive) //failed인지 cleard인지는 외부에서 값을 받아오는 걸로
+        if (GameFlowManager.Instance.Cleared) //failed인지 cleard인지는 외부에서 값을 받아오는 걸로
         {
+            GameFlowManager.Instance.Cleared = false;
             _machine.ChangeState(new ResultState(_machine), State.Result);
         }
     }

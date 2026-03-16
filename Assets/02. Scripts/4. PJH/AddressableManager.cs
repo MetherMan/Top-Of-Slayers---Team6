@@ -22,6 +22,7 @@ public class AddressableManager : Singleton<AddressableManager>
     private Dictionary<string, GameObject> _monsterPf = new Dictionary<string, GameObject>();
     private Dictionary<string, GameObject> _vFX = new Dictionary<string, GameObject>();
     private Dictionary<string, ItemSO> _itemSO = new Dictionary<string, ItemSO>();
+    private Dictionary<string, DropTable> _dropTable = new Dictionary<string, DropTable>();
     //private Dictionary<string, Material> _uIMat = new Dictionary<string, Material>();
     //private Dictionary<string, TMP_FontAsset> _uIAsset = new Dictionary<string, TMP_FontAsset>();
     //private Dictionary<string, Sprite> _uISprite = new Dictionary<string, Sprite>();
@@ -108,13 +109,14 @@ public class AddressableManager : Singleton<AddressableManager>
             //ItemPrefab
             //UniTask uIResourceTask = LoadAllUIResource();
             UniTask vFXTask = LoadAllVFX();
+            UniTask dropTalbeTask = LoadAllDropTable();
             //SFX
 
             List<UniTask> tasks = new List<UniTask> 
             { 
                 databaseTask, stageSOTask, ruleSOTask,
                 uITask, monsterSOTask, monsterPfTask,
-                itemSOTask, vFXTask
+                itemSOTask, vFXTask, dropTalbeTask
             };
 
             await UniTask.WhenAll(tasks);
@@ -706,193 +708,253 @@ public class AddressableManager : Singleton<AddressableManager>
 
     //}
 
-    //UIResource
-    //private async UniTask LoadAllUIResource()
-    //{
-    //    AsyncOperationHandle<IList<IResourceLocation>> handle
-    //        = Addressables.LoadResourceLocationsAsync("UIResource");
+    //DropTable
+    private async UniTask LoadAllDropTable()
+    {
+        AsyncOperationHandle<IList<IResourceLocation>> loadResourceLocationHandle
+            = Addressables.LoadResourceLocationsAsync("DropTable", typeof(DropTable));
 
-    //    await handle.Task;
-    //    if (IsFailed(handle)) Debug.LogError("LoadAllUIResource : Failed");
+        await loadResourceLocationHandle.Task;
 
-    //    List<AsyncOperationHandle> opList = new List<AsyncOperationHandle>();
+        if (IsFailed(loadResourceLocationHandle)) Debug.LogError("loadResourceLocationHandle : Failed");
 
-    //    foreach (IResourceLocation location in handle.Result)
-    //    {
-    //        string path = location.InternalId;
-    //        if (path.EndsWith(".mat"))
-    //        {
-    //            AsyncOperationHandle<Material> loadLocationHandle
-    //                = Addressables.LoadAssetAsync<Material>(location);
-    //            opList.Add(loadLocationHandle);
+        List<AsyncOperationHandle> dropTableOpList = new List<AsyncOperationHandle>();
 
-    //            await loadLocationHandle.Task;
+        foreach (IResourceLocation location in loadResourceLocationHandle.Result)
+        {
+            AsyncOperationHandle<DropTable> loadAssetHandle
+                = Addressables.LoadAssetAsync<DropTable>(location);
 
-    //            if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
+            loadAssetHandle.Completed += op =>
+            {
+                if (IsSucceeded(op))
+                {
+                    if (!_dropTable.ContainsKey(location.PrimaryKey))
+                    {
+                        _dropTable.Add(location.PrimaryKey, op.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"MonsterPf 중복 : {location.PrimaryKey}");
+                    }
+                }
+                else if (IsFailed(op))
+                {
+                    Debug.LogError("LoadAllDropTable : Failed");
+                }
 
-    //            loadLocationHandle.Completed += (loadHandle) =>
-    //            {
-    //                if (!_uIMat.ContainsKey(location.PrimaryKey))
-    //                {
-    //                    _uIMat.Add(location.PrimaryKey, loadHandle.Result);
-    //                }
-    //                else
-    //                {
-    //                    Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
-    //                }
-    //            };
-    //        }
-    //        else if (path.EndsWith(".asset"))
-    //        {
-    //            AsyncOperationHandle<TMPro.TMP_FontAsset> loadLocationHandle
-    //                = Addressables.LoadAssetAsync<TMPro.TMP_FontAsset>(location);
-    //            opList.Add(loadLocationHandle);
+            };
 
-    //            await loadLocationHandle.Task;
+            dropTableOpList.Add(loadAssetHandle);
+        }
 
-    //            if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
+        //create a GroupOperation to wait on all the above loads at once.
+        AsyncOperationHandle dropTableGroupOp
+            = Addressables.ResourceManager.CreateGenericGroupOperation(dropTableOpList);
 
-    //            loadLocationHandle.Completed += (loadHandle) =>
-    //            {
-    //                if (!_uIAsset.ContainsKey(location.PrimaryKey))
-    //                {
-    //                    _uIAsset.Add(location.PrimaryKey, loadHandle.Result);
-    //                }
-    //                else
-    //                {
-    //                    Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
-    //                }
-    //            };
-    //        }
-    //        else if (path.EndsWith(".png"))
-    //        {
-    //            AsyncOperationHandle<Sprite> loadLocationHandle
-    //                = Addressables.LoadAssetAsync<Sprite>(location);
-    //            opList.Add(loadLocationHandle);
+        await dropTableGroupOp.Task;
+        loadedAssets.Add(dropTableGroupOp);
 
-    //            await loadLocationHandle.Task;
+        //ResourceLocation 위치 정보이기에 메모리를 지워도 데이터가 사라지지 않는다.
+        Addressables.Release(loadResourceLocationHandle);
 
-    //            if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
+        //foreach (KeyValuePair<string, DropTable> item in _dropTable)
+        //{
+        //    Debug.Log($"DropTable Key : {item.Key} value : {item.Value.name}");
+        //}
 
-    //            loadLocationHandle.Completed += (loadHandle) =>
-    //            {
-    //                if (!_uISprite.ContainsKey(location.PrimaryKey))
-    //                {
-    //                    _uISprite.Add(location.PrimaryKey, loadHandle.Result);
-    //                }
-    //                else
-    //                {
-    //                    Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
-    //                }
-    //            };
-    //        }
-    //        else if (path.EndsWith(".ttf"))
-    //        {
-    //            AsyncOperationHandle<Font> loadLocationHandle
-    //                = Addressables.LoadAssetAsync<Font>(location);
-    //            opList.Add(loadLocationHandle);
+        Debug.Log("LoadAllMonsterPf : Completed");
+    }
 
-    //            await loadLocationHandle.Task;
+    /*
+    UIResource
+    private async UniTask LoadAllUIResource()
+    {
+        AsyncOperationHandle<IList<IResourceLocation>> handle
+            = Addressables.LoadResourceLocationsAsync("UIResource");
 
-    //            if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
+        await handle.Task;
+        if (IsFailed(handle)) Debug.LogError("LoadAllUIResource : Failed");
 
-    //            loadLocationHandle.Completed += (loadHandle) =>
-    //            {
-    //                if (!_uIFont.ContainsKey(location.PrimaryKey))
-    //                {
-    //                    _uIFont.Add(location.PrimaryKey, loadHandle.Result);
-    //                }
-    //                else
-    //                {
-    //                    Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
-    //                }
-    //            };
-    //        }
-    //        else if (path.EndsWith(".shader"))
-    //        {
-    //            AsyncOperationHandle<Shader> loadLocationHandle
-    //                = Addressables.LoadAssetAsync<Shader>(location);
-    //            opList.Add(loadLocationHandle);
+        List<AsyncOperationHandle> opList = new List<AsyncOperationHandle>();
 
-    //            await loadLocationHandle.Task;
+        foreach (IResourceLocation location in handle.Result)
+        {
+            string path = location.InternalId;
+            if (path.EndsWith(".mat"))
+            {
+                AsyncOperationHandle<Material> loadLocationHandle
+                    = Addressables.LoadAssetAsync<Material>(location);
+                opList.Add(loadLocationHandle);
 
-    //            if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
+                await loadLocationHandle.Task;
 
-    //            loadLocationHandle.Completed += (loadHandle) =>
-    //            {
-    //                if (!_uIShader.ContainsKey(location.PrimaryKey))
-    //                {
-    //                    _uIShader.Add(location.PrimaryKey, loadHandle.Result);
-    //                }
-    //                else
-    //                {
-    //                    Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
-    //                }
-    //            };
+                if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
 
-    //        }
-    //    };
+                loadLocationHandle.Completed += (loadHandle) =>
+                {
+                    if (!_uIMat.ContainsKey(location.PrimaryKey))
+                    {
+                        _uIMat.Add(location.PrimaryKey, loadHandle.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
+                    }
+                };
+            }
+            else if (path.EndsWith(".asset"))
+            {
+                AsyncOperationHandle<TMPro.TMP_FontAsset> loadLocationHandle
+                    = Addressables.LoadAssetAsync<TMPro.TMP_FontAsset>(location);
+                opList.Add(loadLocationHandle);
 
-    //    AsyncOperationHandle opListGroup
-    //        = Addressables.ResourceManager.CreateGenericGroupOperation(opList);
+                await loadLocationHandle.Task;
 
-    //    await opListGroup.Task;
+                if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
 
-    //    loadedAssets.Add(opListGroup);
+                loadLocationHandle.Completed += (loadHandle) =>
+                {
+                    if (!_uIAsset.ContainsKey(location.PrimaryKey))
+                    {
+                        _uIAsset.Add(location.PrimaryKey, loadHandle.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
+                    }
+                };
+            }
+            else if (path.EndsWith(".png"))
+            {
+                AsyncOperationHandle<Sprite> loadLocationHandle
+                    = Addressables.LoadAssetAsync<Sprite>(location);
+                opList.Add(loadLocationHandle);
 
-    //    Addressables.Release(handle);
+                await loadLocationHandle.Task;
 
-    //    foreach (KeyValuePair<string, TMP_FontAsset> item in _uIAsset)
-    //    {
-    //        Debug.Log($"<color=blue>uIAsset Key : {item.Key} value : {item.Value.name}</color>");
-    //    }
+                if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
 
-    //    foreach (KeyValuePair<string, Material> item in _uIMat)
-    //    {
-    //        Debug.Log($"<color=blue>uIMat Key : {item.Key} value : {item.Value.name}</color>");
-    //    }
+                loadLocationHandle.Completed += (loadHandle) =>
+                {
+                    if (!_uISprite.ContainsKey(location.PrimaryKey))
+                    {
+                        _uISprite.Add(location.PrimaryKey, loadHandle.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
+                    }
+                };
+            }
+            else if (path.EndsWith(".ttf"))
+            {
+                AsyncOperationHandle<Font> loadLocationHandle
+                    = Addressables.LoadAssetAsync<Font>(location);
+                opList.Add(loadLocationHandle);
 
-    //    foreach (KeyValuePair<string, Font> item in _uIFont)
-    //    {
-    //        Debug.Log($"<color=blue>uIFont Key : {item.Key} value : {item.Value.name}</color>");
-    //    }
+                await loadLocationHandle.Task;
 
-    //    foreach (KeyValuePair<string, Shader> item in _uIShader)
-    //    {
-    //        Debug.Log($"<color=blue>uIShader Key : {item.Key} value : {item.Value.name}</color>");
-    //    }
+                if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
 
-    //    foreach (KeyValuePair<string, Sprite> item in _uISprite)
-    //    {
-    //        Debug.Log($"<color=blue>uISprite Key : {item.Key} value : {item.Value.name}</color>");
-    //    }
+                loadLocationHandle.Completed += (loadHandle) =>
+                {
+                    if (!_uIFont.ContainsKey(location.PrimaryKey))
+                    {
+                        _uIFont.Add(location.PrimaryKey, loadHandle.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
+                    }
+                };
+            }
+            else if (path.EndsWith(".shader"))
+            {
+                AsyncOperationHandle<Shader> loadLocationHandle
+                    = Addressables.LoadAssetAsync<Shader>(location);
+                opList.Add(loadLocationHandle);
 
-    //    //RefreshUI();
+                await loadLocationHandle.Task;
 
-    //    Debug.Log("LoadUIResource : Completed");
-    //}
+                if (IsFailed(loadLocationHandle)) Debug.LogError("LoadUIResource : Failed");
 
-    //private void RefreshUI()
-    //{
-    //    //(true) 비활성화 객체 포함 UI SetActive:False되있는 것도 포함시킬 때 쓰는 용도랑 동일
-    //    TextMeshProUGUI[] allTexts = FindObjectsOfType<TMPro.TextMeshProUGUI>(true);
-    //    foreach (TextMeshProUGUI text in allTexts)
-    //    {
-    //        if (text.font != null && _uIAsset.TryGetValue(text.font.name, out TMP_FontAsset loadedFont))
-    //        {
-    //            text.font = loadedFont; //폰트 강제로 재할당
-    //            text.fontSharedMaterial = loadedFont.material; //기본 재질 강제로 재할당
-    //        }
-    //    }
+                loadLocationHandle.Completed += (loadHandle) =>
+                {
+                    if (!_uIShader.ContainsKey(location.PrimaryKey))
+                    {
+                        _uIShader.Add(location.PrimaryKey, loadHandle.Result);
+                    }
+                    else
+                    {
+                        Debug.LogWarningFormat("UIResource 중복 : {0}", location.PrimaryKey);
+                    }
+                };
 
-    //    TMP_SubMeshUI[] subMeshes = FindObjectsOfType<TMP_SubMeshUI>(true);
-    //    foreach (TMP_SubMeshUI sub in subMeshes)
-    //    {
+            }
+        };
 
-    //    }
+        AsyncOperationHandle opListGroup
+            = Addressables.ResourceManager.CreateGenericGroupOperation(opList);
 
-    //    Debug.Log("Font 갱신");
-    //}
+        await opListGroup.Task;
+
+        loadedAssets.Add(opListGroup);
+
+        Addressables.Release(handle);
+
+        foreach (KeyValuePair<string, TMP_FontAsset> item in _uIAsset)
+        {
+            Debug.Log($"<color=blue>uIAsset Key : {item.Key} value : {item.Value.name}</color>");
+        }
+
+        foreach (KeyValuePair<string, Material> item in _uIMat)
+        {
+            Debug.Log($"<color=blue>uIMat Key : {item.Key} value : {item.Value.name}</color>");
+        }
+
+        foreach (KeyValuePair<string, Font> item in _uIFont)
+        {
+            Debug.Log($"<color=blue>uIFont Key : {item.Key} value : {item.Value.name}</color>");
+        }
+
+        foreach (KeyValuePair<string, Shader> item in _uIShader)
+        {
+            Debug.Log($"<color=blue>uIShader Key : {item.Key} value : {item.Value.name}</color>");
+        }
+
+        foreach (KeyValuePair<string, Sprite> item in _uISprite)
+        {
+            Debug.Log($"<color=blue>uISprite Key : {item.Key} value : {item.Value.name}</color>");
+        }
+
+        //RefreshUI();
+
+        Debug.Log("LoadUIResource : Completed");
+    }
+
+    private void RefreshUI()
+    {
+        //(true) 비활성화 객체 포함 UI SetActive:False되있는 것도 포함시킬 때 쓰는 용도랑 동일
+        TextMeshProUGUI[] allTexts = FindObjectsOfType<TMPro.TextMeshProUGUI>(true);
+        foreach (TextMeshProUGUI text in allTexts)
+        {
+            if (text.font != null && _uIAsset.TryGetValue(text.font.name, out TMP_FontAsset loadedFont))
+            {
+                text.font = loadedFont; //폰트 강제로 재할당
+                text.fontSharedMaterial = loadedFont.material; //기본 재질 강제로 재할당
+            }
+        }
+
+        TMP_SubMeshUI[] subMeshes = FindObjectsOfType<TMP_SubMeshUI>(true);
+        foreach (TMP_SubMeshUI sub in subMeshes)
+        {
+
+        }
+
+        Debug.Log("Font 갱신");
+    }
+    */
     #endregion
 
     #region Get
@@ -996,6 +1058,19 @@ public class AddressableManager : Singleton<AddressableManager>
         }
 
         return data;
+    }
+
+    public DropTable GetDropTable(string addressableName)
+    {
+        if (_dropTable.TryGetValue(addressableName, out DropTable data))
+        {
+            return data;
+        }
+        else
+        {
+            Debug.LogWarning("AddressableManager에 존재하지 않는 데이터");
+        }
+        return null;
     }
     #endregion
 

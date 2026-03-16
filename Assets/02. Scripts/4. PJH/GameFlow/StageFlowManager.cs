@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 /*
@@ -48,6 +48,8 @@ public class StageFlowManager : Singleton<StageFlowManager>
 
     private bool hasStageResult;
     private bool isStageStateInitialized;
+
+    public bool stageIn = false;
     #endregion
 
     protected override void Awake()

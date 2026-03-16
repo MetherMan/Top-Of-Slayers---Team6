@@ -29,7 +29,8 @@ public class MainLevel : MonoBehaviour
 
     private void Init()
     {
-        FirebaseManager.Instance.RefreshLevel(currentLevel, currentExp);
+        currentLevel = FirebaseManager.Instance.RefreshLevel();
+        currentExp = FirebaseManager.Instance.RefreshExp();
         UpdateUI();
     }
 
@@ -49,7 +50,8 @@ public class MainLevel : MonoBehaviour
         {
             LevelUp();
         }
-        FirebaseManager.Instance.SaveLevel(currentLevel, currentExp);
+        FirebaseManager.Instance.SaveLevel(currentLevel);
+        FirebaseManager.Instance.SaveExp(currentExp);
         UpdateUI();
     }
     private void LevelUp()

@@ -49,8 +49,6 @@ public class LoginUI : Singleton<LoginUI>
     [SerializeField] Button yBtn;
     [SerializeField] Button nBtn;
 
-    //상태변환 변수
-    public bool changeState = false;
     #endregion
 
     protected override void Awake()
@@ -67,6 +65,8 @@ public class LoginUI : Singleton<LoginUI>
     //데이터 전달 또는 초기화 할 때 사용
     void Init()
     {
+        if (lodingUI == null || loginUI == null) return; //죽었다 환생하지 마라
+
         if (!lodingUI.activeSelf) lodingUI.SetActive(true);
         if (loginUI.activeSelf) loginUI.SetActive(false);
 
@@ -164,7 +164,6 @@ public class LoginUI : Singleton<LoginUI>
         }
         if (check)
         {
-            changeState = true;
             CancleEvent();
             LoginSceneManager.Instance.CheckIn();
         }
