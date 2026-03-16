@@ -8,6 +8,9 @@ public class GameFlowManager : Singleton<GameFlowManager>
 
     #region field
     public int waveIndex;
+
+    //상태체크
+    public bool Cleared = false;
     #endregion
 
     protected override void Awake()
@@ -23,6 +26,7 @@ public class GameFlowManager : Singleton<GameFlowManager>
     #region method
     public void RoundClear()
     {
+        Cleared = true;
         StageManager stageManager = StageManager.Instance;
         if (stageManager == null || stageManager.selectDB == null) Debug.LogError("selectDB null");
 

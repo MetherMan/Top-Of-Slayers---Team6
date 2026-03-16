@@ -59,9 +59,9 @@ public class StageDatabase : ScriptableObject
     //        }
     //    }
     //}
-    public StageConfigSO GetStageData(string addressableName)
+    public StageConfigSO GetStageData(string stageSOName)
     {
-        StageConfigSO data = AddressableManager.Instance.GetStageData(addressableName);
+        StageConfigSO data = AddressableManager.Instance.GetStageData(stageSOName);
 
         roundDatas = data.roundDatas;
         selectStage = data;

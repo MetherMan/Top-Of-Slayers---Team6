@@ -11,13 +11,13 @@ public class LobbyState : IGameState
 
     public void Enter()
     {
-        Debug.Log("로비 UI 활성화");
+        Debug.Log("<color=green>로비 UI 활성화</color>");
     }
 
     public void Execute()
     {
-        //상태 전환 조건
-        if (true)
+        //상태 전환 조건 : 스테이지 진입 UI 클릭 시
+        if (StageFlowManager.Instance.stageIn)
         {
             _machine.ChangeState(new PlayState(_machine), State.Play);
         }

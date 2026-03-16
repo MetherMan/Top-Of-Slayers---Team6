@@ -48,6 +48,7 @@ public class LoginUI : Singleton<LoginUI>
     [SerializeField] public TextMeshProUGUI downloadText;
     [SerializeField] Button yBtn;
     [SerializeField] Button nBtn;
+
     #endregion
 
     protected override void Awake()
@@ -64,6 +65,8 @@ public class LoginUI : Singleton<LoginUI>
     //데이터 전달 또는 초기화 할 때 사용
     void Init()
     {
+        if (lodingUI == null || loginUI == null) return; //죽었다 환생하지 마라
+
         if (!lodingUI.activeSelf) lodingUI.SetActive(true);
         if (loginUI.activeSelf) loginUI.SetActive(false);
 

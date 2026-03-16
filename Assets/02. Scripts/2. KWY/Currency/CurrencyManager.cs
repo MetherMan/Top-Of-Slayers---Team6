@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System;
+using Cysharp.Threading.Tasks;
 
 public class CurrencyManager : Singleton<CurrencyManager>
 {
-    [SerializeField] int gold = 10000;
+    private int gold;
+    [SerializeField] public bool isCompleted = false;
 
     public event Action OnGoldChanged;
     protected override void Awake()
@@ -15,6 +17,34 @@ public class CurrencyManager : Singleton<CurrencyManager>
             DontDestroyOnLoad(gameObject);
         }
     }
+
+    private async void Start()
+    {
+        try
+        {
+            await WithUntilDataloaded();
+            Init();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"CurrencyManager Start중 Error : {ex.Message}\n{ex.StackTrace}");
+        }
+    }
+
+    private void Init()
+    {
+        gold = FirebaseManager.Instance.RefreshGold();
+        isCompleted = true;
+    }
+
+    private async UniTask WithUntilDataloaded()
+    {
+        while (!FirebaseManager.Instance.IsDataLoaded)
+        {
+            await UniTask.Delay(500);
+        }
+    }
+
     //현재 보유 골드 반환
     public int GetGold()
     {
@@ -32,11 +62,13 @@ public class CurrencyManager : Singleton<CurrencyManager>
 
         gold -= amount;
         OnGoldChanged?.Invoke();
+        FirebaseManager.Instance.SaveGold(gold);
     }
     // 골드 증가
     public void Add(int amount)
     {
         gold += amount;
         OnGoldChanged?.Invoke();
+        FirebaseManager.Instance.SaveGold(gold);
     }
 }

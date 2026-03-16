@@ -47,12 +47,12 @@ public class FirebaseManager : MonoBehaviour
     FirebaseFirestore db;
 
     //유저 게임 데이터 (세이브용)
-    int userLevel;
-    int userCurrentExp;
+    private int userLevel;
+    private int userCurrentExp;
     public List<InventoryItem> userInventory = new List<InventoryItem>();
     Dictionary<string, object> userEquipment = new Dictionary<string, object>();
-    int userGold;
-    int userEnerge;
+    private int userGold;
+    private int userEnerge;
 
     //로그인 시 : User.userId keyValue / iventory, equipment 데이터 가져오기
 
@@ -68,6 +68,9 @@ public class FirebaseManager : MonoBehaviour
     //가챠 : 아이템 획득
     //인벤토리 : 장비 착용, 아이템 제거
     //상점 : 골드 사용 - 터치를 여러 번 할 수 있다.
+
+    //상태전환 체크 불 변수
+    public bool loginSucceeded = false;
     #endregion
 
     private void Awake()
@@ -252,6 +255,8 @@ public class FirebaseManager : MonoBehaviour
                 GetUserData(result.User.UserId);
 
                 message = "로그인 성공";
+                loginSucceeded = true;
+
                 //LoginUI.cs
                 inputFailedEvent?.Invoke(message, true);
             }
@@ -328,7 +333,7 @@ public class FirebaseManager : MonoBehaviour
 
         Dictionary<string, object> cost = new Dictionary<string, object>
         {
-            { "gold", 1000 }, //골드
+            { "gold", 1500 }, //골드
             { "energe", 60 } //행동력
         };
 
@@ -401,6 +406,7 @@ public class FirebaseManager : MonoBehaviour
                     {
                         userLevel = System.Convert.ToInt32(userDetail["level"]);
                         userCurrentExp = System.Convert.ToInt32(userDetail["Exp"]);
+
                         Debug.Log("User 데이터 로드 완료");
                     }
                     else
@@ -447,7 +453,10 @@ public class FirebaseManager : MonoBehaviour
                     Dictionary<string, object> cost = user.Value as Dictionary<string, object>;
                     if (cost != null)
                     {
-
+                        userEnerge = System.Convert.ToInt32(cost["energe"]);
+                        userGold = System.Convert.ToInt32(cost["gold"]);
+                        
+                        Debug.Log("User 데이터 로드 완료");
                     }
                     else
                     {
@@ -467,16 +476,52 @@ public class FirebaseManager : MonoBehaviour
         Debug.LogFormat("IsDataLoaded: {0}", IsDataLoaded);
     }
 
-    public void SaveLevel(int level, int exp)
+    public int RefreshLevel()
     {
-        userLevel = level;
-        userCurrentExp = exp;
+        return userLevel;
     }
 
-    public void RefreshLevel(int level, int exp)
+    public int RefreshExp()
     {
-        level = userLevel;
-        exp = userCurrentExp;
+        return userCurrentExp;
+    }
+
+    public void SaveLevel(int level)
+    {
+        userLevel = level;
+
+        db.Collection("UserData").Document(uid).UpdateAsync("User.level", userLevel);
+    }
+
+    public void SaveExp(int exp)
+    {
+        userCurrentExp = exp;
+
+        db.Collection("UserData").Document(uid).UpdateAsync("User.Exp", userCurrentExp);
+    }
+
+    public void SaveGold(int gold)
+    {
+        userGold = gold;
+
+        db.Collection("UserData").Document(uid).UpdateAsync("Cost.gold", userGold);
+    }
+
+    public int RefreshGold()
+    {
+        return userGold;
+    }
+
+    public void SaveEnerge(int energe)
+    {
+        userEnerge = energe;
+
+        db.Collection("UserData").Document(uid).UpdateAsync("Cost.energe", userEnerge);
+    }
+    
+    public int RefreshEnerge()
+    {
+        return userEnerge;
     }
 
     //저장용 데이터 -> 인벤토리 아이템 변환
@@ -699,8 +744,6 @@ public class FirebaseManager : MonoBehaviour
                 .UpdateAsync(path, equipmentCast);
         }
     }
-
-    //유저 레벨, 경험치 -> 저장용 데이터
 
     #endregion
 
