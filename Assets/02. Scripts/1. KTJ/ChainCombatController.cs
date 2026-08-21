@@ -27,7 +27,7 @@ public class ChainCombatController : MonoBehaviour
     [SerializeField] private bool lockMovementDuringSlow = false;
 
     private Transform lastTarget;
-    private int currentChain;
+    private ChainRules chainRules;
     private bool isSlowActive;
     private float pendingTimeScale = -1f;
     private Coroutine slowRoutine;
@@ -38,7 +38,7 @@ public class ChainCombatController : MonoBehaviour
     private float slowDurationRealtime;
     private int lastTriggeredMilestoneChain;
 
-    public int CurrentChain => currentChain;
+    public int CurrentChain => chainRules != null ? chainRules.CurrentChain : 0;
     public bool IsSlowActive => isSlowActive;
     public Transform LastTarget => lastTarget;
     public float SlowRemainingTime => !isSlowActive ? 0f : Mathf.Max(0f, slowEndTimeRealtime - Time.unscaledTime);
@@ -50,6 +50,7 @@ public class ChainCombatController : MonoBehaviour
 
     private void Awake()
     {
+        EnsureChainRules();
         EnsureDamageSystem();
         EnsureMoveController();
         EnsureTargetingSystem();
@@ -84,10 +85,8 @@ public class ChainCombatController : MonoBehaviour
     {
         if (target == null) return 1f;
 
-        var nextChain = target != lastTarget ? currentChain + 1 : currentChain;
-        if (nextChain <= 0) nextChain = 1;
-
-        return 1f + damageIncreaseRate * (nextChain - 1);
+        EnsureChainRules();
+        return chainRules.GetDamageMultiplier(GetChainTargetId(target));
     }
 
     public void CancelSlow()
@@ -100,21 +99,17 @@ public class ChainCombatController : MonoBehaviour
     {
         if (result.Target == null) return;
 
-        var previousChain = currentChain;
-        var isNewTarget = result.Target != lastTarget;
-        if (isNewTarget || currentChain <= 0)
+        EnsureChainRules();
+        var identity = result.TargetIdentity != null ? result.TargetIdentity : result.Target;
+        var transition = chainRules.RegisterHit(identity.GetInstanceID());
+        if (transition.Advanced)
         {
-            currentChain = Mathf.Max(1, currentChain + 1);
-        }
-
-        if (currentChain != previousChain)
-        {
-            TryNotifyChainMilestone(currentChain);
+            TryNotifyChainMilestone(transition.CurrentChain);
         }
 
         lastTarget = result.Target;
 
-        var duration = currentChain <= 1 ? firstSlowDuration : chainSlowDuration;
+        var duration = chainRules.CurrentChain <= 1 ? firstSlowDuration : chainSlowDuration;
         StartSlow(duration);
 
         if (result.IsDead)
@@ -283,9 +278,24 @@ public class ChainCombatController : MonoBehaviour
 
     private void ResetChainState()
     {
-        currentChain = 0;
+        chainRules?.Reset();
         lastTarget = null;
         lastTriggeredMilestoneChain = 0;
+    }
+
+    private void EnsureChainRules()
+    {
+        if (chainRules != null) return;
+        chainRules = new ChainRules(damageIncreaseRate);
+    }
+
+    private int GetChainTargetId(Transform target)
+    {
+        EnsureTargetingSystem();
+        var identity = targetingSystem != null
+            ? targetingSystem.ResolveTargetIdentity(target)
+            : target;
+        return identity != null ? identity.GetInstanceID() : 0;
     }
 
     private IEnumerator WaitForTimeScaleResume()

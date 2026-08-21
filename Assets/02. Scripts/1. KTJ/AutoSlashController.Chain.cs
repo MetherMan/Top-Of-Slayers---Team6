@@ -145,8 +145,8 @@ public partial class AutoSlashController
         aimDirection = rawDirection;
         if (targetingSystem == null) return null;
 
-        var candidates = targetingSystem.GetTargetsInLine(origin, rawDirection, range, ignoreTarget);
-        if (candidates == null || candidates.Count == 0) return null;
+        targetingSystem.GetTargetsInLineNonAlloc(origin, rawDirection, range, ignoreTarget, linePriorityTargets);
+        if (linePriorityTargets.Count == 0) return null;
 
         rawDirection.y = 0f;
         if (rawDirection.sqrMagnitude <= 0f) return null;
@@ -156,9 +156,9 @@ public partial class AutoSlashController
         float bestDot = float.MinValue;
         float bestPerpSqr = float.MaxValue;
 
-        for (int i = 0; i < candidates.Count; i++)
+        for (int i = 0; i < linePriorityTargets.Count; i++)
         {
-            var candidate = candidates[i];
+            var candidate = linePriorityTargets[i];
             if (candidate == null || candidate == ignoreTarget) continue;
 
             var diff = candidate.position - origin;

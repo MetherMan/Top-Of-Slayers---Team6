@@ -96,38 +96,34 @@ public partial class AutoSlashController
     {
         if (target == null) return null;
 
-        var direct = target.GetComponent<DamageSystem.IDamageable>();
-        if (direct != null) return direct;
-
-        var parent = target.GetComponentInParent<DamageSystem.IDamageable>();
-        if (parent != null) return parent;
-
-        var root = target.root;
-        if (root == null) return null;
-
-        var components = root.GetComponentsInChildren<MonoBehaviour>(true);
-        for (int i = 0; i < components.Length; i++)
+        if (targetingSystem != null && targetingSystem.TryResolveDamageable(target, out var cachedDamageable))
         {
-            if (components[i] is DamageSystem.IDamageable damageable)
-            {
-                return damageable;
-            }
+            return cachedDamageable;
         }
 
-        return null;
+        CombatTargetResolver.TryResolve(
+            target,
+            damageableSearchBuffer,
+            out var damageable,
+            out _);
+        return damageable;
     }
 
     private Transform ResolveAttackTargetIdentity(Transform target)
     {
         if (target == null) return null;
 
-        var damageable = ResolveDamageableTarget(target);
-        if (damageable is Component component)
+        if (targetingSystem != null)
         {
-            return component.transform;
+            return targetingSystem.ResolveTargetIdentity(target);
         }
 
-        return target;
+        CombatTargetResolver.TryResolve(
+            target,
+            damageableSearchBuffer,
+            out _,
+            out var identity);
+        return identity != null ? identity : target;
     }
 
     private bool AreSameAttackTargets(Transform first, Transform second)

@@ -59,6 +59,9 @@ public partial class SlashDashController : MonoBehaviour
     private Transform pendingTarget;
     private int pendingDamage;
     private readonly List<Transform> pendingPierceTargets = new List<Transform>();
+    private readonly HashSet<Transform> pendingPierceTargetIdentities = new HashSet<Transform>(16);
+    private readonly HashSet<Transform> appliedTargetIdentities = new HashSet<Transform>(16);
+    private readonly List<MonoBehaviour> damageableSearchBuffer = new List<MonoBehaviour>(16);
     private bool contactStopTriggered;
     private bool impactTriggered;
     private Rigidbody cachedRigidbody;

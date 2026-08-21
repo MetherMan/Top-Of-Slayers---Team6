@@ -1,57 +1,67 @@
 ﻿using System;
 using UnityEngine;
 
+using System.Collections.Generic;
+
 public class DamageSystem : MonoBehaviour
 {
+    [SerializeField] private TargetingSystem targetingSystem;
+
+    private readonly List<MonoBehaviour> damageableSearchBuffer = new List<MonoBehaviour>(16);
+
     public event Action<DamageResult> OnDamageApplied;
+
+    private void Awake()
+    {
+        if (targetingSystem == null) targetingSystem = GetComponent<TargetingSystem>();
+        if (targetingSystem == null) targetingSystem = GetComponentInParent<TargetingSystem>();
+    }
 
     public void ApplyDamage(Transform target, int amount)
     {
         if (target == null) return;
         if (amount <= 0) return;
 
-        var damageable = ResolveDamageable(target);
-        if (damageable == null) return;
+        if (!TryResolveDamageable(target, out var damageable, out var targetIdentity)) return;
         if (damageable.IsDead) return;
 
         damageable.ApplyDamage(amount);
 
-        var result = new DamageResult(target, amount, damageable.IsDead);
+        var result = new DamageResult(target, targetIdentity, amount, damageable.IsDead);
         OnDamageApplied?.Invoke(result);
     }
 
-    private IDamageable ResolveDamageable(Transform target)
+    private bool TryResolveDamageable(Transform target, out IDamageable damageable, out Transform identity)
     {
-        var direct = target.GetComponent<IDamageable>();
-        if (direct != null) return direct;
-
-        var parent = target.GetComponentInParent<IDamageable>();
-        if (parent != null) return parent;
-
-        var root = target.root;
-        if (root == null) return null;
-
-        var components = root.GetComponentsInChildren<MonoBehaviour>(true);
-        for (int i = 0; i < components.Length; i++)
+        if (targetingSystem != null && targetingSystem.TryResolveDamageable(target, out damageable))
         {
-            if (components[i] is IDamageable damageable)
-            {
-                return damageable;
-            }
+            identity = targetingSystem.ResolveTargetIdentity(target);
+            return true;
         }
 
-        return null;
+        return CombatTargetResolver.TryResolve(
+            target,
+            damageableSearchBuffer,
+            out damageable,
+            out identity);
     }
 
     public struct DamageResult
     {
         public readonly Transform Target;
+        public readonly Transform TargetIdentity;
         public readonly int Amount;
         public readonly bool IsDead;
 
         public DamageResult(Transform target, int amount, bool isDead)
+            : this(target, target, amount, isDead)
+        {
+        }
+
+        public DamageResult(Transform target, Transform targetIdentity, int amount, bool isDead)
         {
             Target = target;
+            TargetIdentity = targetIdentity != null ? targetIdentity : target;
             Amount = amount;
             IsDead = isDead;
         }

@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+using System.Collections.Generic;
+
 public partial class AutoSlashController : MonoBehaviour
 {
     [Header("참조")]
@@ -147,6 +149,8 @@ public partial class AutoSlashController : MonoBehaviour
     private float lastAttackRange;
     private bool wasChainActiveLastFrame;
     private float postChainAttackGraceTimer;
+    private readonly List<Transform> linePriorityTargets = new List<Transform>(64);
+    private readonly List<MonoBehaviour> damageableSearchBuffer = new List<MonoBehaviour>(16);
 
     public event System.Action OnAttackReady;
     public bool IsChainSlowActive => chainCombat != null && chainCombat.IsSlowActive;

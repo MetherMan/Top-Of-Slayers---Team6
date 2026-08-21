@@ -5,18 +5,19 @@ public partial class TargetingSystem
 {
     private interface ITargetingStrategy
     {
-        Transform SelectTarget(Vector3 origin, Vector3 forward, List<Transform> candidates, float range, float angle, Transform ignoreTarget);
+        Transform SelectTarget(Vector3 origin, Vector3 forward, List<TargetEntry> candidates, float range, float angle, Transform ignoreTarget);
     }
 
     private class NearestTargetStrategy : ITargetingStrategy
     {
-        public Transform SelectTarget(Vector3 origin, Vector3 forward, List<Transform> candidates, float range, float angle, Transform ignoreTarget)
+        public Transform SelectTarget(Vector3 origin, Vector3 forward, List<TargetEntry> candidates, float range, float angle, Transform ignoreTarget)
         {
             Transform best = null;
             float bestSqr = range * range;
 
-            foreach (var candidate in candidates)
+            for (int i = 0; i < candidates.Count; i++)
             {
+                var candidate = candidates[i].Target;
                 if (candidate == null || candidate == ignoreTarget) continue;
                 var diff = candidate.position - origin;
                 diff.y = 0f;
@@ -34,14 +35,21 @@ public partial class TargetingSystem
 
     private class ForwardConeTargetStrategy : ITargetingStrategy
     {
-        public Transform SelectTarget(Vector3 origin, Vector3 forward, List<Transform> candidates, float range, float angle, Transform ignoreTarget)
+        public Transform SelectTarget(Vector3 origin, Vector3 forward, List<TargetEntry> candidates, float range, float angle, Transform ignoreTarget)
         {
+            var flatForward = forward;
+            flatForward.y = 0f;
+            if (flatForward.sqrMagnitude <= 0f) return null;
+
             Transform best = null;
             float bestSqr = range * range;
             float halfAngle = angle * 0.5f;
+            float minimumDot = Mathf.Cos(halfAngle * Mathf.Deg2Rad);
+            var normalizedForward = flatForward.normalized;
 
-            foreach (var candidate in candidates)
+            for (int i = 0; i < candidates.Count; i++)
             {
+                var candidate = candidates[i].Target;
                 if (candidate == null || candidate == ignoreTarget) continue;
                 var diff = candidate.position - origin;
                 diff.y = 0f;
@@ -49,13 +57,8 @@ public partial class TargetingSystem
                 var sqr = diff.sqrMagnitude;
                 if (sqr > bestSqr) continue;
 
-                var flatForward = forward;
-                flatForward.y = 0f;
-                if (flatForward.sqrMagnitude <= 0f) continue;
-
-                var dir = diff.normalized;
-                var currentAngle = Vector3.Angle(flatForward, dir);
-                if (currentAngle > halfAngle) continue;
+                var normalizedDot = Vector3.Dot(normalizedForward, diff) / Mathf.Sqrt(sqr);
+                if (normalizedDot < minimumDot) continue;
 
                 best = candidate;
                 bestSqr = sqr;
@@ -67,7 +70,7 @@ public partial class TargetingSystem
 
     private class LineTargetStrategy : ITargetingStrategy
     {
-        public Transform SelectTarget(Vector3 origin, Vector3 forward, List<Transform> candidates, float range, float angle, Transform ignoreTarget)
+        public Transform SelectTarget(Vector3 origin, Vector3 forward, List<TargetEntry> candidates, float range, float angle, Transform ignoreTarget)
         {
             forward.y = 0f;
             if (forward.sqrMagnitude <= 0f) return null;
@@ -79,8 +82,9 @@ public partial class TargetingSystem
             float lineWidthSqr = angle * angle;
             var dir = forward.normalized;
 
-            foreach (var candidate in candidates)
+            for (int i = 0; i < candidates.Count; i++)
             {
+                var candidate = candidates[i].Target;
                 if (candidate == null || candidate == ignoreTarget) continue;
                 var diff = candidate.position - origin;
                 diff.y = 0f;

@@ -37,19 +37,19 @@ public partial class SlashDashController
         }
 
         var hitCount = 0;
-        var appliedTargets = new HashSet<Transform>();
+        appliedTargetIdentities.Clear();
         if (pendingPierceTargets.Count > 0)
         {
             for (int i = 0; i < pendingPierceTargets.Count; i++)
             {
                 var target = pendingPierceTargets[i];
-                if (!TryApplyDamageToUniqueTarget(target, appliedTargets)) continue;
+                if (!TryApplyDamageToUniqueTarget(target, appliedTargetIdentities)) continue;
                 hitCount++;
             }
         }
         else if (pendingTarget != null)
         {
-            if (TryApplyDamageToUniqueTarget(pendingTarget, appliedTargets))
+            if (TryApplyDamageToUniqueTarget(pendingTarget, appliedTargetIdentities))
             {
                 hitCount++;
             }
@@ -79,6 +79,8 @@ public partial class SlashDashController
         contactStopTriggered = false;
         impactTriggered = false;
         pendingPierceTargets.Clear();
+        pendingPierceTargetIdentities.Clear();
+        appliedTargetIdentities.Clear();
     }
 
     public bool TryStartAutoSlash(Transform target, Vector3 aimDirection, float aimDistance, TimingGrade grade, float damageMultiplier)
@@ -89,6 +91,7 @@ public partial class SlashDashController
         if (spec == null) return true;
 
         pendingPierceTargets.Clear();
+        pendingPierceTargetIdentities.Clear();
         pendingTarget = target;
         var multiplier = Mathf.Max(0f, damageMultiplier);
         pendingDamage = Mathf.RoundToInt(CalculateDamage(grade, spec) * multiplier);
@@ -103,6 +106,7 @@ public partial class SlashDashController
         if (spec == null) return true;
 
         pendingPierceTargets.Clear();
+        pendingPierceTargetIdentities.Clear();
         pendingTarget = target;
         var multiplier = Mathf.Max(0f, damageMultiplier);
         pendingDamage = Mathf.RoundToInt(CalculateDamage(grade, spec) * multiplier);
@@ -141,14 +145,8 @@ public partial class SlashDashController
         if (candidate == null) return false;
 
         var candidateIdentity = ResolveDamageableTargetIdentity(candidate);
-        for (int i = 0; i < pendingPierceTargets.Count; i++)
-        {
-            var registeredIdentity = ResolveDamageableTargetIdentity(pendingPierceTargets[i]);
-            if (registeredIdentity == candidateIdentity)
-            {
-                return false;
-            }
-        }
+        if (candidateIdentity == null) return false;
+        if (!pendingPierceTargetIdentities.Add(candidateIdentity)) return false;
 
         pendingPierceTargets.Add(candidate);
         return true;
@@ -158,34 +156,17 @@ public partial class SlashDashController
     {
         if (target == null) return null;
 
-        var direct = target.GetComponent<DamageSystem.IDamageable>();
-        if (direct is Component directComponent)
+        if (targetingSystem != null)
         {
-            return directComponent.transform;
+            return targetingSystem.ResolveTargetIdentity(target);
         }
 
-        var parent = target.GetComponentInParent<DamageSystem.IDamageable>();
-        if (parent is Component parentComponent)
-        {
-            return parentComponent.transform;
-        }
-
-        var root = target.root;
-        if (root == null)
-        {
-            return target;
-        }
-
-        var components = root.GetComponentsInChildren<MonoBehaviour>(true);
-        for (int i = 0; i < components.Length; i++)
-        {
-            if (components[i] is DamageSystem.IDamageable)
-            {
-                return components[i].transform;
-            }
-        }
-
-        return target;
+        CombatTargetResolver.TryResolve(
+            target,
+            damageableSearchBuffer,
+            out _,
+            out var identity);
+        return identity != null ? identity : target;
     }
 
     private void ApplyHitHeal(int hitCount)

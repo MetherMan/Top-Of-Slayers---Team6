@@ -32,11 +32,25 @@ public partial class TargetingSystem
 
     public List<Transform> GetTargetsInLine(Vector3 origin, Vector3 forward, float rangeOverride, Transform ignoreTarget)
     {
+        var result = new List<Transform>();
+        GetTargetsInLineNonAlloc(origin, forward, rangeOverride, ignoreTarget, result);
+        return result;
+    }
+
+    public void GetTargetsInLineNonAlloc(
+        Vector3 origin,
+        Vector3 forward,
+        float rangeOverride,
+        Transform ignoreTarget,
+        List<Transform> result)
+    {
+        if (result == null) return;
+
+        result.Clear();
         CleanupTargets();
 
-        var result = new List<Transform>();
         forward.y = 0f;
-        if (forward.sqrMagnitude <= 0f) return result;
+        if (forward.sqrMagnitude <= 0f) return;
 
         var range = rangeOverride > 0f ? rangeOverride : maxRange;
         if (lineEndPadding > 0f)
@@ -48,8 +62,9 @@ public partial class TargetingSystem
         var rangeSqr = range * range;
         var lineWidthSqr = lineWidth * lineWidth;
 
-        foreach (var candidate in targets)
+        for (int i = 0; i < targets.Count; i++)
         {
+            var candidate = targets[i].Target;
             if (candidate == null || candidate == ignoreTarget) continue;
 
             var diff = candidate.position - origin;
@@ -66,8 +81,6 @@ public partial class TargetingSystem
 
             result.Add(candidate);
         }
-
-        return result;
     }
 
     public Transform GetTargetNearPoint(Vector3 point, float radius, Transform ignoreTarget)
@@ -80,7 +93,7 @@ public partial class TargetingSystem
 
         for (int i = 0; i < targets.Count; i++)
         {
-            var candidate = targets[i];
+            var candidate = targets[i].Target;
             if (candidate == null || candidate == ignoreTarget) continue;
 
             var diff = candidate.position - point;
@@ -108,11 +121,12 @@ public partial class TargetingSystem
         var dir = forward.normalized;
 
         Transform best = null;
-        float bestAngle = float.MaxValue;
+        float bestDirectionScore = float.MinValue;
         float bestSqr = float.MaxValue;
 
-        foreach (var candidate in targets)
+        for (int i = 0; i < targets.Count; i++)
         {
+            var candidate = targets[i].Target;
             if (candidate == null || candidate == ignoreTarget) continue;
 
             var diff = candidate.position - origin;
@@ -121,13 +135,13 @@ public partial class TargetingSystem
             var sqr = diff.sqrMagnitude;
             if (sqr > rangeSqr) continue;
 
-            var angle = Vector3.Angle(dir, diff);
-            var isBetterAngle = angle < bestAngle - 0.1f;
-            var isSameAngle = Mathf.Abs(angle - bestAngle) <= 0.1f;
-            if (isBetterAngle || (isSameAngle && sqr < bestSqr))
+            var directionScore = Vector3.Dot(dir, diff) / Mathf.Sqrt(sqr);
+            var isBetterDirection = directionScore > bestDirectionScore + TargetDirectionScoreEpsilon;
+            var isSameDirection = Mathf.Abs(directionScore - bestDirectionScore) <= TargetDirectionScoreEpsilon;
+            if (isBetterDirection || (isSameDirection && sqr < bestSqr))
             {
                 best = candidate;
-                bestAngle = angle;
+                bestDirectionScore = directionScore;
                 bestSqr = sqr;
             }
         }
